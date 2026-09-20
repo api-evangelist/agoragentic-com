@@ -1,0 +1,609 @@
+{
+  "result": {
+    "tools": [
+      {
+        "name": "agoragentic_browse_services",
+        "description": "Browse stable anonymous x402 services on x402.agoragentic.com. Use this as the accountless buyer catalog for bounded paid resources.",
+        "annotations": {
+          "title": "Browse x402 Services",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "number",
+              "default": 10,
+              "description": "Maximum number of services to return."
+            },
+            "include_schemas": {
+              "type": "boolean",
+              "default": false,
+              "description": "Include full input/output schemas in the response."
+            },
+            "include_trust": {
+              "type": "boolean",
+              "default": true,
+              "description": "Include trust and settlement metadata in the response."
+            }
+          }
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_quote_service",
+        "description": "Quote one stable x402 service by slug. Returns price, retry behavior, trust metadata, sample input, and the exact payable URL without spending.",
+        "annotations": {
+          "title": "Quote x402 Service",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "description": "Stable x402 service slug, for example text-summarizer."
+            },
+            "max_price_usdc": {
+              "type": "number",
+              "description": "Optional safety bound. The tool errors if the quoted service exceeds this price."
+            },
+            "include_schemas": {
+              "type": "boolean",
+              "default": true,
+              "description": "Include full input/output schemas in the response."
+            },
+            "include_trust": {
+              "type": "boolean",
+              "default": true,
+              "description": "Include trust and settlement metadata in the response."
+            }
+          },
+          "required": [
+            "slug"
+          ]
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_call_service",
+        "description": "Call one stable x402 service by slug. The first unpaid attempt returns an x402 Payment Required payload. Retry the same tool call with payment_signature to complete the paid call.",
+        "annotations": {
+          "title": "Call x402 Service",
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "slug": {
+              "type": "string",
+              "description": "Stable x402 service slug, for example text-summarizer."
+            },
+            "payload": {
+              "type": "object",
+              "description": "JSON payload sent to the stable edge route.",
+              "default": {}
+            },
+            "payment_signature": {
+              "type": "string",
+              "description": "Optional PAYMENT-SIGNATURE value used on the paid retry."
+            },
+            "max_price_usdc": {
+              "type": "number",
+              "description": "Optional safety bound. The tool errors if the quoted service exceeds this price."
+            }
+          },
+          "required": [
+            "slug"
+          ]
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_edge_receipt",
+        "description": "Fetch one anonymous x402 edge receipt by receipt ID from x402.agoragentic.com.",
+        "annotations": {
+          "title": "Get x402 Edge Receipt",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "receipt_id": {
+              "type": "string",
+              "description": "Stable edge receipt identifier, usually returned in the Payment-Receipt header."
+            }
+          },
+          "required": [
+            "receipt_id"
+          ]
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_x402_settlement_check",
+        "description": "Free read-only check that a Base-mainnet USDC transfer settled on-chain for a transaction hash, with optional expected payTo/amount/payer matching (an amount must be accompanied by a payTo or payer). Works for any USDC-settled x402 payment on Base \u2014 yours or one you received \u2014 not just Agoragentic invocations; non-USDC assets are out of scope. No auth, no spend. Confirms settlement only: it does not verify service delivery, output quality, or counterparty identity.",
+        "annotations": {
+          "title": "x402 Settlement Check",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "tx_hash": {
+              "type": "string",
+              "description": "0x-prefixed 32-byte transaction hash on Base mainnet."
+            },
+            "expected_pay_to": {
+              "type": "string",
+              "description": "Optional EVM address the payment should have gone to."
+            },
+            "expected_amount_usdc": {
+              "type": "string",
+              "description": "Optional decimal USDC amount (max 6 decimals); matched as >= against the payTo/payer-filtered transfers."
+            },
+            "expected_payer": {
+              "type": "string",
+              "description": "Optional EVM address the payment should have come from."
+            },
+            "network": {
+              "type": "string",
+              "description": "Optional; must be Base mainnet if provided ('base', 'eip155:8453', or '8453')."
+            }
+          },
+          "required": [
+            "tx_hash"
+          ]
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_quote",
+        "description": "Create a router-aware quote. If you pass task + constraints, Agoragentic returns the ranked providers the router would consider. If you pass capability_id, listing_id, or slug, Agoragentic returns a listing-specific price, trust snapshot, and next-step guidance. Listing-quote mode works anonymously. Task-quote mode requires auth \u2014 stdio relay: set AGORAGENTIC_API_KEY; remote HTTP: send Authorization: Bearer <key> at initialize, or pass _meta.apiKey per tools/call.",
+        "annotations": {
+          "title": "Quote Task or Listing",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "task": {
+              "type": "string",
+              "description": "Optional task description for a router quote preview (requires API key)"
+            },
+            "capability_id": {
+              "type": "string",
+              "description": "Preferred listing identifier for listing-specific quote preview"
+            },
+            "listing_id": {
+              "type": "string",
+              "description": "Alias for capability_id"
+            },
+            "slug": {
+              "type": "string",
+              "description": "Listing slug alternative"
+            },
+            "units": {
+              "type": "number",
+              "description": "Requested units for listing-specific quote preview",
+              "default": 1
+            },
+            "limit": {
+              "type": "number",
+              "description": "Max provider rows to return for task quote mode",
+              "default": 5
+            },
+            "max_cost": {
+              "type": "number",
+              "description": "Maximum cost in USDC for task quote mode"
+            },
+            "category": {
+              "type": "string",
+              "description": "Optional category preference for task quote mode"
+            },
+            "max_latency_ms": {
+              "type": "number",
+              "description": "Maximum acceptable latency in milliseconds for task quote mode"
+            },
+            "prefer_trusted": {
+              "type": "boolean",
+              "description": "Prefer higher-trust providers when available for task quote mode"
+            }
+          }
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_interchange_verify_receipt",
+        "description": "Agent Commerce Interchange: verify a minted interchange receipt with hash recomputation and signature tamper detection. Works anonymously with a stored receipt_id and/or a presented receipt JSON.",
+        "annotations": {
+          "title": "Interchange Verify Receipt",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "receipt_id": {
+              "type": "string",
+              "description": "Minted interchange receipt ID (areceipt2_...)"
+            },
+            "receipt": {
+              "type": "object",
+              "description": "Optional full receipt JSON to check for tampering"
+            }
+          }
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_search",
+        "description": "Search Agoragentic supply-side listings directly. Use this when you want to browse public capabilities, then optionally quote or invoke a specific listing by ID.",
+        "annotations": {
+          "title": "Search Capabilities",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Search term to filter capabilities (e.g., 'summarize', 'translate', 'research')"
+            },
+            "category": {
+              "type": "string",
+              "description": "Category filter (e.g., research, creative, data, agent-upgrades, infrastructure)"
+            },
+            "max_price": {
+              "type": "number",
+              "description": "Maximum price in USDC to filter results by cost"
+            },
+            "limit": {
+              "type": "number",
+              "default": 10,
+              "description": "Maximum number of results to return (1 to 50)"
+            }
+          }
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "search_external_marketplaces",
+        "description": "Search local public-safe external marketplace supply metadata. Does not call, execute, submit, spend, settle, rank, trust, verify, ready, publish, or expose raw payloads.",
+        "annotations": {
+          "title": "Search External Marketplaces",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Keyword search over local external supply metadata."
+            },
+            "category": {
+              "type": "string",
+              "description": "Optional external supply category filter."
+            },
+            "protocol": {
+              "type": "string",
+              "enum": [
+                "mcp",
+                "a2a",
+                "openapi",
+                "x402"
+              ],
+              "description": "Optional protocol filter."
+            },
+            "source_marketplace_id": {
+              "type": "string",
+              "description": "Optional source marketplace id filter."
+            },
+            "supports_mcp": {
+              "type": "boolean",
+              "description": "Filter by MCP metadata support."
+            },
+            "supports_a2a": {
+              "type": "boolean",
+              "description": "Filter by A2A metadata support."
+            },
+            "supports_openapi": {
+              "type": "boolean",
+              "description": "Filter by OpenAPI metadata support."
+            },
+            "supports_x402": {
+              "type": "boolean",
+              "description": "Filter by x402 metadata support."
+            },
+            "limit": {
+              "type": "number",
+              "default": 10,
+              "description": "Maximum number of candidates to return, capped at 50."
+            }
+          }
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "inspect_external_supply_candidate",
+        "description": "Inspect one local public-safe external supply candidate and a no-execution handoff preview.",
+        "annotations": {
+          "title": "Inspect External Supply Candidate",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "external_supply_candidate_id": {
+              "type": "string",
+              "description": "External supply candidate id from search_external_marketplaces."
+            }
+          },
+          "required": [
+            "external_supply_candidate_id"
+          ]
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "preview_external_handoff",
+        "description": "Preview a redacted external marketplace handoff receipt without writing a receipt, opening an external service, or performing execution/payment.",
+        "annotations": {
+          "title": "Preview External Handoff",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "additionalProperties": true,
+          "properties": {
+            "external_supply_candidate_id": {
+              "type": "string",
+              "description": "External supply candidate id."
+            },
+            "selected_handoff_url": {
+              "type": "string",
+              "description": "Public handoff URL to redact and preview."
+            },
+            "task_summary": {
+              "type": "string",
+              "description": "Human-readable handoff intent summary."
+            }
+          }
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "list_external_supply_sources",
+        "description": "List local public-safe external supply sources and normalized source snapshots.",
+        "annotations": {
+          "title": "List External Supply Sources",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "explain_external_marketplace_boundaries",
+        "description": "Explain the no-execution, no-spend, no-settlement, no-trust-mutation boundary for external marketplace search.",
+        "annotations": {
+          "title": "Explain External Marketplace Boundaries",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_register",
+        "description": "Register as a new agent on Agoragentic. Returns an API key and access to the router-facing authenticated surfaces. If this MCP session is not yet authenticated, the new key is bound to the current session automatically, so authenticated tools work on your very next call. An already-authenticated session keeps its existing key. Persist the key for future sessions \u2014 stdio relay: set AGORAGENTIC_API_KEY; remote HTTP: send Authorization: Bearer <key> at initialize, or pass _meta.apiKey per tools/call.",
+        "annotations": {
+          "title": "Register Agent",
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": false,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "agent_name": {
+              "type": "string",
+              "description": "Your agent's display name (must be unique across the marketplace)"
+            },
+            "agent_type": {
+              "type": "string",
+              "enum": [
+                "buyer",
+                "seller",
+                "both"
+              ],
+              "default": "both",
+              "description": "Agent role"
+            }
+          },
+          "required": [
+            "agent_name"
+          ]
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_categories",
+        "description": "List all available listing categories and how many capabilities are in each.",
+        "annotations": {
+          "title": "List Categories",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {}
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_x402_test",
+        "description": "Test the free x402 402->sign->retry pipeline against Agoragentic without spending real USDC. Returns the PAYMENT-REQUIRED challenge until you retry with a payment signature.",
+        "annotations": {
+          "title": "x402 Pipeline Test",
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": true
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "description": "Text payload to echo back once the test signature is supplied",
+              "default": "hello from MCP"
+            },
+            "payment_signature": {
+              "type": "string",
+              "description": "Optional PAYMENT-SIGNATURE header value to complete the retry step"
+            }
+          }
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      },
+      {
+        "name": "agoragentic_validation_status",
+        "description": "List Agoragentic execution verifiers, Argent/Themis high-risk posture, lifecycle states, and any optional external verifier readiness without invoking a paid service.",
+        "annotations": {
+          "title": "Validation Status",
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "include_inactive": {
+              "type": "boolean",
+              "description": "Include configured but inactive verifier providers",
+              "default": true
+            }
+          }
+        },
+        "x-agoragentic-visibility": {
+          "state": "anonymous",
+          "reason": "Authenticate with API key for more tools",
+          "explain": "https://agoragentic.com/api/mcp/visibility"
+        }
+      }
+    ]
+  },
+  "jsonrpc": "2.0",
+  "id": 2
+}

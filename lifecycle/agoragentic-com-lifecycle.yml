@@ -1,0 +1,80 @@
+generated: '2026-09-19'
+method: searched
+source: https://agoragentic.com/trust.html
+derived_from: openapi/agoragentic-com-openapi.json
+docs:
+- https://agoragentic.com/legal-notice.html
+- https://agoragentic.com/api/index.json
+- https://agoragentic.com/marketplace-terms.html
+- https://github.com/rhein1/agoragentic-integrations/blob/main/CHANGELOG.md
+versioning:
+  scheme: unversioned paths under /api; version numbers live in the documents and the runtime, not in URLs or headers
+  current_version: 'OpenAPI info.version 2.0.0; runtime 2.1.0 (GET /api/health "version":"2.1.0", MCP serverInfo 2.1.0, agent-marketplace.json 2.1.0); agent card version 2.0.0'
+  spec_url: https://agoragentic.com/openapi.json
+  base_url: https://agoragentic.com/api
+  policy_published: false
+  per_capability_versioning:
+    note: >-
+      Versioning exists as a FEATURE for marketplace listings rather than for the API: GET/POST
+      /capabilities/{id}/versions (list / publish a new version) and PATCH
+      /capabilities/{id}/versions/{version}/deprecate (deprecate a version), with error schemas
+      InvalidVersionNumberError, CapabilityVersionInvalidError, VersionNumberExhaustedError and
+      VersionExecutionIneligibleError. That is how a SELLER retires a listing version; it says nothing about
+      how Agoragentic retires its own routes.
+  note: >-
+    Paths carry no version segment. The OpenAPI (2.0.0) and the runtime (2.1.0) disagree by a minor version,
+    which is consistent with the contract lagging the deployment. The Terms and the Marketplace Addendum are
+    dated (both "Last modified / owner-published September 9, 2026") and the discovery documents carry
+    _artifact_version / updated_at fields, so document-level change is dated even though the API is not.
+deprecation:
+  policy_published: false
+  policy_url: null
+  sunset_header: false
+  deprecation_header: false
+  rfc8594: false
+  deprecated_operations:
+  - openapi/agoragentic-com-openapi.json#post_api_wallet_deposit
+  documented_retirements:
+  - what: POST /api/wallet/deposit
+    status: 'deprecated: true; returns 410 Gone'
+    replacement: POST /api/wallet/purchase
+    evidence: 'openapi summary "DEPRECATED — Use POST /wallet/purchase instead"; description "This endpoint has been removed. Test deposits no longer exist. All balance is real USDC."; /api/index.json _deprecation map.'
+  - what: POST /api/agents/register
+    status: compatibility-only alias
+    replacement: POST /api/quickstart
+    evidence: 'openapi summary "Legacy agent registration compatibility"; /api/index.json _deprecation: "compatibility-only; use POST /api/quickstart".'
+  - what: POST /api/crypto/wallet
+    status: optional; no longer required for quickstart, execute echo, catalog browse or the first free listing slot
+    evidence: /api/index.json _deprecation map.
+  - what: Paid execution, x402 payment challenges, settlement, managed-wallet provisioning
+    status: temporarily_unavailable (platform_custody_frozen) — "retained, not retired"
+    since: '2026-07-31 (agent.json payment.availability.observed_date)'
+    evidence: 'Every discovery document, the OpenAPI info.description, the agent card availability block and GET /market.json; the owner calls it an "owner_initiated_interchange_completion_gate".'
+  note: >-
+    No deprecation or versioning policy page exists (/developers/versioning/ and /developers/changelog/
+    return the site's catch-all HTML shell). Deprecations are announced in-contract (summary text, a 410
+    response) and in a machine-readable _deprecation map inside /api/index.json — a real, agent-readable
+    notice mechanism, but not a policy with notice periods, so no Deprecation pointer is emitted.
+status_page:
+  url: https://stats.uptimerobot.com/b3ZzoAu9M9
+  provider: UptimeRobot public status page ("Agoragentic Status")
+  probed: [{url: 'https://stats.uptimerobot.com/b3ZzoAu9M9', status: 200, fetched: '2026-09-19'}]
+  linked_from: [https://agoragentic.com/trust.html ("View live status page"), https://agoragentic.com/legal-notice.html ("Live system status: public status page")]
+  machine_signals:
+  - {url: 'https://agoragentic.com/api/health', status: 200, note: 'liveness JSON — status healthy, version, uptime_seconds, startup/payments/x402 check blocks; the payments.x402 block reports the custody freeze'}
+  - {url: 'https://agoragentic.com/api/health/details', status: 200, note: 'cached readiness diagnostics'}
+  - {url: 'https://agoragentic.com/api/discovery/check', status: 200, note: 'provider-run self-test of its discovery documents'}
+  note: 'Probes of /status, /status/ and /status.html on agoragentic.com return the catch-all HTML shell; the real status page is the UptimeRobot page above.'
+sla:
+  url: null
+  uptime_target: null
+  note: >-
+    No uptime SLA is published. The Marketplace Addendum says "Paid availability is operational state, not
+    a permanent promise" and the security page says "No bounty or response SLA promised". Per-LISTING 7d and
+    30d uptime rollups and p50/p95 latency are exposed as data on each capability (trust.html), which is a
+    seller-side signal, not a platform SLA.
+support:
+  channel: support@agoragentic.com (general, privacy, legal, accessibility, security and content reports all route here)
+  response_targets: none published ("A seller-facing human appeal and response target are not presently guaranteed" — marketplace-terms.html)
+  page: https://agoragentic.com/contact.html
+changelog: changelog/agoragentic-com-changelog.yml

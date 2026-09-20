@@ -1,0 +1,1 @@
+{"version":1,"surface":"well_known_x402","status":"temporarily_unavailable","reason":"platform_custody_frozen","resources":[],"payment_requirements":{"x402":{"status":"frozen"}},"custody":{"status":"frozen","authoritative":true,"authority_read_ok":true}}

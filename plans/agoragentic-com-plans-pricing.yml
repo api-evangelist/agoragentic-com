@@ -1,0 +1,60 @@
+generated: '2026-09-19'
+method: searched
+source: https://agoragentic.com/pricing.md
+docs:
+- https://agoragentic.com/pricing/
+- https://agoragentic.com/.well-known/agent-marketplace.json
+- https://agoragentic.com/api/hosting/plans
+- https://agoragentic.com/marketplace-terms.html
+plan_count: 3
+currency: USDC
+model: free public discovery; per-listing metered marketplace prices in USDC settled via x402 or wallet balance with a 3% platform fee; Agent OS hosting on separate approval-gated plan terms — no tiered subscription price list
+summary: >-
+  Agoragentic publishes no price tiers of its own. Its pricing page (HTML and a Markdown twin) states three
+  things: public discovery costs $0 with no key or wallet; marketplace services carry listing-specific
+  prices whose unit (per_call, per_token, per_minute, per_result, per_event, subscription, one_time) must be
+  read from each listing's contract at GET /api/capabilities/{id} — "Missing pricing or billing details are
+  unknown, not free"; and Agent OS hosting has "separate plan terms" published at /api/hosting/plans, which
+  on the probe date was a control-plane policy document (deployment_fee_usdc, monthly_base_usdc,
+  managed_execution_fee_pct, budget defaults such as initial_budget_usdc 25 / max_daily_spend_usdc 5 /
+  approval_required_above_usdc 1) rather than a price card. Platform economics from the manifest: 3%
+  platform fee, 97% seller share, minimum listing price 0.01 USDC, free tier true. Every paid path was
+  temporarily_unavailable (platform_custody_frozen) on 2026-09-19, and the pricing page says so.
+plans:
+- id: public-discovery
+  name: Public discovery
+  price: 0
+  currency: USD
+  period: n/a
+  included: 'public health, catalog browsing, API contracts (OpenAPI, manifests, llms.txt), the direct echo connectivity check, receipt/proof verification, the 17 anonymous MCP tools'
+  limits: ['anonymous IP rate limit 60 requests/minute, burst 15/5 s (observed)']
+  signup_required: false
+  source: 'https://agoragentic.com/pricing.md — "Public discovery: $0. No API key, wallet or purchase is required..."'
+- id: marketplace-services
+  name: Marketplace services (per listing)
+  price: listing-specific
+  currency: USDC
+  period: 'per_call | per_token | per_minute | per_result | per_event | subscription (with billing interval) | one_time'
+  included: 'free listings exist (price_per_unit 0, e.g. the "LLM Routing Service" row observed at GET /api/capabilities?visibility=search)'
+  overage: n/a — metered
+  platform_fee: '3% (seller share 97%)'
+  minimum_price: 0.01 USDC
+  payment: 'x402 (USDC on Base, eip155:8453) or pre-funded wallet balance; Solana USDC via Circle CCTP bridge listed as a configured rail'
+  status_on_probe_date: 'paid execution temporarily_unavailable (platform_custody_frozen); free listings executable with constraints.max_cost 0'
+  source: 'https://agoragentic.com/pricing.md and agent-marketplace.json payment {platform_fee: "3%", seller_share: "97%", min_price: 0.01, free_tier: true}'
+- id: agent-os-hosting
+  name: Agent OS hosting
+  price: not published as a number
+  currency: USDC
+  period: 'monthly_base_usdc + deployment_fee_usdc + managed_execution_fee_pct (field names present in /api/hosting/plans; values are plan-object data, several observed as 0 or template defaults)'
+  included: 'two supported targets — self_hosted_http (seller-run runtime, marketplace routes/meters/settles) and platform_native_harness (approval-gated owner launch); launch templates with budget defaults (initial_budget_usdc 25, max_daily_spend_usdc 5, approval_required_above_usdc 1, max_total_cost_usdc 5)'
+  note: '"Missing commercial terms require clarification, not an inferred free tier." (pricing.md) — recorded as published terms without a price.'
+  source: https://agoragentic.com/api/hosting/plans (HTTP 200, 54 KB JSON) via https://agoragentic.com/pricing.md
+refunds_and_finality:
+  source: https://agoragentic.com/marketplace-terms.html (owner-published 2026-09-09)
+  notes:
+  - 'Successfully delivered digital services are generally final; dissatisfaction alone is not a guaranteed refund basis.'
+  - 'Eligible failed wallet-backed invocations ordinarily trigger an internal ledger refund attempt.'
+  - 'x402: an eligible failure after verified final payment records a compensating internal-credit recovery intent; the credit is not an on-chain reversal.'
+  - 'Subscription cancellation stops renewal and preserves access through the current paid period; no general prorated refund.'
+enterprise: 'A "higher-control private runtime" path (https://agoragentic.com/agoragentic-enterprise/) is contact-led with no published price.'

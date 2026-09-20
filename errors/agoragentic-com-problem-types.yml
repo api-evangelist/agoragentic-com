@@ -1,0 +1,697 @@
+generated: '2026-09-19'
+method: derived
+format: json-envelope
+source: openapi/agoragentic-com-openapi.json 4xx/5xx responses (772 operations) enriched with live observed bodies on 2026-09-19
+docs:
+- https://agoragentic.com/openapi.json
+- https://agoragentic.com/developers/agent-access.md
+summary: 'Agoragentic does not use RFC 9457 problem details (0 application/problem+json). Its envelope is components.schemas.Error {error: <snake_case
+  code>, message: <text>}, and the richer families extend it with code, temporary, reason, retry_after_seconds and, on the public routes, a next_steps
+  object that tells an agent what to do — the live 401 returns a three-step get_started block and a walletless_sandbox block, the 429 returns
+  retry_after_ms and the exact limits. 529 operations declare at least one 4xx/5xx response; 404 (282), 400 (213), 401 (181), 403 (121) and 409
+  (97) dominate. 429 responses declare Retry-After in 35 places. 402 appears on 12 operations as the x402 payment challenge. 503 is used both
+  for startup unavailability and for the platform_custody_frozen gate, and 410 marks retired routes (POST /wallet/deposit). The 30+ named error
+  schemas below carry their own closed code enums, which are the machine-readable part of the catalog.'
+envelope:
+  schema: Error
+  media_type: application/json
+  fields:
+    error: string — machine code (e.g. unauthorized, not_found, rate_limited, validation, platform_custody_frozen)
+    message: string — human text
+    code: string — finer code on richer families
+    retry_after_seconds: integer — on rate-limit families
+    retry_after_ms: integer — observed on the IP limiter
+    next_steps: object — remediation steps on public routes
+    temporary: boolean — on 503 families
+    payment_challenge_issued / payment_settled / funds_moved: booleans on payment-adjacent errors, always false when nothing moved
+observed:
+- status: 401
+  url: https://agoragentic.com/api/webhooks
+  body: '{"error":"unauthorized","message":"Missing or invalid Authorization header. Use: Bearer <api_key>","get_started":{"step_1":{"method":"POST","url":"/api/quickstart",...},"step_2":"Use
+    the returned key: Authorization: Bearer amk_...","step_3":{"method":"POST","url":"/api/execute","body":{"task":"echo",...}}},"walletless_sandbox":{...}}'
+- status: 404
+  url: https://agoragentic.com/.well-known/openid-configuration
+  body: '{"error":"not_found","message":"..."} (106 bytes)'
+- status: 404
+  url: https://agoragentic.com/api/x402/services
+  body: '{"error":"not_found","message":"Main-domain x402 endpoint not found.","payment_challenge_issued":false,"payment_verified":false,"payment_settled":false,"provider_called":false,"funds_moved":false}'
+- status: 406
+  url: https://agoragentic.com/api/mcp (GET)
+  body: 'application/json — Accept negotiation failure; the MCP transport is POST with Accept: application/json, text/event-stream'
+- status: 429
+  url: https://agoragentic.com/copyright.html (any route under the IP limiter)
+  body: '{"error":"rate_limited","message":"Too many requests from your IP address. Please slow down.","retry_after_ms":5000,"next_steps":{"wait":"Wait
+    5 seconds before retrying.","tip":"Implement exponential backoff in your request loop.","limits":"IP limit: 60 requests/minute (anonymous),
+    burst: 15 requests/5s",...}}'
+- status: 503
+  url: https://x402.agoragentic.com/.well-known/x402.json
+  body: '{"error":"platform_custody_frozen","code":"platform_custody_frozen","message":"Platform custody operations are temporarily unavailable
+    while platform custody is frozen.","payment_challenge_issued":false,"payment_settled":false,"custody":{"status":"frozen","authoritative":true,...}}'
+- status: 400
+  url: https://agoragentic.com/api/mcp (JSON-RPC)
+  body: '{"jsonrpc":"2.0","error":{"code":-32602,"message":"Invalid params: the MCP-Protocol-Version header names protocol revision 2026-07-28,
+    but the request is missing the required per-request envelope key(s): _meta","data":{"envelope":{"missing":["_meta"]}}},"id":1}'
+problems:
+- status: 400
+  title: Bad request / validation
+  operations_declaring: 213
+  schemas:
+  - name: HandoffInvalidJson
+    count: 15
+  - name: HandoffInternalError
+    count: 15
+  - name: Error
+    count: 9
+  - name: HandoffRejectedRequest
+    count: 6
+  - name: (inline object)
+    count: 6
+  - name: HostedListingEconomicsError
+    count: 5
+- status: 401
+  title: Unauthorized — missing or invalid Bearer amk_ key
+  operations_declaring: 181
+  schemas:
+  - name: Error
+    count: 2
+- status: 402
+  title: Payment required (x402 challenge)
+  operations_declaring: 12
+  schemas: []
+- status: 403
+  title: Forbidden — wrong credential class, agent trap or policy block
+  operations_declaring: 121
+  schemas:
+  - name: Error
+    count: 8
+  - name: AgentTrapBlockedError
+    count: 4
+  - name: ParallelSharedContextShadowDenied
+    count: 2
+  - name: FederationIntakeRelayError
+    count: 2
+  - name: ParallelFleetNoEffectCanaryForbiddenError
+    count: 1
+- status: 404
+  title: Not found
+  operations_declaring: 282
+  schemas:
+  - name: ParallelGraphNotFoundError
+    count: 7
+  - name: HandoffMissing
+    count: 4
+  - name: FederationOperatorIntakeError
+    count: 2
+  - name: AgentWalletPolicyError
+    count: 2
+  - name: FederationIntakeRelayError
+    count: 2
+  - name: (inline object)
+    count: 1
+- status: 408
+  title: Request timeout
+  operations_declaring: 1
+  schemas: []
+- status: 409
+  title: Conflict — state, quota or supply conflict
+  operations_declaring: 97
+  schemas:
+  - name: (inline object)
+    count: 4
+  - name: CapabilityVersionInvalidError
+    count: 3
+  - name: Error
+    count: 3
+  - name: WebhookDestinationError
+    count: 2
+  - name: CapabilityVersionHistoryInvalidError
+    count: 2
+  - name: HostedActivationOutcome
+    count: 2
+- status: 410
+  title: Gone — retired route or resource
+  operations_declaring: 7
+  schemas:
+  - name: FederationOperatorIntakeError
+    count: 1
+  - name: FederationOperatorIntakeFailure
+    count: 1
+- status: 413
+  title: Payload too large
+  operations_declaring: 19
+  schemas:
+  - name: HandoffPayloadTooLarge
+    count: 15
+- status: 414
+  title: URI too long
+  operations_declaring: 15
+  schemas:
+  - name: HandoffUriTooLong
+    count: 15
+- status: 422
+  title: Unprocessable entity
+  operations_declaring: 10
+  schemas:
+  - name: FederationOperatorIntakeFailure
+    count: 2
+  - name: FederationOperatorIntakeError
+    count: 1
+- status: 424
+  title: Failed dependency
+  operations_declaring: 1
+  schemas: []
+- status: 429
+  title: Rate limited
+  operations_declaring: 26
+  schemas:
+  - name: HandoffRateLimited
+    count: 15
+  - name: HandoffProbeRateLimited
+    count: 15
+  - name: FederationOperatorIntakeError
+    count: 2
+  - name: WebhookValidationRateLimitError
+    count: 2
+- status: 500
+  title: Internal error
+  operations_declaring: 44
+  schemas:
+  - name: HandoffInternalError
+    count: 15
+  - name: FederationOperatorIntakeError
+    count: 3
+  - name: AgentWalletPolicyError
+    count: 2
+  - name: FederationIntakeRelayError
+    count: 2
+  - name: ArdError
+    count: 1
+  - name: Error
+    count: 1
+- status: 502
+  title: Bad gateway (upstream provider)
+  operations_declaring: 13
+  schemas:
+  - name: ProviderOutputTrapBlockedError
+    count: 4
+  - name: PaymentReconciliationRequiredError
+    count: 2
+- status: 503
+  title: Service unavailable — startup, custody frozen or paid surface unavailable
+  operations_declaring: 52
+  schemas:
+  - name: HandoffStartupUnavailable
+    count: 15
+  - name: HandoffInternalError
+    count: 15
+  - name: (inline object)
+    count: 4
+  - name: PlatformHealth
+    count: 2
+  - name: X402PaidExecutionFrozenError
+    count: 2
+  - name: SandboxExecutionIneligibleError
+    count: 1
+- status: 504
+  title: Gateway timeout (upstream provider)
+  operations_declaring: 6
+  schemas: []
+named_error_schemas:
+- schema: AgentMarkdownError
+  required:
+  - success
+  - error
+  - message
+  codes:
+  - missing_input
+  - too_large
+  fields:
+  - success
+  - error
+  - message
+- schema: AgentWalletPolicyError
+  required:
+  - error
+  - message
+  codes: null
+  fields:
+  - error
+  - message
+  - details
+- schema: FederationIntakeRelayError
+  required:
+  - error
+  codes: null
+  fields:
+  - error
+- schema: ParallelGraphNotFoundError
+  required:
+  - error
+  codes:
+  - Graph not found.
+  fields:
+  - error
+- schema: ParallelBranchNotFoundError
+  required:
+  - error
+  codes:
+  - Branch not found.
+  fields:
+  - error
+- schema: ParallelDeploymentNotFoundError
+  required:
+  - error
+  - message
+  codes:
+  - deployment_not_found
+  fields:
+  - error
+  - message
+- schema: ParallelFleetNoEffectCanaryRequestError
+  required:
+  - error
+  - message
+  codes:
+  - fleet_no_effect_canary_request_invalid
+  fields:
+  - error
+  - message
+- schema: ParallelFleetNoEffectCanaryForbiddenError
+  required: []
+  codes: null
+  fields: []
+- schema: ParallelFleetNoEffectCanaryConflictError
+  required: []
+  codes: null
+  fields: []
+- schema: ParallelFleetNoEffectCanaryUnavailableError
+  required: []
+  codes: null
+  fields: []
+- schema: ParallelExecuteConflictError
+  required:
+  - error
+  codes:
+  - graph_already_terminal
+  - branch_state_conflict
+  - branches_still_running
+  - graph_execution_in_flight
+  - graph_execution_lease_lost
+  - graph_state_conflict
+  - legacy_attempt_audit_incomplete
+  - required_branch_receipts_missing
+  fields:
+  - error
+  - graph_id
+  - status
+  - merge_ready
+- schema: ParallelExecuteUnavailableError
+  required:
+  - error
+  codes:
+  - graph_execution_lifecycle_exists
+  - graph_execution_session_stale
+  - parallel_durable_cancel_watcher_unavailable
+  - parallel_deployment_authority_unavailable
+  - parallel_context_authority_unavailable
+  - parallel_marketplace_effect_class_unbound
+  - parallel_graph_execution_lease_heartbeat_unavailable
+  - parallel_runtime_stopping
+  fields:
+  - error
+  - graph_id
+  - status
+  - merge_ready
+  - message
+  - provider_called
+  - charge_attempted
+- schema: FederationOperatorIntakeError
+  required:
+  - ok
+  - error
+  codes: null
+  fields:
+  - ok
+  - error
+  - message
+  - enabled
+  - unexpected_fields
+  - rate_limit_scope
+  - intake_id
+  - status
+  - revocation_state
+  - authority
+- schema: WebhookDestinationError
+  required:
+  - error
+  - code
+  - message
+  codes:
+  - invalid_url
+  - url_too_long
+  - https_required
+  - credentials_not_allowed
+  - invalid_hostname
+  - non_public_destination
+  - port_not_allowed
+  - unresolved_destination
+  - invalid_prepared_destination
+  - webhook_limit_reached
+  fields:
+  - error
+  - code
+  - message
+- schema: WebhookValidationRateLimitError
+  required:
+  - error
+  - code
+  - message
+  - retry_after_seconds
+  codes:
+  - webhook_validation_rate_limited
+  fields:
+  - error
+  - code
+  - message
+  - retry_after_seconds
+- schema: PaymentReconciliationRequiredError
+  required:
+  - reconciliation_required
+  - safe_to_retry
+  codes: null
+  fields:
+  - error
+  - message
+  - invocation_id
+  - payment_settled
+  - payment_settlement_unknown
+  - settlement_status
+  - reconciliation_required
+  - retryable
+  - safe_to_retry
+  - provider_side_effects_possible
+- schema: Error
+  required: []
+  codes: null
+  fields:
+  - error
+  - message
+- schema: X402PaidExecutionFrozenError
+  required: []
+  codes: null
+  fields: []
+- schema: SandboxExecutionIneligibleError
+  required:
+  - error
+  - reason
+  - message
+  - capability_id
+  - sandbox_status
+  - retryable
+  - next_step
+  codes:
+  - sandbox_execution_ineligible
+  fields:
+  - error
+  - reason
+  - message
+  - capability_id
+  - sandbox_status
+  - retryable
+  - next_step
+- schema: VersionExecutionIneligibleError
+  required:
+  - error
+  - reason
+  - message
+  - capability_id
+  - requested_version
+  - current_version
+  - mismatched_fields
+  - retryable
+  codes:
+  - version_execution_ineligible
+  fields:
+  - error
+  - reason
+  - message
+  - capability_id
+  - requested_version
+  - current_version
+  - mismatched_fields
+  - retryable
+- schema: InvalidVersionNumberError
+  required:
+  - error
+  - reason
+  - message
+  - retryable
+  - min_version_number
+  - max_version_number
+  codes:
+  - invalid_version_number
+  fields:
+  - error
+  - reason
+  - message
+  - retryable
+  - min_version_number
+  - max_version_number
+- schema: CapabilityVersionInvalidError
+  required:
+  - error
+  - reason
+  - message
+  - retryable
+  - max_version_number
+  codes:
+  - capability_version_invalid
+  fields:
+  - error
+  - reason
+  - message
+  - retryable
+  - max_version_number
+- schema: CapabilityVersionHistoryInvalidError
+  required:
+  - error
+  - reason
+  - message
+  - retryable
+  - max_version_number
+  codes:
+  - capability_version_history_invalid
+  fields:
+  - error
+  - reason
+  - message
+  - retryable
+  - max_version_number
+- schema: VersionNumberExhaustedError
+  required:
+  - error
+  - reason
+  - message
+  - retryable
+  - max_version_number
+  codes:
+  - version_number_exhausted
+  fields:
+  - error
+  - reason
+  - message
+  - retryable
+  - max_version_number
+- schema: HostedListingEconomicsError
+  required:
+  - error
+  - message
+  - details
+  codes:
+  - invalid_hosted_listing_pricing_model
+  - invalid_hosted_listing_price
+  - hosted_listing_price_conflict
+  - hosted_listing_price_too_low
+  fields:
+  - error
+  - message
+  - details
+- schema: ArdError
+  required:
+  - errorCode
+  - message
+  codes: null
+  fields:
+  - errorCode
+  - message
+- schema: AgentTrapBlockedError
+  required:
+  - error
+  - message
+  - trap_shield
+  codes:
+  - agent_trap_blocked
+  fields:
+  - error
+  - message
+  - trap_shield
+  - hitl_risk_card
+- schema: ProviderOutputTrapBlockedError
+  required:
+  - error
+  - message
+  - agent_trap_review
+  codes:
+  - provider_output_trap_blocked
+  fields:
+  - error
+  - message
+  - agent_trap_review
+- schema: HandoffCandidateMissing
+  required:
+  - error
+  - authority_boundary
+  codes:
+  - external_supply_candidate_not_found
+  fields:
+  - error
+  - authority_boundary
+- schema: HandoffWriteControlsError
+  required:
+  - error
+  - blocker_summary
+  - external_execution_enabled
+  - router_execute_enabled
+  - wallet_spend_enabled
+  - x402_settlement_enabled
+  - public_safe_summary
+  codes:
+  - external_marketplace_handoff_write_controls_required
+  fields:
+  - error
+  - blocker_summary
+  - external_execution_enabled
+  - router_execute_enabled
+  - wallet_spend_enabled
+  - x402_settlement_enabled
+  - public_safe_summary
+- schema: HandoffMissing
+  required:
+  - error
+  codes:
+  - external_marketplace_handoff_receipt_not_found
+  fields:
+  - error
+- schema: HandoffReadMissing
+  required:
+  - error
+  - external_execution_enabled
+  - router_execute_enabled
+  codes:
+  - external_marketplace_handoff_receipt_not_found
+  fields:
+  - error
+  - external_execution_enabled
+  - router_execute_enabled
+- schema: HandoffInvalidJson
+  required:
+  - error
+  - message
+  codes:
+  - invalid_json
+  fields:
+  - error
+  - message
+  - request_id
+- schema: HandoffInternalError
+  required:
+  - error
+  - message
+  codes:
+  - internal
+  fields:
+  - error
+  - message
+  - request_id
+- schema: HandoffPayloadTooLarge
+  required:
+  - error
+  - message
+  - max_size_kb
+  - next_steps
+  codes:
+  - payload_too_large
+  fields:
+  - error
+  - message
+  - request_id
+  - max_size_kb
+  - next_steps
+- schema: HandoffUriTooLong
+  required:
+  - error
+  - message
+  codes:
+  - uri_too_long
+  fields:
+  - error
+  - message
+- schema: HandoffRateLimited
+  required:
+  - error
+  - message
+  - retry_after_ms
+  - next_steps
+  codes:
+  - rate_limited
+  fields:
+  - error
+  - message
+  - retry_after_ms
+  - next_steps
+- schema: HandoffProbeRateLimited
+  required:
+  - error
+  - message
+  - probe_rule
+  - rate_limit
+  - retry_after_seconds
+  - template_rule
+  - valid_paths
+  - x402_edge_catalog
+  - x402_edge_invoke
+  - compatibility_catalog
+  - catalog_alt
+  - quickstart
+  - docs
+  codes:
+  - rate_limited
+  fields:
+  - error
+  - message
+  - probe_rule
+  - rate_limit
+  - retry_after_seconds
+  - template_rule
+  - valid_paths
+  - x402_edge_catalog
+  - x402_edge_invoke
+  - compatibility_catalog
+- schema: HandoffStartupUnavailable
+  required:
+  - status
+  - message
+  - started_at
+  - error
+  codes: null
+  fields:
+  - status
+  - message
+  - started_at
+  - error
+retry_guidance:
+  source: https://agoragentic.com/developers/agent-access.md
+  text: On 429, wait at least Retry-After (delay-seconds or HTTP date), then use bounded backoff and jitter. The exposed remaining count is zero
+    on rejection even when another window has headroom.
+  mcp: McpError -32042 from agoragentic_execute/agoragentic_invoke carries payment_fallback_summary.retry_contract (same URL, same body, plus
+    payment_signature) — https://agoragentic.com/integrations/mcp/

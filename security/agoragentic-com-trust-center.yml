@@ -1,0 +1,42 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: https://agoragentic.com/trust.html
+url: https://agoragentic.com/trust.html
+certifications: []
+claims:
+  soc2_type_ii: 'Not claimed — "Agoragentic does not currently claim SOC 2 Type II certification or a formal audit."'
+  gdpr: 'Planned — "Privacy rights, transfer terms, retention schedules, and processing agreements remain subject to scope, contract, and the owner-verification gaps documented in the Data Processing notice."'
+  iso27001: not mentioned
+  pci_dss: not mentioned (no card payments; USDC/x402)
+summary: >-
+  https://agoragentic.com/trust.html is a real trust center (self-titled "TRUST CENTER") with a "Compliance
+  & Certifications" section, and that section states in its own words that NO certification is held: SOC 2
+  Type II is "Not claimed" and GDPR compliance is "Planned". The companion enterprise page repeats "It is
+  not a claim of SOC 2 certification". CORRECTION: the automated probe-security-programs.py pass credited
+  "SOC 2" and "GDPR" from keyword matches on this page; those words appear only inside the disclaimers
+  above, so certifications is emptied here and no Compliance pointer is emitted. What the page DOES publish
+  is a set of named security controls and a trust vocabulary, recorded below.
+controls_published:
+- {control: API key authentication, detail: '256-bit API keys with prefix-based routing (amk_); keys hashed at rest using bcrypt', status: Active}
+- {control: USDC settlement on Base L2, detail: 'when the money path is enabled; check the Interchange operating state first', status: Active (frozen on the probe date)}
+- {control: Rate limiting & DDoS protection, detail: 'Per-agent, per-capability rate limits; managed infrastructure', status: Active}
+- {control: Audit trails / receipts, detail: 'selected invocation, payment, registration and authentication events with timestamps and agent identifiers — "operational records, not a claim of cryptographic immutability"', status: Active}
+- {control: Sandbox verification of listings, detail: 'deterministic sandbox probe; public listing runtime states verified / reachable / failed', status: Active}
+- {control: Seller trust tiers, detail: 'unverified / verified / audited; AI-powered listing review (Bedrock Claude) then sandbox endpoint verification then continuous monitoring', status: Active}
+- {control: Pre-action review and outcome reconciliation, detail: 'Argent / Consequences Engine inside Agent OS', status: Active}
+- {control: Live status page, detail: 'https://stats.uptimerobot.com/b3ZzoAu9M9', status: Active}
+related_pages:
+  security_disclosure: https://agoragentic.com/security.html
+  data_processing: https://agoragentic.com/data-processing.html
+  ai_transparency: https://agoragentic.com/ai-transparency.html
+  legal_notice: https://agoragentic.com/legal-notice.html
+evidence:
+- source: https://agoragentic.com/trust.html
+  http_status: 200
+  fetched: '2026-09-19'
+  quote: '"SOC 2 Type II — Agoragentic does not currently claim SOC 2 Type II certification or a formal audit. Not claimed"; "GDPR Compliance — ... Planned"'
+- source: https://agoragentic.com/agoragentic-enterprise/
+  http_status: 200
+  fetched: '2026-09-19'
+  quote: '"It is not a claim of SOC 2 certification, blanket production readiness, or universal enterprise compatibility."'

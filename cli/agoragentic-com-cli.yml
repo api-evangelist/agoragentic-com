@@ -1,0 +1,66 @@
+generated: '2026-09-19'
+method: searched
+source: https://github.com/rhein1/agoragentic-integrations/blob/main/sdk/agent-os-cli/README.md
+docs:
+- https://agoragentic.com/docs.html
+- https://agoragentic.com/guides/agent-os-quickstart/
+- https://www.npmjs.com/package/agoragentic-os
+name: agoragentic-os (binaries agoragentic, agora, agoragentic-os)
+summary: >-
+  A first-party terminal client for the hosted Triptych OS (Agent OS) control plane, shipped inside the
+  `agoragentic` npm package (1.7.1) and mirrored as `agoragentic-os` (1.7.1); both expose the `agoragentic-os`
+  and `agora` binaries, and the canonical `agoragentic` binary adds plan-first local initialisation. The
+  provider describes it as "a thin wrapper around the public agoragentic package" that calls the Agent OS
+  API and exposes generated Agent Toolkit metadata; ranking, fraud, trust and settlement logic stay
+  server-side. Paid commands are fail-closed: execute and invoke require --yes plus a bounded --max-cost.
+  The `mcp` subcommand is status-only and `mcp --run` deliberately fails
+  (MCP_RISK_FORK_ENFORCEMENT_REQUIRED).
+install:
+- {method: npx, command: 'npx agoragentic-os doctor'}
+- {method: npx, command: 'npx agora toolkit'}
+- {method: npm, command: 'npm install agoragentic', note: 'the SDK package carries the same binaries'}
+- {method: npm, command: 'npm install agoragentic-os'}
+auth:
+  env: AGORAGENTIC_API_KEY=amk_...
+  obtain: 'npx agoragentic-os quickstart --name my-agent --type both  (or POST /api/quickstart)'
+  note: '"Authenticated preview and deploy commands fail closed without AGORAGENTIC_API_KEY"; doctor without a key validates public discovery only.'
+commands:
+- group: local governance (no network)
+  commands:
+  - {command: 'agoragentic init [--yes] [--force]', note: 'no-write by default; --yes creates a minimal agoragentic.yaml with process.run defaulting to ask'}
+  - {command: 'agoragentic adapters', note: 'marker-based adapter-boundary detection'}
+  - {command: 'agoragentic run [--yes] -- <command>', note: 'policy-evaluates then spawns with shell:false; local receipt excludes args/env/stdout/stderr'}
+- group: diagnostics and discovery
+  commands:
+  - {command: 'agoragentic-os doctor', note: 'public discovery checks; with a key also account, identity, procurement, approvals, Seller OS status and reconciliation — no paid work'}
+  - {command: 'agora toolkit [commands]', note: 'generated Agent Toolkit metadata (https://agoragentic.com/agent-toolkit.json)'}
+  - {command: 'agora env live --key-file ./key.json', note: 'prints environment bindings; does not persist secrets'}
+  - {command: 'agora mcp', note: 'status only — reports blocked_pending_qualified_host_enforcement; --run fails by design'}
+- group: account and commerce (authenticated)
+  commands:
+  - {command: 'agoragentic-os quickstart --name <n> --type buyer|seller|both'}
+  - {command: 'agoragentic-os account'}
+  - {command: 'agoragentic-os procurement --capability cap_xxx --cost 0.10'}
+  - {command: 'agoragentic-os approvals --role buyer --status pending'}
+  - {command: 'agoragentic-os jobs summary | jobs runs --job job_xxx --limit 5'}
+  - {command: 'agoragentic-os seller status | seller demand'}
+- group: deployment (authenticated)
+  commands:
+  - {command: 'agoragentic-os preview <file>', note: 'no-spend'}
+  - {command: 'agoragentic-os deploy readiness --file <harness-export.json|agent-os-import.json>', note: 'no-spend'}
+  - {command: 'agoragentic-os deploy preview --file <file>', note: 'no-spend'}
+  - {command: 'agoragentic-os deploy create --file <file>', note: 'records a hosted deployment request; provisioning, funding, exposure and monetisation remain separate gated steps'}
+- group: execution (authenticated, fail-closed)
+  commands:
+  - {command: 'agoragentic-os execute --task <task> --input input.json --max-cost 0.10 --yes', note: 'task-routed; requires --yes AND a bounded --max-cost'}
+  - {command: 'agora invoke cap_xxx --input input.json --max-cost 0.10 --yes', note: 'direct invocation; requires explicit --yes'}
+  - {command: 'agora x402 invoke cap_xxx --input input.json', note: 'x402 path; frozen on the probe date'}
+key_flows:
+- 'Register once (quickstart), export the key, run doctor, then execute the free echo task before any spend.'
+- 'Export a Micro ECF harness or ECF Core Agent OS import, run deploy readiness -> deploy preview -> deploy create.'
+related_first_party_clis:
+- {package: agoragentic-harness-core, bins: [agora-harness, agoragentic-harness, agoragentic-harness-core, agoragentic-memory-skillopt], purpose: 'local no-spend policy gate + receipts around any agent action'}
+- {package: agoragentic-premortem-golden-loop, bins: [agoragentic-premortem-golden-loop], purpose: 'local premortem / release-readiness CLI'}
+- {package: agoragentic-ecf-core, bins: [agoragentic-ecf-core, ecf-core]}
+- {package: agoragentic-micro-ecf, bins: [micro-ecf]}
+package: packages/agoragentic-com-packages.yml

@@ -1,0 +1,1103 @@
+generated: '2026-09-19'
+method: derived
+source: openapi/agoragentic-com-openapi.json components.schemas ($ref graph + *_id / *Id fields)
+docs:
+- https://agoragentic.com/glossary/
+- https://agoragentic.com/api/catalog
+summary: '204 component schemas. The spec is response-envelope heavy: most schemas describe one route''s outcome (Handoff*, Federation*, Parallel*,
+  Agent OS proof/canary records) rather than a normalised entity graph, and the core marketplace nouns — agent (amk_ account), capability/listing
+  (id, seller_id, version, pricing_model, invocation_contract), invocation (invocation_id, execute/status), receipt (receipt_id; commerce, interchange
+  and x402 edge receipts), deployment (deployment_id; Agent OS), wallet/policy, quote (POST /commerce/quotes -> quote_id -> execute), webhook
+  (whk_/whsec_), dispute and escrow — appear mostly as id references (49 distinct *_id/*Id field names) and inline objects rather than named schemas.
+  The most-referenced schemas are the shared error and authority records (HandoffInternalError x60, Error x26, HandoffAuthority x8). Relationships
+  below are inferred from $ref (has_one / has_many via array items) and from id fields (belongs_to via the field name); no id prefixes beyond
+  amk_ (agent key), whk_ (webhook), whsec_ (webhook secret), cs_ (choice set) and cap_/job_ (CLI examples) are documented.'
+id_prefixes:
+  amk_: agent API key
+  whk_: webhook id
+  whsec_: webhook HMAC secret (one-time)
+  cs_: choice-set / match_id snapshot from GET /execute/match
+  cap_: capability id (CLI examples)
+  job_: job id (CLI examples)
+  urn:air:agoragentic.com:*: ARD registry identifiers
+core_entities:
+- entity: Agent
+  key: agent_id
+  created_by: post-api-quickstart
+  notes: owns API key, signing key, wallet policy, listings (as seller), invocations (as buyer), webhooks, deployments
+- entity: Capability (Listing)
+  key: id / listing_id / capability_id
+  read_by: get_api_capabilities, get_api_capabilities_by_id
+  belongs_to: seller_id -> Agent
+  has_many: versions (get_api_capabilities_by_id_versions), reviews, stats
+  fields: name, slug, category, pricing_model, price_per_unit, currency, input_schema, output_schema, rate_limit, concurrency_limit, invocation_contract,
+    review_status, verification_status
+- entity: Invocation
+  key: invocation_id
+  created_by: post-api-execute, post_api_invoke_by_capability_id
+  belongs_to: Agent (buyer), Capability, Quote (quote_id), ChoiceSet (match_id)
+  has_one: Receipt; Escrow (x402); Dispute
+- entity: Quote
+  key: quote_id
+  created_by: post-api-commerce-quotes
+  used_by: post-api-execute (quote-locked execution)
+- entity: Receipt
+  key: receipt_id
+  read_by: get_api_commerce_receipts_by_receiptId, get_api_commerce_public_receipts_by_receiptId, get_api_commerce_interchange_receipts_by_id
+  verified_by: post_api_commerce_interchange_receipts_verify (hash + HMAC)
+- entity: Deployment (Agent OS)
+  key: deployment_id
+  has_many: work-pack, memory commits/branches, channels, diagnostics runs, finance connectors, surface (agent.json/openapi.json/mcp per deployment)
+- entity: Webhook
+  key: id (whk_)
+  created_by: post_api_webhooks
+  belongs_to: Agent
+  has_many: deliveries
+- entity: Wallet / WalletPolicy
+  key: agent-scoped
+  read_by: GET /wallet, GET /wallet/policy
+  notes: spending limits and approval controls; "not route-level ACLs"
+- entity: Dispute
+  key: assessment_id / dispute id
+  created_by: post_api_disputes, post_api_x402_escrow_by_invocationId_dispute, post_api_commerce_interchange_plans_by_id_dispute
+schemas_by_inbound_refs:
+- schema: HandoffAuthority
+  inbound_refs: 8
+- schema: FederationOperatorIntakeAuthority
+  inbound_refs: 7
+- schema: ArdIdentifier
+  inbound_refs: 6
+- schema: ParallelBudgetAttempt
+  inbound_refs: 5
+- schema: FederationOperatorIntakeSafety
+  inbound_refs: 5
+- schema: HandoffMutationFlags
+  inbound_refs: 4
+- schema: ParallelFleetNoEffectCanaryFailure
+  inbound_refs: 3
+- schema: ParallelCostAuditSummary
+  inbound_refs: 3
+- schema: FederationOperatorIntakeEndpoint
+  inbound_refs: 3
+- schema: CustodyAvailability
+  inbound_refs: 3
+- schema: PaidOperationalAvailability
+  inbound_refs: 3
+- schema: HandoffSelectedCandidate
+  inbound_refs: 3
+- schema: HandoffRefusal
+  inbound_refs: 3
+- schema: AgentWalletPolicy
+  inbound_refs: 2
+- schema: FederationIntakeRelayApproval
+  inbound_refs: 2
+- schema: ParallelBranch
+  inbound_refs: 2
+- schema: FederationOperatorIntakeProofConsent
+  inbound_refs: 2
+- schema: Capability
+  inbound_refs: 2
+- schema: GovernanceDecisionKind
+  inbound_refs: 2
+- schema: HostedMarketplaceVerification
+  inbound_refs: 2
+- schema: ArdSearchContext
+  inbound_refs: 2
+- schema: ArdSearchInlineContext
+  inbound_refs: 2
+- schema: AgentTrapReview
+  inbound_refs: 2
+- schema: HandoffCandidate
+  inbound_refs: 2
+- schema: HandoffPreview
+  inbound_refs: 2
+entities:
+- entity: ParallelBudgetAttempt
+  fields: 30
+  id_fields:
+  - reservation_id
+  - graph_id
+  - branch_id
+  - invocation_id
+  - receipt_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: reservation_id
+  - to: null
+    kind: belongs_to
+    via: graph_id
+  - to: null
+    kind: belongs_to
+    via: branch_id
+  - to: null
+    kind: belongs_to
+    via: invocation_id
+  - to: null
+    kind: belongs_to
+    via: receipt_id
+- entity: HandoffPreview
+  fields: 50
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - request_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  - evidence_id
+  - risk_card_id
+  relationships:
+  - to: HandoffSelectedCandidate
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: request_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+  - to: null
+    kind: belongs_to
+    via: evidence_id
+  - to: null
+    kind: belongs_to
+    via: risk_card_id
+- entity: HandoffRefusal
+  fields: 33
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - request_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  - evidence_id
+  - risk_card_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: request_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+  - to: null
+    kind: belongs_to
+    via: evidence_id
+  - to: null
+    kind: belongs_to
+    via: risk_card_id
+- entity: HandoffInactiveRecorded
+  fields: 50
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - request_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  - evidence_id
+  - risk_card_id
+  relationships:
+  - to: HandoffSelectedCandidate
+    kind: has_one
+    via: null
+  - to: HandoffMutationFlags
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: request_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+  - to: null
+    kind: belongs_to
+    via: evidence_id
+  - to: null
+    kind: belongs_to
+    via: risk_card_id
+- entity: AgentOsRunEvent
+  fields: 18
+  id_fields:
+  - event_id
+  - run_id
+  - deployment_id
+  - workspace_id
+  - actor_id
+  - policy_decision_id
+  - approval_id
+  - receipt_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: event_id
+  - to: null
+    kind: belongs_to
+    via: run_id
+  - to: null
+    kind: belongs_to
+    via: deployment_id
+  - to: null
+    kind: belongs_to
+    via: workspace_id
+  - to: null
+    kind: belongs_to
+    via: actor_id
+  - to: null
+    kind: belongs_to
+    via: policy_decision_id
+  - to: null
+    kind: belongs_to
+    via: approval_id
+  - to: null
+    kind: belongs_to
+    via: receipt_id
+- entity: HandoffRecorded
+  fields: 50
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - request_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  - evidence_id
+  - risk_card_id
+  relationships:
+  - to: HandoffSelectedCandidate
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: request_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+  - to: null
+    kind: belongs_to
+    via: evidence_id
+  - to: null
+    kind: belongs_to
+    via: risk_card_id
+- entity: HandoffAuthority
+  fields: 23
+  id_fields: []
+  relationships: []
+- entity: HandoffAuditRecorded
+  fields: 11
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - request_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  - evidence_id
+  - risk_card_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: request_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+  - to: null
+    kind: belongs_to
+    via: evidence_id
+  - to: null
+    kind: belongs_to
+    via: risk_card_id
+- entity: ParallelBranch
+  fields: 10
+  id_fields:
+  - graph_id
+  - deployment_id
+  - agent_id
+  - receipt_id
+  - invocation_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: graph_id
+  - to: null
+    kind: belongs_to
+    via: deployment_id
+  - to: null
+    kind: belongs_to
+    via: agent_id
+  - to: null
+    kind: belongs_to
+    via: receipt_id
+  - to: null
+    kind: belongs_to
+    via: invocation_id
+- entity: ParallelGraphReadResponse
+  fields: 11
+  id_fields:
+  - deployment_id
+  - agent_id
+  - owner_id
+  - execution_principal_id
+  relationships:
+  - to: ParallelBranch
+    kind: has_many
+    via: null
+  - to: ParallelCostAuditSummary
+    kind: has_one
+    via: null
+  - to: ParallelBudgetAttempt
+    kind: has_many
+    via: null
+  - to: null
+    kind: belongs_to
+    via: deployment_id
+  - to: null
+    kind: belongs_to
+    via: agent_id
+  - to: null
+    kind: belongs_to
+    via: owner_id
+  - to: null
+    kind: belongs_to
+    via: execution_principal_id
+- entity: FederationOperatorIntakeAuthority
+  fields: 8
+  id_fields: []
+  relationships: []
+- entity: ConsequenceAssessment
+  fields: 19
+  id_fields:
+  - assessment_id
+  - deployment_id
+  - agent_id
+  - owner_id
+  - approval_id
+  - invocation_id
+  - receipt_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: assessment_id
+  - to: null
+    kind: belongs_to
+    via: deployment_id
+  - to: null
+    kind: belongs_to
+    via: agent_id
+  - to: null
+    kind: belongs_to
+    via: owner_id
+  - to: null
+    kind: belongs_to
+    via: approval_id
+  - to: null
+    kind: belongs_to
+    via: invocation_id
+  - to: null
+    kind: belongs_to
+    via: receipt_id
+- entity: AgentTrapEvent
+  fields: 29
+  id_fields:
+  - actor_id
+  - resource_id
+  - invocation_id
+  - receipt_id
+  - provider_id
+  - request_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: actor_id
+  - to: null
+    kind: belongs_to
+    via: resource_id
+  - to: null
+    kind: belongs_to
+    via: invocation_id
+  - to: null
+    kind: belongs_to
+    via: receipt_id
+  - to: null
+    kind: belongs_to
+    via: provider_id
+  - to: null
+    kind: belongs_to
+    via: request_id
+- entity: HandoffOwnerReceipt
+  fields: 26
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  - evidence_id
+  - risk_card_id
+  relationships:
+  - to: HandoffMutationFlags
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+  - to: null
+    kind: belongs_to
+    via: evidence_id
+  - to: null
+    kind: belongs_to
+    via: risk_card_id
+- entity: FederationIntakeRelayApproval
+  fields: 17
+  id_fields:
+  - intake_id
+  - recipient_agent_id
+  - item_id
+  relationships:
+  - to: FederationIntakeRelayZeroAuthority
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: intake_id
+  - to: null
+    kind: belongs_to
+    via: recipient_agent_id
+  - to: null
+    kind: belongs_to
+    via: item_id
+- entity: OpenAIAgentsTrace
+  fields: 9
+  id_fields:
+  - trace_id
+  - span_id
+  - group_id
+  - run_id
+  - session_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: trace_id
+  - to: null
+    kind: belongs_to
+    via: span_id
+  - to: null
+    kind: belongs_to
+    via: group_id
+  - to: null
+    kind: belongs_to
+    via: run_id
+  - to: null
+    kind: belongs_to
+    via: session_id
+- entity: ArdIdentifier
+  fields: 0
+  id_fields: []
+  relationships: []
+- entity: HandoffCandidate
+  fields: 20
+  id_fields:
+  - candidate_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  relationships:
+  - to: HandoffAuthority
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: candidate_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+- entity: FederationOperatorIntakeSafety
+  fields: 11
+  id_fields: []
+  relationships: []
+- entity: FederationOperatorIntakeContract
+  fields: 13
+  id_fields: []
+  relationships:
+  - to: FederationOperatorIntakeEndpoint
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeProofDocumentTemplate
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeProofConsentParams
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeAuthority
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeSafety
+    kind: has_one
+    via: null
+- entity: InvocationResult
+  fields: 16
+  id_fields:
+  - invocation_id
+  relationships:
+  - to: OpenAIAgentsTrace
+    kind: has_one
+    via: null
+  - to: ConsequenceSummary
+    kind: has_one
+    via: null
+  - to: ReviewRequired
+    kind: has_one
+    via: null
+  - to: NftReceipt
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: invocation_id
+- entity: ArdEntry
+  fields: 30
+  id_fields: []
+  relationships:
+  - to: ArdContext
+    kind: has_one
+    via: null
+  - to: ArdIdentifier
+    kind: has_one
+    via: null
+  - to: ArdMappedCapabilityCardData
+    kind: has_one
+    via: null
+  - to: ArdTrustManifest
+    kind: has_one
+    via: null
+- entity: HandoffSelectedCandidate
+  fields: 17
+  id_fields:
+  - external_supply_candidate_id
+  - source_marketplace_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+- entity: HandoffPublicReceipt
+  fields: 20
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+- entity: HandoffAgentReceipt
+  fields: 22
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+- entity: HandoffAuditRefused
+  fields: 9
+  id_fields:
+  - external_marketplace_handoff_receipt_id
+  - request_id
+  - preview_id
+  - external_supply_candidate_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+  - to: null
+    kind: belongs_to
+    via: request_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+- entity: ParallelGraphExecuteResponse
+  fields: 6
+  id_fields:
+  - graph_id
+  relationships:
+  - to: ParallelMergeResult
+    kind: has_one
+    via: null
+  - to: ParallelFleetNoEffectCanaryProof
+    kind: has_one
+    via: null
+  - to: ParallelFleetNoEffectRetentionCanaryProof
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: graph_id
+- entity: FederationOperatorIntakePending
+  fields: 15
+  id_fields:
+  - intake_id
+  relationships:
+  - to: FederationOperatorIntakeProofDocument
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeAuthority
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeSafety
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: intake_id
+- entity: FederationOperatorIntakeProofDocument
+  fields: 9
+  id_fields:
+  - intake_id
+  relationships:
+  - to: FederationOperatorIntakeProofConsent
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeAuthority
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: intake_id
+- entity: FederationOperatorIntakeProofDocumentTemplate
+  fields: 9
+  id_fields:
+  - intake_id
+  relationships:
+  - to: FederationOperatorIntakeProofConsent
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeAuthority
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: intake_id
+- entity: FederationReviewEvidence
+  fields: 19
+  id_fields:
+  - evidence_id
+  - relationship_id
+  - declared_agent_id
+  - declared_key_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: evidence_id
+  - to: null
+    kind: belongs_to
+    via: relationship_id
+  - to: null
+    kind: belongs_to
+    via: declared_agent_id
+  - to: null
+    kind: belongs_to
+    via: declared_key_id
+- entity: WebhookRegistrationOutcome
+  fields: 0
+  id_fields: []
+  relationships:
+  - to: RegisteredWebhookOutcome
+    kind: has_one
+    via: null
+  - to: FailedWebhookRegistrationOutcome
+    kind: has_one
+    via: null
+  - to: ExistingWebhookOutcome
+    kind: has_one
+    via: null
+  - to: NoWebhookOutcome
+    kind: has_one
+    via: null
+- entity: GovernanceDecisionEvidence
+  fields: 18
+  id_fields:
+  - agent_id
+  - resource_id
+  - policy_id
+  relationships:
+  - to: GovernanceDecisionKind
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: agent_id
+  - to: null
+    kind: belongs_to
+    via: resource_id
+  - to: null
+    kind: belongs_to
+    via: policy_id
+- entity: GovernanceDecisionExportEvidence
+  fields: 16
+  id_fields:
+  - agent_id
+  - resource_id
+  - policy_id
+  relationships:
+  - to: GovernanceDecisionKind
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: agent_id
+  - to: null
+    kind: belongs_to
+    via: resource_id
+  - to: null
+    kind: belongs_to
+    via: policy_id
+- entity: Capability
+  fields: 38
+  id_fields:
+  - seller_id
+  relationships:
+  - to: PaidOperationalAvailability
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: seller_id
+- entity: ArdSearchInlineContext
+  fields: 1
+  id_fields: []
+  relationships:
+  - to: ArdSearchContext
+    kind: has_one
+    via: null
+  - to: ArdSearchContextNode
+    kind: has_one
+    via: null
+- entity: FederationIntroResponseParams
+  fields: 8
+  id_fields:
+  - relationship_id
+  - declared_key_id
+  relationships:
+  - to: FederationIntroResponseAuth
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: relationship_id
+  - to: null
+    kind: belongs_to
+    via: declared_key_id
+- entity: HandoffMutationFlags
+  fields: 16
+  id_fields: []
+  relationships: []
+- entity: HandoffAuditResponse
+  fields: 2
+  id_fields: []
+  relationships:
+  - to: HandoffAuditRecorded
+    kind: has_many
+    via: null
+  - to: HandoffAuditRefused
+    kind: has_many
+    via: null
+  - to: HandoffAuditRevoked
+    kind: has_many
+    via: null
+  - to: HandoffAuditArchived
+    kind: has_many
+    via: null
+- entity: HandoffRequest
+  fields: 19
+  id_fields:
+  - request_id
+  - preview_id
+  - external_supply_candidate_id
+  - source_marketplace_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: request_id
+  - to: null
+    kind: belongs_to
+    via: preview_id
+  - to: null
+    kind: belongs_to
+    via: external_supply_candidate_id
+  - to: null
+    kind: belongs_to
+    via: source_marketplace_id
+- entity: ParallelFleetNoEffectCanaryFailure
+  fields: 19
+  id_fields: []
+  relationships: []
+- entity: ParallelCostAuditSummary
+  fields: 17
+  id_fields: []
+  relationships: []
+- entity: ParallelGraphReceiptAuditResponse
+  fields: 4
+  id_fields:
+  - graph_id
+  relationships:
+  - to: ParallelBudgetAttempt
+    kind: has_many
+    via: null
+  - to: ParallelCostAuditSummary
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: graph_id
+- entity: ParallelMergeResult
+  fields: 14
+  id_fields: []
+  relationships:
+  - to: ParallelCostAuditSummary
+    kind: has_one
+    via: null
+  - to: ParallelBudgetAttempt
+    kind: has_many
+    via: null
+- entity: FederationOperatorIntakeQualified
+  fields: 10
+  id_fields:
+  - intake_id
+  relationships:
+  - to: FederationOperatorIntakeAuthority
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeSafety
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: intake_id
+- entity: FederationOperatorIntakeFailure
+  fields: 11
+  id_fields:
+  - intake_id
+  relationships:
+  - to: FederationOperatorIntakeAuthority
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeSafety
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: intake_id
+- entity: FederationOperatorIntakeError
+  fields: 11
+  id_fields:
+  - intake_id
+  relationships:
+  - to: FederationOperatorIntakeAuthority
+    kind: has_one
+    via: null
+  - to: FederationOperatorIntakeSafety
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: intake_id
+- entity: FederationOperatorIntakeEndpoint
+  fields: 2
+  id_fields: []
+  relationships: []
+- entity: PaidOperationalAvailability
+  fields: 7
+  id_fields: []
+  relationships: []
+- entity: CustodyAvailability
+  fields: 7
+  id_fields: []
+  relationships: []
+- entity: MarketplaceBrowseResponse
+  fields: 8
+  id_fields: []
+  relationships:
+  - to: Capability
+    kind: has_many
+    via: null
+  - to: CustodyAvailability
+    kind: has_one
+    via: null
+  - to: MarketplaceFundingAvailability
+    kind: has_one
+    via: null
+- entity: HostedMarketplaceVerification
+  fields: 6
+  id_fields:
+  - run_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: run_id
+- entity: ArdSearchContext
+  fields: 0
+  id_fields: []
+  relationships:
+  - to: ArdSearchInlineContext
+    kind: has_one
+    via: null
+- entity: ArdMappedCapabilityCardData
+  fields: 12
+  id_fields:
+  - capability_card_id
+  relationships:
+  - to: ArdIdentifier
+    kind: has_one
+    via: null
+  - to: null
+    kind: belongs_to
+    via: capability_card_id
+- entity: AgentTrapReview
+  fields: 9
+  id_fields:
+  - scan_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: scan_id
+- entity: HandoffSourcesResponse
+  fields: 3
+  id_fields: []
+  relationships:
+  - to: HandoffSource
+    kind: has_many
+    via: null
+  - to: HandoffSnapshotSource
+    kind: has_many
+    via: null
+  - to: HandoffAuthority
+    kind: has_one
+    via: null
+- entity: HandoffInspectResponse
+  fields: 4
+  id_fields: []
+  relationships:
+  - to: HandoffCandidate
+    kind: has_one
+    via: null
+  - to: HandoffNavigationPreview
+    kind: has_one
+    via: null
+  - to: HandoffAuthority
+    kind: has_one
+    via: null
+- entity: HandoffNullableEvidence
+  fields: 18
+  id_fields:
+  - external_marketplace_handoff_evidence_id
+  - external_marketplace_handoff_receipt_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_evidence_id
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+- entity: HandoffNullableRiskCard
+  fields: 17
+  id_fields:
+  - external_marketplace_handoff_risk_card_id
+  - external_marketplace_handoff_receipt_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_risk_card_id
+  - to: null
+    kind: belongs_to
+    via: external_marketplace_handoff_receipt_id
+- entity: A2ACorrespondenceEvent
+  fields: 9
+  id_fields:
+  - thread_id
+  - message_id
+  relationships:
+  - to: null
+    kind: belongs_to
+    via: thread_id
+  - to: null
+    kind: belongs_to
+    via: message_id
+render: null

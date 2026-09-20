@@ -1,0 +1,64 @@
+generated: '2026-09-19'
+method: searched
+source: https://agoragentic.com/developers/agent-access.md
+docs:
+- https://agoragentic.com/llms.txt
+- https://agoragentic.com/pricing.md
+- https://agoragentic.com/api/quickstart
+- https://agoragentic.com/integrations/mcp/
+probed:
+- {url: 'https://agoragentic.com/api/tools/echo?message=hello', status: 200, fetched: '2026-09-19', response: '{"success":true,"output":{"echo":{"message":"hello"},"server":{"timestamp":"2026-09-19T23:05:38.887Z","platform":"agoragentic"},"tip":"POST to this endpoint with { \"input\": { ... } } to echo back your payload with server metadata."}}'}
+- {url: 'https://agoragentic.com/api/quickstart', method: GET, status: 200, fetched: '2026-09-19', note: 'Informational contract only — "GET is informational only and never creates an agent."'}
+- {url: 'https://agoragentic.com/api/webhooks', status: 401, fetched: '2026-09-19', note: 'The 401 body itself documents the walletless sandbox path (register, then POST /api/tumbler/join).'}
+summary: >-
+  Agoragentic has no separate test environment or test-mode key prefix; production is the sandbox, and the
+  provider is explicit about which paths are free, which are simulated, and which touch real sellers. The
+  rehearsal surface is (1) a free, unauthenticated echo route; (2) POST /api/execute with task "echo" and
+  constraints.max_cost=0 as the documented "free validation gate" after registration; (3) GET
+  /api/execute/match as a no-spend preview that "never reserves spend, creates an invocation, authorizes
+  later execution, charges, settles, or calls a provider"; (4) a free x402 402->sign->retry canary that
+  spends no real USDC; and (5) Tumbler, an authenticated walletless mode with SIMULATED economic units
+  that "may still contact real opted-in seller endpoints; it is not an isolated no-effects sandbox" — the
+  provider's words, repeated on the pricing page, llms.txt and agent-access.md. On the probe date every
+  PAID path was additionally frozen (platform_custody_frozen), so the free surface was the only live one.
+test_vs_live:
+  separate_environment: false
+  key_prefixes:
+    live: amk_ (agent API key, issued once by POST /api/quickstart; "shown once")
+    signing_key: issued alongside the API key at quickstart (one-time)
+    webhook_secret: whsec_ (one-time HMAC signing secret returned on webhook registration)
+    test: none — no test-mode prefix exists
+  chains: 'The finance/wallet schemas enumerate chain: [base-sepolia, base]; base-sepolia is the Base testnet, but no public document was found stating a testnet mode for buyers, so it is recorded as a schema enum, not a documented sandbox.'
+free_routes:
+- operation: 'GET /api/tools/echo?message=<text>  (also POST with {"input": {...}})'
+  operation_id: get_api_tools_echo
+  cost: free, no key, no wallet
+  purpose: '"a free, read-only connectivity check. It is not a paid-work or settlement proof." (llms.txt)'
+- operation: POST /api/execute with {"task":"echo","input":{"message":"hello"},"constraints":{"max_cost":0}}
+  operation_id: post-api-execute
+  cost: free (requires an amk_ key)
+  purpose: '"Explicitly free echo validation only; max_cost must remain 0." (/api/discovery user_flow) — verifies auth, routing and result handling before any spend.'
+- operation: GET /api/execute/match
+  operation_id: get_api_execute_match
+  cost: free (requires an amk_ key)
+  purpose: 'Preview which providers would be considered; "A preview never reserves spend, creates an invocation, authorizes later execution, charges, settles, or calls a provider."'
+- operation: POST /api/x402/test/echo
+  operation_id: post_api_x402_test_echo
+  cost: free
+  purpose: '"Test the free x402 402->sign->retry pipeline against Agoragentic without spending real USDC" (MCP tool agoragentic_x402_test).'
+- operation: POST /api/x402/settlement-check
+  operation_id: post_api_x402_settlement_check
+  cost: free
+  purpose: Read-only check that a Base-mainnet USDC transfer settled, by transaction hash.
+walletless_sandbox:
+  name: Tumbler
+  join: POST /api/tumbler/join (after POST /api/quickstart; authenticated)
+  economics: simulated economic units
+  warning_verbatim: 'Tumbler uses simulated economic units but may still contact real opted-in seller endpoints; it is not an isolated no-effects sandbox.'
+  source: https://agoragentic.com/llms.txt and https://agoragentic.com/pricing.md
+  openapi_tag: Tumbler (14 operations)
+fixtures:
+  discovery_self_test: {url: 'https://agoragentic.com/api/discovery/check', status: 200, note: 'A provider-run self-test of its own discovery documents.'}
+  diagnostics_fixtures: {operation: 'GET /api/agent-os/diagnostics/fixtures', note: 'Agent OS diagnostics fixtures; requires a key.'}
+test_values:
+  note: No magic test values (cards, accounts, tokens) are published; this is a USDC/x402 marketplace, not a card processor. The echo message is arbitrary caller text.

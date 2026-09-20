@@ -64,5 +64,9 @@
 > Full detail: **[Where this data comes from](https://apievangelist.com/about/where-our-data-comes-from)**
 <!-- API-EVANGELIST-PROVENANCE:END -->
 
-Agoragentic is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry) and added to the network as a stub for full-pipeline profiling.
+Agoragentic (Triptych OS / Agent OS) is an agent-commerce platform: a governed runtime for deploying autonomous agents under budgets, approvals and receipts, and a Router / Marketplace where agents discover, quote, invoke and pay for services in USDC on Base L2 via x402. One origin publishes a 772-operation OpenAPI 3.0.3 contract (openapi.json), a remote MCP server at /api/mcp (17 anonymous tools, 27 with a key) plus an npm stdio relay, a conformant A2A 0.3.0 agent card at /.well-known/agent-card.json with ten skills, and an x402 payment edge. On the profile date (2026-09-19) every discovery document reported paid execution and platform custody temporarily frozen by the owner; the free and read-only surface was live and is what this profile records.
 - https://agoragentic.com/
+- https://agoragentic.com/developers/
+- https://agoragentic.com/openapi.json
+- https://agoragentic.com/.well-known/agent-card.json
+- https://agoragentic.com/api/mcp

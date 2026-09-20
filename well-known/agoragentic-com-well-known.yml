@@ -1,0 +1,188 @@
+generated: '2026-09-19'
+method: probed
+source: >-
+  Live GET probes of the named /.well-known/* path list on agoragentic.com, www.agoragentic.com and
+  x402.agoragentic.com (the x402 edge host named by the agent card and the marketplace manifest),
+  2026-09-19. The MCP server host is the apex itself (https://agoragentic.com/api/mcp), so the RFC 9728
+  protected-resource probe on the MCP host is the apex row. Every row below is a request that was actually
+  issued; every status is the one returned.
+summary:
+  hosts_probed: 3
+  paths_probed: 58
+  documents_served: 8
+  hit_count: 8
+  path_echo_control: passed
+  note: >-
+    agoragentic.com serves a rich, real /.well-known/ surface: RFC 9116 security.txt, the ChatGPT-era
+    ai-plugin.json, an MCP server manifest at /.well-known/mcp/server.json (and its server-card.json
+    alias), the A2A agent card (canonical path; captured and graded in a2a/), a legacy agent.json that is a
+    discovery manifest rather than a card, the provider's own agent-marketplace.json bootstrap manifest, an
+    Agentic Resource Discovery (ARD 1.0) registry manifest at ard.json (mirrored at ai-catalog.json), and a
+    main-domain x402.json that reports the payment surface frozen. Every miss is the host's real JSON 404
+    ({"error":"not_found","message":"..."}, 106 bytes, application/json) — NOT an SPA shell — and a
+    negative-control path that cannot exist also 404s, so each 200 is a served document. NOT served: OIDC
+    discovery, RFC 8414 authorization-server metadata, RFC 9728 protected-resource metadata (the API uses
+    agent-account bearer keys and its own docs say "No OAuth authorization server or RFC 9728 scope grant is
+    implied"), RFC 9727 api-catalog, APIs.json, AAuth, UCP, ACP. Note the HTML side of the site is a
+    catch-all (any unknown HTML route returns the 53,574-byte homepage-style shell with 200), which is why
+    only the JSON /.well-known/ and /api/ surfaces were trusted for presence.
+pointer_basis: >-
+  WellKnown pointer emitted on the strength of eight served documents on agoragentic.com. SecurityTxt
+  pointer emitted for the served RFC 9116 document (Contact, Canonical, Policy, Preferred-Languages,
+  Expires 2027-07-30).
+hosts:
+- host: agoragentic.com
+  role: Website, API (OpenAPI servers[] https://agoragentic.com/api), MCP server (/api/mcp) and A2A JSON-RPC (/api/a2a) — one origin
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    content_type: text/plain; charset=utf-8
+    bytes: 200
+    file: agoragentic-com-security.txt
+    standard: RFC 9116
+    fields: {Contact: 'mailto:support@agoragentic.com', Canonical: 'https://agoragentic.com/.well-known/security.txt', Policy: 'https://agoragentic.com/security.html', Preferred-Languages: en, Expires: '2027-07-30T23:59:59Z'}
+  - path: /.well-known/agent-card.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 19384
+    file: ../a2a/agoragentic-com-agent-card.json
+    standard: A2A Agent Card (protocolVersion 0.3.0)
+    note: Saved verbatim under a2a/ and graded in a2a/agoragentic-com-a2a.yml (conformant).
+  - path: /.well-known/agent.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 9638
+    file: agoragentic-com-agent.json
+    note: >-
+      Legacy pre-0.3 card path, but the body is NOT an AgentCard — it self-declares "a2a_role:
+      compatibility_alias" and points at agent-card.json as canonical. It is a broader discovery manifest
+      (endpoints, onboarding steps, protocols, payment availability, contact). Recorded as a served document;
+      not counted as a second agent card.
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 2758
+    file: agoragentic-com-ai-plugin.json
+    note: >-
+      schema_version v1 plugin manifest; auth service_http bearer with the amk_ key prefix; api.type
+      openapi at https://agoragentic.com/openapi.yaml; carries the same availability block
+      (paid_execution temporarily_unavailable, platform_custody_frozen).
+  - path: /.well-known/mcp/server.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 13789
+    file: agoragentic-com-mcp-server.json
+    note: >-
+      Provider MCP server manifest: hosted Streamable HTTP at /api/mcp, protocol 2026-07-28 verified by
+      required CI plus a retained sessionful legacy lane, stdio relay agoragentic-mcp@1.3.6, 27 tools total
+      (17 anonymous), links to skill.md, llms.txt, agents.txt, openapi.yaml and mcp-compatibility.json.
+  - path: /.well-known/mcp/server-card.json
+    status: 200
+    bytes: 13789
+    note: Byte-identical alias of server.json; not saved twice.
+  - path: /.well-known/mcp
+    status: 307
+    redirect: /api/mcp
+    note: Method-preserving redirect to the MCP transport, as the llms.txt says. Not a document.
+  - path: /.well-known/agent-marketplace.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 31788
+    file: agoragentic-com-agent-marketplace.json
+    note: >-
+      The provider's self-described "canonical machine bootstrap" manifest (version 2.1.0): protocols,
+      endpoints, auth, payment rails, rate limits, SDK coordinates, trust vocabulary, availability. A
+      provider-specific format, not a standard.
+  - path: /.well-known/ard.json
+    status: 200
+    content_type: application/json
+    bytes: 7658
+    file: agoragentic-com-ard.json
+    standard: Agentic Resource Discovery (ARD) specVersion 1.0 — @context https://agenticresourcediscovery.org/context/v1
+    note: Registry manifest with urn:air:agoragentic.com:* identifiers pointing at /api/ard/search. Mirrored byte-for-byte at /.well-known/ai-catalog.json (the predecessor path).
+  - path: /.well-known/ai-catalog.json
+    status: 200
+    bytes: 7658
+    note: Identical to ard.json; not saved twice.
+  - path: /.well-known/x402.json
+    status: 200
+    content_type: application/json; charset=utf-8
+    bytes: 254
+    file: agoragentic-com-x402.json
+    note: '{"version":1,"surface":"well_known_x402","status":"temporarily_unavailable","reason":"platform_custody_frozen","resources":[]} — the main-domain x402 manifest reports the payment surface frozen; the canonical x402 origin is x402.agoragentic.com (below).'
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/oauth-protected-resource
+    status: 404
+    note: This host is also the MCP resource host (https://agoragentic.com/api/mcp); no RFC 9728 metadata is served for it. The provider's agent-access.md states the API uses agent-account bearer keys, not OAuth scopes.
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/api-catalog.json
+    status: 404
+  - path: /.well-known/ucp.json
+    status: 404
+  - path: /.well-known/acp.json
+    status: 404
+  - path: /.well-known/aauth-resource.json
+    status: 404
+  - path: /.well-known/apis.json
+    status: 404
+  - path: /apis.json
+    status: 404
+  - path: /apis.yml
+    status: 404
+  - path: /.well-known/jwks.json
+    status: 404
+  - path: /.well-known/sbom
+    status: 404
+  - path: /llms.txt
+    status: 200
+    bytes: 5911
+    file: ../llms/agoragentic-com-llms.txt
+    note: Saved under llms/. /skill.md and /agents.txt serve the byte-identical document.
+  - path: /.well-known/agoragentic-com-negative-control-7f3ab91c.json
+    status: 404
+    control: negative
+    note: A path that cannot exist. Its JSON 404 proves the host does not echo or catch-all /.well-known/* requests.
+- host: www.agoragentic.com
+  role: Alias — 301 to the apex for every path
+  documents:
+  - {path: /.well-known/security.txt, status: 301, redirect: 'https://agoragentic.com/.well-known/security.txt'}
+  - {path: /.well-known/agent-card.json, status: 301, redirect: 'https://agoragentic.com/.well-known/agent-card.json'}
+  - {path: /, status: 301, redirect: 'https://agoragentic.com/'}
+- host: x402.agoragentic.com
+  role: x402 payment edge (canonical x402 origin per the agent card and manifest) — 503 platform_custody_frozen on every application path on the probe date
+  documents:
+  - path: /.well-known/x402.json
+    status: 503
+    body: '{"error":"platform_custody_frozen","code":"platform_custody_frozen","message":"Platform custody operations are temporarily unavailable while platform custody is frozen.",...,"custody":{"status":"frozen","authoritative":true,"authority_source":"aws_secrets_manager"}}'
+    note: A deliberate, self-describing 503 — the edge is deployed but its owner has frozen custody. Re-probe when /market.json reports paid execution enabled.
+  - {path: /openapi.json, status: 503}
+  - {path: /services/index.json, status: 503}
+  - {path: /.well-known/agent.json, status: 503}
+  - {path: /.well-known/agent-card.json, status: 404}
+  - {path: /.well-known/security.txt, status: 404}
+  - {path: /.well-known/openid-configuration, status: 404}
+  - {path: /.well-known/oauth-authorization-server, status: 404}
+  - {path: /.well-known/oauth-protected-resource, status: 404}
+  - {path: /.well-known/api-catalog, status: 404}
+  - {path: /.well-known/ai-plugin.json, status: 404}
+  - {path: /.well-known/apis.json, status: 404}
+  - {path: /.well-known/ucp.json, status: 404}
+  - {path: /.well-known/acp.json, status: 404}
+  - {path: /.well-known/aauth-resource.json, status: 404}
+  - {path: /apis.json, status: 429, note: 'IP rate limit hit mid-sweep (60 req/min anonymous); not re-tried — treat as unprobed, not absent.'}
+robots_txt:
+  url: https://agoragentic.com/robots.txt
+  status: 200
+  note: >-
+    Explicit per-crawler policy: CCBot, Bytespider and Applebot-Extended are disallowed entirely; OAI-SearchBot,
+    ChatGPT-User, GPTBot, ClaudeBot, Claude-SearchBot, Claude-User, anthropic-ai, PerplexityBot, Perplexity-User,
+    Googlebot, Google-Extended, Bingbot and Applebot are allowed on the canonical public pages and discovery
+    documents; private, stateful, paid-invocation and owner-control routes are disallowed.
+sitemap:
+  url: https://agoragentic.com/sitemap.xml
+  status: 200
+  urls: 80+

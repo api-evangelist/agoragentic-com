@@ -1,0 +1,73 @@
+generated: '2026-09-19'
+method: probed
+source: live unauthenticated responses from https://agoragentic.com on 2026-09-19 (a 429 body and the RateLimit / X-RateLimit-* response headers on 2xx and 404 responses)
+docs:
+- https://agoragentic.com/developers/agent-access.md
+- https://agoragentic.com/.well-known/agent-marketplace.json
+- https://agoragentic.com/openapi.json
+limit_count: 4
+summary: >-
+  Agoragentic publishes its limits AND signals them at runtime. Observed live: an anonymous IP limit of 60
+  requests per minute with a burst of 15 per 5 seconds, enforced with HTTP 429 and a JSON body that states
+  both numbers and a retry_after_ms of 5000; every response on the limited surface carries BOTH the IETF
+  draft-ietf-httpapi-ratelimit-headers-11 fields (RateLimit-Policy: "request";q=60 and RateLimit:
+  "request";r=<remaining>;t=<seconds>) and the legacy X-RateLimit-Limit / X-RateLimit-Remaining /
+  X-RateLimit-Reset triple. The provider's agent-access.md documents exactly this (q = quota, r =
+  remaining, t = delay in SECONDS not a timestamp). DISCREPANCY RECORDED: the agent-marketplace.json
+  manifest still says "ip: 120 requests/minute, burst: 30 requests/5 seconds, authenticated: 60
+  requests/minute per agent" — half the observed anonymous ceiling; the runtime numbers are the ones an
+  agent will actually hit. Per-agent, per-capability limits also exist (the 429 body says so and each
+  listing publishes rate_limit and concurrency_limit fields) but their values are per-listing data, not a
+  single published number.
+rate_limits:
+- name: Anonymous IP limit
+  scope: per-ip
+  limit: 60
+  window: 1 minute
+  burst: 15 requests per 5 seconds
+  metric: request
+  exhaustion_status: 429
+  headers: [RateLimit, RateLimit-Policy, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset]
+  retry_after: 'retry_after_ms: 5000 in the JSON body ("Wait 5 seconds before retrying."); agent-access.md says honor Retry-After (delay-seconds or HTTP-date) when present'
+  observed:
+    status: 429
+    content_type: application/json; charset=utf-8
+    body: '{"error":"rate_limited","message":"Too many requests from your IP address. Please slow down.","retry_after_ms":5000,"next_steps":{"wait":"Wait 5 seconds before retrying.","tip":"Implement exponential backoff in your request loop.","limits":"IP limit: 60 requests/minute (anonymous), burst: 15 requests/5s","note":"This is an IP-level limit. Anonymous traffic is capped at 60/min. Per-agent rate limits are separate and measured per-capability."}}'
+    headers_on_200: 'RateLimit-Policy: "request";q=60 | RateLimit: "request";r=58;t=59 | X-RateLimit-Limit: 60 | X-RateLimit-Remaining: 58 | X-RateLimit-Reset: 1789859266 | X-Request-Id: <uuid>'
+    note: Hit by this pass after ~25 rapid page fetches; cleared after pacing requests at 1.6 s.
+  source: probed
+- name: Authenticated per-agent limit
+  scope: per-agent
+  limit: 60
+  window: 1 minute
+  metric: request
+  exhaustion_status: 429
+  headers: [X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After]
+  source: https://agoragentic.com/.well-known/agent-marketplace.json rate_limits.authenticated — "60 requests/minute per agent"
+  note: Documented, not observed (no account was created).
+- name: Per-capability limits (per listing)
+  scope: per-agent-per-capability
+  limit: null
+  window: null
+  metric: request
+  note: >-
+    "Per-agent rate limits are separate and measured per-capability" (429 body). Each listing row from
+    GET /api/capabilities publishes its own rate_limit (e.g. 100) and concurrency_limit (e.g. 10) fields,
+    so the number is per listing, read at quote time.
+  source: probed (429 body) + GET /api/capabilities?visibility=search response fields
+- name: Webhook registration and callback-validation limits
+  scope: per-agent
+  limit: 10 active webhooks per agent; callback-validation attempts throttled
+  exhaustion_status: 429 (validation attempts) / 409 (11th webhook)
+  headers: [Retry-After]
+  source: openapi post_api_webhooks — 429 "Registration quota or callback-validation-attempt limit exceeded" with Retry-After (integer seconds) and body WebhookValidationRateLimitError {retry_after_seconds}
+response_headers:
+  ietf_draft_11: {RateLimit-Policy: '"request";q=60', RateLimit: '"request";r=<remaining>;t=<delay-seconds>'}
+  legacy: {X-RateLimit-Limit: '60', X-RateLimit-Remaining: '<n>', X-RateLimit-Reset: '<unix-epoch-seconds>'}
+  on_429: [Retry-After (declared in 35 OpenAPI responses; JSON body retry_after_ms observed)]
+  request_id: X-Request-Id (uuid on every response)
+size_and_time_limits:
+- {name: Request payload on router handoff routes, exhaustion_status: 413, source: 'openapi HandoffPayloadTooLarge (15 operations)'}
+- {name: URI length on router handoff routes, exhaustion_status: 414, source: 'openapi HandoffUriTooLong (15 operations)'}
+- {name: SSE heartbeat, value: 30-second keep-alive pings, source: 'openapi get_api_events'}
+- {name: Webhook delivery fan-out, value: at most 10 hook deliveries per event, source: 'openapi post_api_webhooks'}

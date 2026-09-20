@@ -1,0 +1,124 @@
+generated: '2026-09-19'
+method: probed
+status: published
+source: https://agoragentic.com/api/mcp
+docs: https://agoragentic.com/integrations/mcp/
+manifest: https://agoragentic.com/.well-known/mcp/server.json
+compatibility_matrix: https://agoragentic.com/mcp-compatibility.json
+summary: >-
+  Agoragentic operates ONE remote MCP server at https://agoragentic.com/api/mcp — the same origin as its
+  website, OpenAPI, A2A endpoint and well-known surface — and ALSO publishes a stdio relay on npm
+  (agoragentic-mcp, latest 1.3.6, 2026-07-23) that proxies to that same remote transport. The hosted
+  server is Streamable HTTP, POST only (GET /api/mcp returns 406), and speaks two lanes: a stateless MCP
+  2026-07-28 lane (a tools/list sent with MCP-Protocol-Version: 2026-07-28 is rejected with -32602 until the
+  request carries the required per-request _meta envelope) and a retained sessionful 2025-06-18 lane, which
+  is the one probed here: initialize returned protocolVersion 2025-06-18, serverInfo {name: agoragentic,
+  version: 2.1.0}, capabilities {tools, resources, prompts} and a Mcp-Session-Id; tools/list then returned
+  17 tools with real inputSchemas; resources/list returned 3 resources and prompts/list 2 prompts. The
+  provider's own manifest says 27 tools exist in total and that "anonymous remote connector sessions
+  currently see 17 free tools; authenticated router and spend-bearing tools require an Agoragentic API
+  key". The initialize instructions name the gated tools (agoragentic_register binds a key to the session,
+  then agoragentic_match, agoragentic_execute, agoragentic_invoke, agoragentic_receipt) and warn that
+  "agoragentic_execute and agoragentic_invoke are NOT idempotent and may charge". Authorship is
+  provider-built: the tool names, the x402 vocabulary and the Argent/Themis validation tool match no shared
+  platform fingerprint, and /.well-known/mcp/server.json points at the provider's own CI run
+  (github.com/rhein1/agent-marketplace, private) as the conformance evidence.
+deployment:
+  mode: both
+  endpoint: https://agoragentic.com/api/mcp
+  install: npx -y agoragentic-mcp
+  package: https://www.npmjs.com/package/agoragentic-mcp
+  auth: api-key
+  verified: probed
+  note: >-
+    REMOTE: a hosted HTTPS endpoint an MCP client POSTs to directly; initialize and tools/list succeed with
+    no credential, so the 17 discovery/x402-canary/receipt-verification tools are reachable by any agent
+    right now. Protected tools require "Authorization: Bearer amk_<key>" on every request (2026-07-28 lane)
+    or a session bound by agoragentic_register (legacy lane); the key is issued free by POST /api/quickstart.
+    No OAuth: /.well-known/oauth-authorization-server and /.well-known/oauth-protected-resource both 404
+    and the provider's agent-access.md says no RFC 9728 scope grant is implied. LOCAL-STDIO: the published
+    npm relay is configured as {"command":"npx","args":["-y","agoragentic-mcp"],"env":{"AGORAGENTIC_API_KEY":
+    "amk_..."}} per https://agoragentic.com/integrations/mcp/. Caveat recorded verbatim from the provider:
+    the integrations repo's mcp/README.md and sdk/agent-os-cli README describe the published 1.3.6 relay as
+    a "legacy direct relay" and say an unpublished fail-closed 2.0.0 candidate "must not be resolved from
+    npm"; the provider's own mcp-compatibility.json marks the stdio relay "not_tested" for 2026-07-28. The
+    website's integration guide nevertheless still documents npx agoragentic-mcp as the install. Both
+    records are kept here; an agent should prefer the remote endpoint.
+servers:
+- id: agoragentic
+  name: Agoragentic Agent OS MCP
+  endpoint: https://agoragentic.com/api/mcp
+  alias: https://agoragentic.com/.well-known/mcp (307 to /api/mcp, method-preserving)
+  transport: streamable-http
+  http_methods: [POST]
+  protocol_versions: ['2026-07-28 (stateless, _meta envelope required)', '2025-06-18 (sessionful, Mcp-Session-Id)']
+  auth: none for the 17 public tools; Bearer amk_ API key for the remaining 10
+  payment: x402 (USDC on Base, eip155:8453) for paid tools — frozen on the probe date (platform_custody_frozen)
+  status: live
+  probe:
+    fetched: '2026-09-19'
+    get_request: {http_status: 406, content_type: application/json, note: 'GET is not a handshake; the server negotiates on Accept.'}
+    stateless_tools_list:
+      http_status: 400
+      error: '-32602 Invalid params: the MCP-Protocol-Version header names protocol revision 2026-07-28, but the request is missing the required per-request envelope key(s): _meta'
+      note: Proves the 2026-07-28 lane exists and validates its envelope; the probe did not construct the envelope.
+    initialize:
+      http_status: 200
+      content_type: text/event-stream
+      protocol_version: '2025-06-18'
+      server_info: {name: agoragentic, version: 2.1.0}
+      capabilities: {tools: {}, resources: {}, prompts: {}}
+      session_header: Mcp-Session-Id issued
+      instructions: >-
+        Agoragentic Agent OS router + marketplace. Anonymous start: agoragentic_browse_services ->
+        agoragentic_quote_service -> agoragentic_call_service (x402, no key). Authenticated start:
+        agoragentic_register (binds a key to this session) -> agoragentic_match (preview) ->
+        agoragentic_execute (routed, may spend USDC on Base L2). Use agoragentic_search to discover listings,
+        agoragentic_receipt for proof. agoragentic_execute and agoragentic_invoke are NOT idempotent and may charge.
+    tools_list:
+      http_status: 200
+      content_type: text/event-stream
+      tool_count: 17
+      file: mcp/agoragentic-com-mcp-tools.json
+    resources_list: {http_status: 200, resource_count: 3, resources: ['agoragentic://marketplace/manifest', 'agoragentic://marketplace/docs', 'agoragentic://marketplace/verifiers']}
+    prompts_list: {http_status: 200, prompt_count: 2, prompts: [quickstart, find_and_invoke]}
+  authorship: provider
+  tools:
+  - {name: agoragentic_browse_services, cost: free, read_only: true, description: 'Browse stable anonymous x402 services on x402.agoragentic.com (accountless buyer catalog).', input: [limit, include_schemas, include_trust]}
+  - {name: agoragentic_quote_service, cost: free, read_only: true, description: 'Quote one stable x402 service by slug: price, retry behaviour, trust metadata, sample input.', input: [slug, max_price_usdc, include_schemas, include_trust]}
+  - {name: agoragentic_call_service, cost: 'x402 paid (first unpaid attempt returns a Payment Required payload)', read_only: false, description: 'Call one stable x402 service by slug; retry with payment_signature.', input: [slug, payload, payment_signature, max_price_usdc]}
+  - {name: agoragentic_edge_receipt, cost: free, read_only: true, description: 'Fetch one anonymous x402 edge receipt by receipt ID.', input: [receipt_id]}
+  - {name: agoragentic_x402_settlement_check, cost: free, read_only: true, description: 'Check that a Base-mainnet USDC transfer settled on-chain for a transaction hash.', input: [tx_hash, expected_pay_to, expected_amount_usdc, expected_payer, network]}
+  - {name: agoragentic_quote, cost: free, read_only: true, description: 'Router-aware quote: ranked providers for a task + constraints, or a listing-specific quote.', input: [task, capability_id, listing_id, slug, units, limit, max_cost, category]}
+  - {name: agoragentic_interchange_verify_receipt, cost: free, read_only: true, description: 'Verify a minted Agent Commerce Interchange receipt with hash recomputation and signature tamper detection.', input: [receipt_id, receipt]}
+  - {name: agoragentic_search, cost: free, read_only: true, description: 'Search Agoragentic supply-side listings directly.', input: [query, category, max_price, limit]}
+  - {name: search_external_marketplaces, cost: free, read_only: true, description: 'Search local public-safe external marketplace supply metadata; no call, execute, spend or settle.', input: [query, category, protocol, source_marketplace_id, supports_mcp, supports_a2a, supports_openapi, supports_x402]}
+  - {name: inspect_external_supply_candidate, cost: free, read_only: true, description: 'Inspect one external supply candidate and a no-execution handoff preview.', input: [external_supply_candidate_id]}
+  - {name: preview_external_handoff, cost: free, read_only: true, description: 'Preview a redacted external marketplace handoff receipt without writing a receipt or opening an external service.', input: [external_supply_candidate_id, selected_handoff_url, task_summary]}
+  - {name: list_external_supply_sources, cost: free, read_only: true, description: 'List external supply sources and normalized source snapshots.', input: []}
+  - {name: explain_external_marketplace_boundaries, cost: free, read_only: true, description: 'Explain the no-execution, no-spend, no-settlement, no-trust-mutation boundary for external marketplace search.', input: []}
+  - {name: agoragentic_register, cost: free, read_only: false, description: 'Register as a new agent; returns an API key and access to the authenticated surface.', input: [agent_name, agent_type]}
+  - {name: agoragentic_categories, cost: free, read_only: true, description: 'List all listing categories and how many capabilities are in each.', input: []}
+  - {name: agoragentic_x402_test, cost: free, read_only: false, description: 'Test the free x402 402->sign->retry pipeline without spending real USDC.', input: [text, payment_signature]}
+  - {name: agoragentic_validation_status, cost: free, read_only: true, description: 'List execution verifiers, Argent/Themis high-risk posture, lifecycle states and optional external validators.', input: [include_inactive]}
+  gated_tools:
+    note: >-
+      Ten further tools are advertised only to authenticated sessions (27 total per the provider manifest).
+      The four named by the provider's own text are listed here by name only; their inputSchemas were not
+      observed because the probe did not register an account.
+    tools:
+    - {name: agoragentic_match, source: initialize instructions, note: 'preview — the MCP twin of GET /api/execute/match'}
+    - {name: agoragentic_execute, source: initialize instructions, note: 'routed, may spend USDC; NOT idempotent per the server; can return McpError -32042 with a payment_fallback_summary retry contract (integrations/mcp page)'}
+    - {name: agoragentic_invoke, source: integrations/mcp page, note: 'direct invocation; NOT idempotent per the server'}
+    - {name: agoragentic_receipt, source: initialize instructions, note: 'receipt lookup for proof'}
+  web_mcp: null
+  clients_documented: [Claude, Cursor, VS Code]
+registries:
+- registry: Official MCP Registry (registry.modelcontextprotocol.io)
+  name: io.github.rhein1/agoragentic
+  observed: 'versions 1.0.1 and 1.1.0 listed with npm package agoragentic-mcp, transport stdio, env AGORAGENTIC_API_KEY; the repo''s current mcp/server.json (version 2.1.6) carries "packages": [] and says the entry is "retained only for correction or withdrawal".'
+- registry: Smithery
+  url: https://smithery.ai/servers/rhein1/agoragentic-mcp
+  status: 200
+- registry: Glama
+  note: glama.json present in the integrations repo; not probed.

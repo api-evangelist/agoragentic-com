@@ -1,0 +1,129 @@
+generated: '2026-09-19'
+method: searched
+source: registry metadata endpoints (registry.npmjs.org, pypi.org/pypi/<pkg>/json) and https://github.com/rhein1/agoragentic-integrations, 2026-09-19
+docs: https://agoragentic.com/guides/sdk-quickstart-guide/
+package_count: 9
+summary: >-
+  Agoragentic ships two first-party SDKs (Node and Python, both named `agoragentic`, both 1.7.1, both
+  published 2026-07-23), a stdio MCP relay (agoragentic-mcp 1.3.6), a control-plane CLI (agoragentic-os
+  1.7.1 — the `agoragentic`/`agora`/`agoragentic-os` binaries), an n8n community node, and four local
+  governance packages (harness-core, ecf-core, micro-ecf, premortem-golden-loop) under Apache-2.0. Every
+  package is authored "Agoragentic <hello@|support@agoragentic.com>" or lives in a rhein1/agoragentic-*
+  repository named by the provider's own site, so official: true throughout. The newest release across the
+  set is agoragentic-harness-core 0.4.2 (2026-08-28); the SDKs and MCP relay were last released 2026-07-23,
+  two months before the probe, against an OpenAPI whose info.version is 2.0.0 and a runtime reporting 2.1.0.
+packages:
+- language: javascript
+  registry: npm
+  name: agoragentic
+  url: https://www.npmjs.com/package/agoragentic
+  install: npm install agoragentic
+  official: true
+  version: 1.7.1
+  published: '2026-07-23'
+  license: MIT
+  repository: https://github.com/rhein1/agoragentic-integrations (directory sdk/node)
+  bins: [agoragentic-os, agora]
+  note: Official Node.js SDK; also carries the CLI binaries (see cli/agoragentic-com-cli.yml).
+- language: python
+  registry: pypi
+  name: agoragentic
+  url: https://pypi.org/project/agoragentic/
+  install: pip install agoragentic
+  official: true
+  version: 1.7.1
+  published: '2026-07-23'
+  license: MIT
+  repository: https://github.com/rhein1/agoragentic-integrations (directory sdk/python)
+  note: 'Official Python SDK; project_urls name the API Reference (openapi.yaml), Documentation (docs.html) and Skill Documentation (skill.md).'
+- language: javascript
+  registry: npm
+  name: agoragentic-mcp
+  url: https://www.npmjs.com/package/agoragentic-mcp
+  install: npx -y agoragentic-mcp
+  official: true
+  version: 1.3.6
+  published: '2026-07-23'
+  license: MIT
+  repository: https://github.com/rhein1/agoragentic-integrations (directory mcp)
+  kind: mcp-stdio-relay
+  note: 'Stdio relay to the hosted MCP transport. The repo README calls the published version a "legacy direct relay" and an unpublished 2.0.0 fail-closed candidate exists; the website still documents this install.'
+- language: javascript
+  registry: npm
+  name: agoragentic-os
+  url: https://www.npmjs.com/package/agoragentic-os
+  install: npx agoragentic-os doctor
+  official: true
+  version: 1.7.1
+  published: '2026-07-23'
+  license: MIT
+  repository: https://github.com/rhein1/agoragentic-integrations (directory sdk/agent-os-cli)
+  kind: cli
+  bins: [agoragentic-os, agora]
+- language: javascript
+  registry: npm
+  name: n8n-nodes-agoragentic
+  url: https://www.npmjs.com/package/n8n-nodes-agoragentic
+  install: n8n community node install n8n-nodes-agoragentic
+  official: true
+  version: 0.1.3
+  published: '2026-07-23'
+  license: MIT
+  repository: https://github.com/rhein1/agoragentic-integrations (directory n8n)
+  kind: workflow-connector
+- language: javascript
+  registry: npm
+  name: agoragentic-harness-core
+  url: https://www.npmjs.com/package/agoragentic-harness-core
+  install: npm install agoragentic-harness-core
+  official: true
+  version: 0.4.2
+  published: '2026-08-28'
+  license: Apache-2.0
+  repository: https://github.com/rhein1/agoragentic-harness-core
+  bins: [agora-harness, agoragentic-harness, agoragentic-harness-core, agoragentic-memory-skillopt]
+  kind: local-governance
+  note: Local, no-spend policy gate and receipt layer for any agent action; not an API client.
+- language: javascript
+  registry: npm
+  name: agoragentic-ecf-core
+  url: https://www.npmjs.com/package/agoragentic-ecf-core
+  install: npm install agoragentic-ecf-core
+  official: true
+  version: 1.5.1
+  published: '2026-07-23'
+  license: Apache-2.0
+  repository: https://github.com/rhein1/agoragentic-ecf-core
+  kind: local-governance
+- language: javascript
+  registry: npm
+  name: agoragentic-micro-ecf
+  url: https://www.npmjs.com/package/agoragentic-micro-ecf
+  install: npm install agoragentic-micro-ecf
+  official: true
+  version: 0.1.5
+  published: '2026-07-23'
+  license: Apache-2.0
+  repository: https://github.com/rhein1/agoragentic-micro-ecf
+  kind: local-governance
+- language: javascript
+  registry: npm
+  name: agoragentic-premortem-golden-loop
+  url: https://www.npmjs.com/package/agoragentic-premortem-golden-loop
+  install: npx agoragentic-premortem-golden-loop
+  official: true
+  version: 0.1.7
+  published: '2026-07-23'
+  license: MIT
+  repository: https://github.com/rhein1/agoragentic-premortem-golden-loop
+  kind: local-cli
+searched:
+- {registry: npm, query: 'https://registry.npmjs.org/-/v1/search?text=agoragentic', result: 8 packages, all first-party}
+- {registry: pypi, query: 'https://pypi.org/pypi/agoragentic/json', status: 200}
+- {registry: pypi, query: 'agoragentic-mcp, agoragentic-os, agoragentic-ecf-core, agoragentic-micro-ecf, agoragentic-harness-core', status: 404}
+- {registry: crates.io, query: 'https://crates.io/api/v1/crates/agoragentic', status: 404}
+- {registry: rubygems, query: 'https://rubygems.org/api/v1/gems/agoragentic.json', status: 404}
+- {registry: nuget, query: 'https://azuresearch-usnc.nuget.org/query?q=agoragentic', result: 0 hits}
+- {registry: packagist, query: 'https://packagist.org/search.json?q=agoragentic', result: 0 hits}
+- {registry: pkg.go.dev, note: 'No Go module published; the integrations repo is JavaScript/Python (a Rust framework adapter is described but not on crates.io).'}
+- {registry: github, query: 'https://api.github.com/users/rhein1/repos', result: 'agoragentic-integrations (39 stars, pushed 2026-09-19), agoragentic-harness-core, agoragentic-ecf-core, agoragentic-micro-ecf, agoragentic-premortem-golden-loop, agoragentic-openai-agents-example, agoragentic-summarizer-agent; rhein1/agent-marketplace (the server) is private (404).'}

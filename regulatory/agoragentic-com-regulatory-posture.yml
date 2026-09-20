@@ -1,0 +1,150 @@
+generated: '2026-09-19'
+method: searched
+probe: true
+source: https://agoragentic.com/legal-notice.html
+docs:
+- https://agoragentic.com/privacy.html
+- https://agoragentic.com/cookies.html
+- https://agoragentic.com/data-processing.html
+- https://agoragentic.com/ai-transparency.html
+- https://agoragentic.com/accessibility.html
+- https://agoragentic.com/copyright.html
+summary: >-
+  Agoragentic — operated by an individual sole proprietor (Jeremy Borden, per the Legal Notice, New York
+  governing law) — publishes an unusually candid legal center for a company of its size: a dedicated AI
+  Transparency Notice naming its model provider and each automated decision, an accessibility statement with
+  a named target standard and a dated internal review, a GPC/DNT honouring statement, a data-subject-request
+  channel with an appeal path, a dated infrastructure/subprocessor inventory, and a copyright / content /
+  safety reporting process with a counter-notice procedure. Each page is equally candid about what it is
+  NOT: the accessibility statement is not a conformance claim, the subprocessor page is "not an executed DPA
+  or complete subprocessor register", the DMCA agent is "not verified", and no DPA is "represented as
+  available". Signals are recorded as published; every caveat is quoted so nothing reads stronger than the
+  provider wrote it. Absent: SBOM, support lifetime, training-data summary, data residency, incident
+  notification SLA, age assurance, transparency report, exit assistance.
+signals:
+  ai_transparency:
+    url: https://agoragentic.com/ai-transparency.html
+    updated: '2026-08-01'
+    model_provider: AWS Bedrock-hosted Anthropic Claude
+    evidence:
+    - source: https://agoragentic.com/ai-transparency.html
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: >-
+        "AWS Bedrock-hosted Anthropic Claude is evidenced for listing moderation, community-flag review, and
+        advisory marketplace dispute review. A dispute model recommendation cannot refund a buyer, pay a
+        seller, restore a payout, or otherwise authorize financial movement."
+    - source: https://agoragentic.com/ai-transparency.html
+      quote: '"Point-of-interaction notices still required where applicable" — the notice itself flags where Art. 50-style disclosure is not yet in place.'
+    note: >-
+      A dedicated notice with a use/method/effect table (listing review, community-flag review, marketplace
+      disputes, routing and ranking, customer-configured agent work), the data sent to the model per use, the
+      human-review band for listing scores, and a training statement ("does not use private customer
+      submissions to train Agoragentic general-purpose models unless the customer consents, configures that
+      use, or submits the information publicly"). The Terms also incorporate it by reference.
+  accessibility_conformance:
+    url: https://agoragentic.com/accessibility.html
+    standard: [WCAG 2.2 AA (targeted)]
+    conformance_claimed: false
+    assessment: 'internal review of core public markup and styles, 2026-07-31'
+    published: '2026-07-31'
+    evidence:
+    - source: https://agoragentic.com/accessibility.html
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: >-
+        "Standard targeted: WCAG 2.2 AA. Current status: Agoragentic is working toward WCAG 2.2 Level AA. We
+        have not completed an independent or sitewide conformance assessment, so this is not a claim that
+        every page or complete process conforms."
+    note: >-
+      An accessibility STATEMENT of the kind the European Accessibility Act model expects (scope, measures,
+      known limitations, assessment method and date, feedback channel), recorded with its own disclaimer:
+      no VPAT / ACR and no conformance claim. It is not a marketing page that mentions accessibility; the
+      substance is there and the status is honest.
+  global_privacy_control:
+    honored: true
+    url: https://agoragentic.com/cookies.html
+    scope: optional analytics (first-party and Google Analytics) are treated as denied when GPC or DNT:1 is sent
+    evidence:
+    - source: https://agoragentic.com/cookies.html
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: >-
+        "If this browser sends Global Privacy Control or a Do Not Track value of 1, Agoragentic treats
+        optional analytics as denied even when a prior local preference allowed it. The settings dialog
+        identifies the active signal and disables the optional toggle for that browser context."
+    - source: https://agoragentic.com/privacy.html
+      quote: >-
+        "Where required by law and technically feasible, we will honor recognized browser-based opt-out
+        preference signals, including Global Privacy Control or other universal opt-out mechanisms, for the
+        browser or device that sends the signal."
+    note: Set from the published statements only; no Sec-GPC header was sent to test behaviour. Consent version 20260731; optional analytics default denied.
+  data_subject_request:
+    url: https://agoragentic.com/privacy.html
+    section: State Privacy Rights / International Privacy Rights
+    channel: support@agoragentic.com
+    stated_sla: 'We will respond within the timeframe required by applicable law.'
+    appeal: 'Appeals may be sent to the same email with the subject line Privacy Appeal.'
+    rights_named: [know/confirm, access, correct, delete, portable copy, opt out of sale/sharing/targeted advertising/profiling, limit sensitive PI, appeal, non-discrimination; EEA/UK/CH: restrict, object, withdraw consent, lodge a complaint]
+    evidence:
+    - source: https://agoragentic.com/privacy.html
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: >-
+        "To exercise rights, email support@agoragentic.com. We may need to verify your identity and authority
+        before completing a request. Authorized agents may submit requests where permitted by law. We will
+        respond within the timeframe required by applicable law."
+    note: A documented process with a channel and an appeal path but no numeric response period (the quoted string is verbatim). No web form (/privacy/requests not present) and no API endpoint.
+  subprocessors:
+    url: https://agoragentic.com/data-processing.html
+    dated: '2026-07-31'
+    status_verbatim: 'Not an executed DPA or complete subprocessor register.'
+    entries:
+    - {vendor: Amazon Web Services, purpose: 'Managed hosting, secrets, AWS Bedrock model inference, and email infrastructure'}
+    - {vendor: Neon, purpose: Hosted PostgreSQL database infrastructure}
+    - {vendor: Coinbase CDP, purpose: Configured managed-wallet and x402 infrastructure}
+    - {vendor: Reown / WalletConnect, purpose: Browser wallet connection in supported flows}
+    - {vendor: Google Analytics, purpose: 'Optional website analytics after consent (event data retained 2 months, user data 14 months, checked 2026-08-01)'}
+    evidence:
+    - source: https://agoragentic.com/data-processing.html
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: >-
+        "This page separates verified product and infrastructure evidence from the contractual details that
+        still require an owner-approved Data Processing Addendum and formal subprocessor register. Inventory
+        date: July 31, 2026. Public DPA: not represented as available."
+    note: >-
+      A dated vendor table with purposes — the substance of a subprocessor list — published under a heading
+      that says a formal register and a public DPA do not yet exist, and that each row still needs "legal
+      entity, regions, transfer terms" verification. Recorded as published; no advance-change notice period
+      is promised ("does not ... promise an advance-change period").
+  notice_and_action:
+    url: https://agoragentic.com/copyright.html
+    published: '2026-07-31'
+    channel: 'support@agoragentic.com, subject "Copyright Report"'
+    covers: [copyright notices (DMCA-shaped elements listed), review process, counter-notice, repeat infringement, other content and safety reports]
+    evidence:
+    - source: https://agoragentic.com/copyright.html
+      http_status: 200
+      fetched: '2026-09-19'
+      quote: >-
+        "Use this process to identify specific material on Agoragentic that you believe infringes copyright
+        or violates law or safety rights ... Registered DMCA agent not verified ... The support address is a
+        report channel, not a representation that statutory designation requirements have been satisfied."
+    note: A real notice-and-action page (report elements, review steps, counter-notice, repeat-infringer handling, non-copyright safety reports) with its DMCA-designation caveat stated on the page.
+absent:
+  sbom: {probed: ['https://agoragentic.com/.well-known/sbom -> 404', 'https://agoragentic.com/sbom -> catch-all HTML shell'], note: 'No bill of materials published; the integrations repo ships npm provenance attestations for some packages, which is not an SBOM.'}
+  support_lifetime: {note: 'No support period or product lifetime statement; the Terms allow discontinuation without a stated notice period.'}
+  training_data_summary: {note: 'The privacy policy and AI notice carry a training-USE statement (no training on private submissions without consent), not a summary of training datasets; recorded under ai_transparency.'}
+  data_residency: {note: '"We may process and transfer information in the United States and other countries where we or our service providers operate" (privacy.html) — a transfer statement, not a residency control.'}
+  incident_notification: {note: 'No breach-notification SLA; the data-processing page says breach support belongs in a DPA that is not yet available.'}
+  age_assurance: {note: '"The Services are intended only for people age 18 or older" (privacy.html; Terms require 18+) — an eligibility statement, not an age-assurance mechanism.'}
+  transparency_report: {probed: ['https://agoragentic.com/transparency/ -> catch-all HTML shell'], note: 'None published.'}
+  exit_assistance: {note: 'Portability appears only as a named data-subject right; no export/switching documentation.'}
+operator_disclosure:
+  source: https://agoragentic.com/legal-notice.html
+  operator: Jeremy Borden, individual sole proprietor
+  entity_registration: none represented
+  privacy_controller: Jeremy Borden (no DPO or EU/UK representative appointed)
+  governing_law: New York (arbitration provisions apply)
+  contact: support@agoragentic.com (no street address or telephone published)

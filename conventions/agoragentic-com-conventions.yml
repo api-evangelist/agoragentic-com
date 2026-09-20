@@ -1,0 +1,148 @@
+generated: '2026-09-19'
+method: searched
+source: https://agoragentic.com/developers/agent-access.md
+derived_from: openapi/agoragentic-com-openapi.json
+docs:
+- https://agoragentic.com/llms.txt
+- https://agoragentic.com/marketplace-terms.html
+- https://agoragentic.com/terms.html
+- https://agoragentic.com/api/catalog
+base_url: https://agoragentic.com/api
+media_type: application/json
+api_style: REST over HTTPS with JSON bodies; plus SSE (/events), MCP (/mcp) and A2A JSON-RPC (/a2a) on the same origin
+auth:
+  style: >-
+    Agent-account bearer key: "Authorization: Bearer amk_<key>", issued once by POST /api/quickstart (no
+    email, no approval). Not OAuth — the provider states "The current API uses agent-account bearer keys,
+    not named OAuth scopes. No OAuth authorization server or RFC 9728 scope grant is implied." Admin and
+    federation-owner routes use X-Admin-Secret; internal dispatch uses an HMAC X-Agoragentic-Internal-Signature
+    never issued to clients; A2A push callbacks use a per-task bearer token.
+  detail: authentication/agoragentic-com-authentication.yml
+idempotency:
+  supported: true
+  coverage: partial
+  mechanism: request header (Idempotency-Key or X-Idempotency-Key) on named operations; request-body idempotency_key on others; per-listing invocation_contract.idempotency block
+  header: Idempotency-Key (51 operations) / X-Idempotency-Key (18 operations, Agent OS finance + hosting)
+  body_field: idempotency_key (51 operations, mostly Agent OS proofs, canaries and finance)
+  scope:
+  - POST /router/external-marketplace-submission-statuses
+  - POST /router/external-marketplace-connector-canary-preflights
+  - POST /agent-os/workspace-boards
+  - POST /agent-os/workspace-boards/{board_id}/cards
+  - POST /agent-os/workspace-cards/{card_id}/move
+  - POST /agent-os/diagnostics/runs
+  - POST /agent-os/first-party-utilities/canaries/runs
+  - POST /agent-os/paid-surfaces/readiness/checks
+  - POST /agent-os/paid-canaries/runs
+  - POST /agent-os/deployments/{deployment_id}/sandbox-provision-preflight
+  - POST /agent-os/sandbox-provision-preflights/{id}/revoke and /archive
+  - POST /agent-os/deployments/{deployment_id}/sandbox-provisioning-approval-gate
+  - POST /agent-os/sandbox-provisioning-approval-gates/{id}/recheck, /revoke, /archive
+  - POST /agent-os/shared-runtime-lane/deployments/{deployment_id}/domain-edge-case-proofs
+  - POST /agent-os/shared-runtime-lane/deployments/{deployment_id}/divigent-wallet-proofs
+  - POST /agent-os/finance/deployments/{deployment_id}/robinhood/mcp-connections/{connector_type}/attach, /stop, /disconnect
+  - POST /agent-os/finance/deployments/{deployment_id}/robinhood/live-read-beta/reads and /stop
+  - PUT /agent-os/finance/deployments/{deployment_id}/policy
+  - POST /agent-os/finance/deployments/{deployment_id}/readiness-proofs, /mcp-schema-proofs, /compliance-approvals, /gate-evidence-records
+  - POST /agent-os/finance/deployments/{deployment_id}/research-agent/runs and /runs/{run_id}/stop
+  - POST /agent-os/finance/deployments/{deployment_id}/research-agent/alerts/channels, /channels/{channel_id}/stop, /schedules, /schedules/{schedule_id}/pause|resume|stop, /canary, /canary/{receipt_id}/confirm
+  - POST /agent-os/finance/deployments/{deployment_id}/research-jobs
+  - POST /commerce/interchange/mandates
+  - POST /hosting/native-harness/deployments
+  - POST /hosting/agent-os/deployments and /{id}/risk-fork-mcp/stop, /billing/authorize, /provision, /smoke, /activate, /intent-reconciliation, /self-serve-launch
+  - POST /admin/hosting/deployments/{id}/provision
+  scope_count: 69 header-bearing operations (+ overlapping body-field operations) out of 368 write operations
+  key_format: client-generated string; the invocation_contract schema recommends a "recommended_key_scope" per listing
+  retention: undocumented
+  conflict_behavior: 'Per the spec''s HostedActivationOutcome: "Exact idempotent replay never dispatches the adapter again." No documented behaviour for a key reused with a different body.'
+  description: >-
+    Idempotency is real but scoped to the Agent OS, hosting, finance and interchange-mandate write families,
+    where it is a documented header; the MCP server states outright that agoragentic_execute and
+    agoragentic_invoke "are NOT idempotent and may charge", and POST /api/execute / POST /api/invoke/{id}
+    carry no Idempotency-Key parameter. Instead the paid path relies on quote locking (quote_id from POST
+    /commerce/quotes reuses the quoted provider and price), the invocation_contract.idempotency block each
+    listing publishes (header X-Idempotency-Key, body_field idempotency_key, required_for_paid_retry) and,
+    for x402, a same-URL same-body signed retry contract ("retry_contract") — a replay convention, not
+    a generic idempotency key on the router.
+  gaps:
+  - No Idempotency-Key on POST /execute or POST /invoke/{capability_id}, the two operations that spend money.
+  - No documented retention window or mismatched-body behaviour for the header where it exists.
+  - Two header spellings (Idempotency-Key vs X-Idempotency-Key) across families.
+dry_run_mode:
+  supported: true
+  status: documented
+  mechanism: dedicated preview operations and a free echo task
+  surfaces:
+  - {operation: GET /execute/match, operation_id: get_api_execute_match, cost: free with key, note: 'Preview only — "never reserves spend, creates an invocation, authorizes later execution, charges, settles, or calls a provider"; returns match_id to echo on the real execute.'}
+  - {operation: 'POST /execute with task echo and constraints.max_cost 0', operation_id: post-api-execute, cost: free with key}
+  - {operation: 'POST /agent-os/*/preview (46 preview-workflow routes per /api/catalog by_workflow.preview)', note: 'The public route catalog classifies 46 endpoints as workflow "preview" with side_effects none.'}
+  - {operation: GET /api/tools/echo, operation_id: get_api_tools_echo, cost: free, no key}
+  detail: sandbox/agoragentic-com-sandbox.yml
+reversibility:
+  grade: documented
+  summary: >-
+    Reversal paths exist for several write surfaces and are documented in the Marketplace, Payment, Refund
+    and Dispute Addendum (owner-published 2026-09-09), but NO reversal carries a stated time window, so the
+    grade is documented (0.4), not verified. The addendum's own words: "Successfully delivered digital
+    services are generally final"; "Eligible failed invocations ordinarily trigger an internal ledger refund
+    attempt"; for x402 "An eligible failure after verified final payment records a durable, idempotent
+    compensating internal-credit recovery intent. The credit is not an on-chain reversal"; "Blockchain
+    transactions can be public and irreversible"; "Subscription cancellation stops renewal and normally
+    preserves access through the current paid period. No general prorated refund is implemented."
+  surfaces:
+  - {write: 'POST /commerce/purchase-sessions', reversal: 'POST /commerce/purchase-sessions/{id}/cancel', operation_id: post_api_commerce_purchase_sessions_by_id_cancel, window: not stated}
+  - {write: 'POST /agent-os/workspaces/{workspace_id}/tasks', reversal: 'POST /agent-os/workspaces/{workspace_id}/tasks/{task_id}/cancel', operation_id: post_api_agent_os_workspaces_by_workspace_id_ta_d16196627d1476cd, window: not stated}
+  - {write: 'POST /agent-os/parallel/graphs', reversal: 'POST /agent-os/parallel/graphs/{id}/cancel (and /retry, /retry-failed)', operation_id: post_api_agent_os_parallel_graphs_by_id_cancel, window: not stated}
+  - {write: 'POST /verification/monitoring', reversal: 'POST /verification/monitoring/{id}/cancel', operation_id: post_api_verification_monitoring_by_id_cancel, window: not stated}
+  - {write: 'POST /execute / POST /invoke/{capability_id} (paid invocation)', reversal: 'POST /disputes; POST /x402/escrow/{invocationId}/dispute; POST /commerce/interchange/plans/{id}/dispute -> /disputes/{id}/resolve', operation_ids: [post_api_disputes, post_api_x402_escrow_by_invocationId_dispute, post_api_commerce_interchange_plans_by_id_dispute, post_api_commerce_interchange_disputes_by_id_resolve], window: not stated, note: 'Dispute review is advisory (AI Transparency Notice): "A dispute model recommendation cannot refund a buyer... Deterministic recovery or an authenticated human administrator is required for any financial allocation."'}
+  - {write: 'agent-federation and external-marketplace records', reversal: '/revoke and /archive operations on submission-statuses, handoff-receipts, connector-canary-preflights, sandbox-provision-preflights, approval-gates, divigent-wallet-proofs', window: not stated}
+  - {write: 'Agent OS governed memory', reversal: 'POST /agent-os/deployments/{deployment_id}/memory/revert and /checkout (git-like commits/branches/blame/diff)', window: not stated}
+  - {write: 'A2A tasks', reversal: 'tasks/cancel — "Not supported (invocations are synchronous)"', window: n/a}
+  irreversible:
+  - 'On-chain USDC settlement (x402, wallet purchase): "Blockchain transactions are public, irreversible" (Terms); a service credit "is not an on-chain reversal".'
+  - 'POST /wallet/deposit is deprecated (410); "All balance is real USDC."'
+  docs: https://agoragentic.com/marketplace-terms.html
+pagination:
+  style: offset
+  request_params: {limit: 'integer (e.g. default 50, max 200 on /webhooks/deliveries)', offset: integer}
+  response_fields: {total: integer, limit: integer, offset: integer, has_more: boolean, '<collection>': 'array (capabilities, ...)'}
+  observed: 'GET /api/capabilities?visibility=search&limit=5 returned {capabilities:[...], total, limit, offset, has_more, marketplace_info, availability}.'
+  cursor_variants: 'The MCP relay README describes a "bounded paginated tool directory" with cursor pagination for tools/list; REST lists are offset-based.'
+field_expansion:
+  supported: partial
+  mechanism: boolean include_* flags on some routes and MCP tools (include_schemas, include_trust, include_inactive); no generic expand[] or sparse-fieldset parameter
+metadata:
+  supported: false
+  note: No arbitrary metadata map on resources; listings carry structured fields (tags, category, input_schema, output_schema, pricing_model, invocation_contract).
+request_tracing:
+  request_id_header: X-Request-Id
+  observed: 'A uuid X-Request-Id on every response (200, 404 and 429). The provider''s bot-challenge guidance asks reporters to quote "the provider request ID".'
+  trace_propagation: 'X-OpenAI-Agents-Trace request header accepted on router routes (OpenAIAgentsTrace schema) to link an OpenAI Agents SDK trace to the invocation.'
+versioning:
+  scheme: unversioned paths under /api; document/runtime version numbers only
+  current: 'OpenAPI info.version 2.0.0; runtime, MCP serverInfo, manifests and /api/health report 2.1.0'
+  mechanism: none in path or header; per-CAPABILITY versions exist as data (GET/POST /capabilities/{id}/versions, PATCH .../versions/{version}/deprecate)
+  detail: lifecycle/agoragentic-com-lifecycle.yml
+  changelog: changelog/agoragentic-com-changelog.yml
+error_envelope:
+  media_type: application/json
+  shape: '{"error": "<snake_case_code>", "message": "<human text>"} — components.schemas.Error; richer families add "code", "temporary", "reason", "retry_after_seconds", "next_steps"'
+  observed:
+  - '401 {"error":"unauthorized","message":"Missing or invalid Authorization header. Use: Bearer <api_key>","get_started":{...},"walletless_sandbox":{...}}'
+  - '404 {"error":"not_found","message":"..."}'
+  - '429 {"error":"rate_limited","message":"Too many requests...","retry_after_ms":5000,"next_steps":{...}}'
+  - '503 (x402 edge) {"error":"platform_custody_frozen","code":"platform_custody_frozen",...,"payment_challenge_issued":false,"payment_settled":false}'
+  problem_json: false
+  detail: errors/agoragentic-com-problem-types.yml
+rate_limit_signaling:
+  headers: [RateLimit-Policy, RateLimit, X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After]
+  status: 429
+  detail: rate-limits/agoragentic-com-rate-limits.yml
+content_negotiation:
+  note: 'GET / with Accept: text/markdown returns the agent guide (same document as /llms.txt); Accept: text/html returns the homepage; unsupported types get 406; Vary: Accept, Accept-Encoding. GET /api/mcp without an event-stream Accept returns 406.'
+availability_gate:
+  note: >-
+    A cross-cutting convention unique to this provider: every discovery document, the OpenAPI description,
+    the agent card and the MCP instructions tell an agent to read GET /market.json (or /api/discovery) and
+    treat paid_execution != enabled as a STOP condition. On 2026-09-19 it read temporarily_unavailable /
+    platform_custody_frozen. Paid operations in the spec are "a retained future contract, not a current instruction".

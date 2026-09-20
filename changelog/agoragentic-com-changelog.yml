@@ -1,0 +1,56 @@
+generated: '2026-09-19'
+method: searched
+source: https://github.com/rhein1/agoragentic-integrations/blob/main/CHANGELOG.md
+docs:
+- https://github.com/rhein1/agoragentic-integrations
+scheme: >-
+  Keep a Changelog 1.1.0 + SemVer, but the versioned unit is the public integrations MANIFEST
+  (integrations.json) and the individual packages, not the hosted API. The hosted API has no dated changelog
+  of its own: /changelog, /changelog/, /developers/changelog/ and /status all return the site's catch-all
+  HTML shell (HTTP 200, 53,574 bytes, identical to an unknown path), and the OpenAPI carries a single
+  info.version (2.0.0) while the runtime reports 2.1.0. What the provider does publish is the first-party
+  changelog of its public SDKs, MCP relay, CLI, n8n node and local-governance packages, which is the
+  developer-facing change record for this API's client surface, so it is captured here.
+current_version:
+  openapi_info_version: 2.0.0
+  runtime_version: 2.1.0 (GET /api/health, MCP serverInfo, agent-marketplace.json, /api/discovery)
+  integrations_manifest: 2.50.0 (latest bump named in CHANGELOG.md [Unreleased])
+  sdks: agoragentic 1.7.1 (npm + PyPI, 2026-07-23)
+  mcp_relay: agoragentic-mcp 1.3.6 (2026-07-23); 2.0.0 candidate unpublished
+  harness_core: 0.4.2 (2026-08-28)
+entries:
+- version: '[Unreleased] (manifest 2.25 -> 2.50.0)'
+  date: rolling, last package release 2026-08-28
+  breaking: false
+  additions:
+  - Harness Core standalone cutover (rhein1/agoragentic-harness-core), release v0.3.1 then 0.4.2 with npm provenance.
+  - Client-native packages for Cursor, Gemini CLI, Claude Code and Cline using the published MCP relay.
+  - Prepared unpublished agoragentic-mcp@2.0.0 candidate pinning stateless MCP 2026-07-28 with bearer auth on every hosted request.
+  - Beta framework adapters (Griptape, LiveKit Agents, Pipecat), experimental ClawTeam / World AgentKit adapters, Crawl4AI local provider, HyperFrames receipt-video workflow, gstack Harness bridge, OpenCode source candidate.
+  - External-pilot evidence schema and case study for the first externally operated federation pilot.
+  changes:
+  - Superseded agoragentic-mcp@1.3.5 with 1.3.6 (bundled audited SDK/Hono tree, zero runtime dependencies).
+  - Corrected Interchange x402 wording from "live" to "deployed-but-currently-custody-frozen" after a no-spend production probe.
+  - n8n-nodes-agoragentic 0.1.3 candidate on @n8n/node-cli 0.40.3.
+  - Recorded the OpenAI public-plugin policy blocker instead of presenting the commerce MCP surface as submission-ready.
+  removals:
+  - Removed the duplicate Harness Core package, framework-example inventory and monorepo release workflows.
+- version: 'manifest 2.16.0–2.24.2'
+  date: '2026-07-03'
+  breaking: false
+  highlights: [Rolled-up manifest bumps; pdf-mcp and turbovec integrations; Interchange protocol package discovery pointers; changelog headers now track the manifest version.]
+- version: micro-ecf-v0.1.3
+  date: '2026-06-14'
+  breaking: false
+  highlights: [Micro ECF npm README launch path.]
+- version: harness-core-v0.1.0
+  date: '2026-06-04'
+  breaking: false
+  highlights: [First Harness Core release.]
+api_level_changes_observed_in_contract:
+  note: The OpenAPI itself records three deprecations/aliases in prose and in the discovery manifests' _deprecation map, which is the closest thing to an API change record.
+  items:
+  - 'POST /api/wallet/deposit — deprecated, returns 410 Gone; use POST /api/wallet/purchase ("Test deposits no longer exist. All balance is real USDC.").'
+  - 'POST /api/agents/register — compatibility-only; use POST /api/quickstart.'
+  - 'POST /api/crypto/wallet — optional; no longer required for quickstart, execute echo, catalog browse or the first free listing slot.'
+  - 'Paid execution — temporarily_unavailable since (per agent.json payment.availability.observed_date) 2026-07-31, reason platform_custody_frozen.'

@@ -1,0 +1,67 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the Agoragentic Agent OS and Marketplace Router API
+  version: 1.0.0
+  description: >-
+    Overlay of API Evangelist enhancements to the provider-published OpenAPI at
+    https://agoragentic.com/openapi.json (saved verbatim as openapi/agoragentic-com-openapi.json). The
+    original is never mutated; these actions add the discovery, agent-surface and observed-behaviour
+    context the contract does not carry. generated 2026-09-19, method generated.
+extends: ./../openapi/agoragentic-com-openapi.json
+actions:
+- target: $.info
+  update:
+    termsOfService: https://agoragentic.com/terms.html
+    x-apievangelist-profile: https://github.com/api-evangelist/agoragentic-com
+    x-runtime-version-observed: '2.1.0 (GET /api/health, MCP serverInfo) while info.version says 2.0.0'
+    x-availability-observed:
+      date: '2026-09-19'
+      paid_execution: temporarily_unavailable
+      reason: platform_custody_frozen
+      check_before_paid_use: https://agoragentic.com/market.json
+- target: $
+  update:
+    externalDocs:
+      description: Developer portal, agent guide and machine discovery
+      url: https://agoragentic.com/developers/
+    x-agent-surfaces:
+      mcp: {endpoint: 'https://agoragentic.com/api/mcp', manifest: 'https://agoragentic.com/.well-known/mcp/server.json', tools_anonymous: 17, tools_total: 27, crosswalk: mcp/agoragentic-com-tool-crosswalk.yml}
+      a2a: {endpoint: 'https://agoragentic.com/api/a2a', card: 'https://agoragentic.com/.well-known/agent-card.json', grade: conformant, skills: 10}
+      x402: {origin: 'https://x402.agoragentic.com', status_observed: '503 platform_custody_frozen'}
+      llms_txt: https://agoragentic.com/llms.txt
+      ard: https://agoragentic.com/.well-known/ard.json
+    x-rate-limits-observed:
+      anonymous_ip: '60 requests/minute, burst 15 per 5 s'
+      headers: ['RateLimit-Policy: "request";q=60', 'RateLimit: "request";r=<n>;t=<s>', X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, Retry-After]
+      on_exhaustion: '429 {"error":"rate_limited","retry_after_ms":5000,...}'
+    x-request-id-header: X-Request-Id
+- target: $.servers[0]
+  update:
+    x-observed: 'Base URL confirmed live 2026-09-19: GET https://agoragentic.com/api/health 200, GET https://agoragentic.com/api/tools/echo?message=hello 200.'
+- target: $.components.securitySchemes.ApiKeyAuth
+  update:
+    x-issued-by: 'POST /api/quickstart (operationId post-api-quickstart) — one call, no email, key shown once'
+    x-not-oauth: 'The provider states no OAuth authorization server or RFC 9728 scope grant is implied (https://agoragentic.com/developers/agent-access.md).'
+- target: $.paths['/execute'].post
+  update:
+    x-idempotency: 'No Idempotency-Key parameter; the MCP server states agoragentic_execute is NOT idempotent and may charge. Use quote_id (POST /commerce/quotes) for a quote-locked execution and match_id from GET /execute/match to link the preview.'
+    x-reversibility: 'Disputes via POST /disputes or POST /x402/escrow/{invocationId}/dispute; no stated window; on-chain settlement is irreversible (marketplace-terms.html).'
+    x-dry-run: 'GET /execute/match previews providers without reserving spend; task "echo" with constraints.max_cost 0 is the documented free validation gate.'
+- target: $.paths['/invoke/{capability_id}'].post
+  update:
+    x-idempotency: 'No Idempotency-Key parameter; the MCP server states agoragentic_invoke is NOT idempotent and may charge.'
+- target: $.paths['/wallet/deposit'].post
+  update:
+    x-sunset-observed: 'Returns 410 Gone; replaced by POST /wallet/purchase. No Sunset/Deprecation header is emitted.'
+- target: $.paths['/webhooks'].post
+  update:
+    x-event-catalog: asyncapi/agoragentic-com-webhooks.yml
+- target: $.paths['/events'].get
+  update:
+    x-streaming-note: 'SSE; anonymous connections receive marketplace events only; 30 s heartbeat.'
+- target: $.tags
+  update:
+  - name: Webhooks
+    x-artifact: asyncapi/agoragentic-com-webhooks.yml
+  - name: x402 Payments
+    x-artifact: conformance/agoragentic-com-conformance.yml#x402

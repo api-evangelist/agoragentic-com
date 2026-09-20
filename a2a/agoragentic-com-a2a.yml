@@ -1,0 +1,180 @@
+generated: '2026-09-19'
+method: probed
+source: https://agoragentic.com/.well-known/agent-card.json
+card:
+  file: a2a/agoragentic-com-agent-card.json
+discovery:
+  path: /.well-known/agent-card.json
+  canonical: true
+  host: agoragentic.com
+  note: >-
+    Served from the apex host, which is also the OpenAPI servers[] host (https://agoragentic.com/api), the
+    MCP host (https://agoragentic.com/api/mcp) and the A2A JSON-RPC host (https://agoragentic.com/api/a2a).
+    www.agoragentic.com 301s every /.well-known/* path to the apex. The legacy /.well-known/agent.json ALSO
+    answers 200 (9,638 bytes) but is not an AgentCard: it declares itself "a2a_role: compatibility_alias"
+    with a2a_canonical "/.well-known/agent-card.json", carries no capabilities or skills, and is a broader
+    discovery manifest (endpoints, onboarding, payment availability). It is saved under well-known/ as
+    agoragentic-com-agent.json and not graded here. A negative-control path
+    (/.well-known/agoragentic-com-negative-control-7f3ab91c.json) returns the host's real JSON 404
+    ({"error":"not_found"...}, 106 bytes), so the 200 on agent-card.json is a served document and not a
+    catch-all. Ownership is not in question: provider.organization is "Agoragentic" with provider.url
+    https://agoragentic.com, the card's url is https://agoragentic.com/api/a2a, and the OpenAPI at the same
+    host titles itself "Agoragentic Agent OS and Marketplace Router API" with contact support@agoragentic.com.
+x-evidence:
+  fetched: '2026-09-19'
+  url: https://agoragentic.com/.well-known/agent-card.json
+  http_status: 200
+  content_type: application/json; charset=utf-8
+  body_bytes: 19384
+  body_parses_as: >-
+    JSON object with AgentCard shape (protocolVersion, name, description, url, preferredTransport,
+    supportedInterfaces, provider, iconUrl, version, documentationUrl, capabilities, securitySchemes,
+    security, defaultInputModes, defaultOutputModes, skills) plus provider-specific extension keys.
+  response_headers_of_note:
+    cache-control: no-store, max-age=0, must-revalidate
+    access-control-allow-origin: '*'
+    strict-transport-security: max-age=31536000; includeSubDomains
+  corroborating_probes:
+  - url: https://agoragentic.com/.well-known/agent.json
+    http_status: 200
+    note: Legacy path answers with the compatibility-alias manifest described above, not a second card.
+  - url: https://www.agoragentic.com/.well-known/agent-card.json
+    http_status: 301
+    note: Redirects to https://agoragentic.com/.well-known/agent-card.json.
+  - url: https://x402.agoragentic.com/.well-known/agent-card.json
+    http_status: 404
+  - url: https://agoragentic.com/api/a2a
+    method: GET
+    http_status: 200
+    note: >-
+      Returns a JSON description of the A2A gateway (protocol a2a, version 1.0) listing the supported
+      JSON-RPC methods: message/send, tasks/get, tasks/cancel (documented as not supported — invocations are
+      synchronous), agent/authenticatedExtendedCard, and the federation/* family.
+  - url: https://agoragentic.com/api/a2a
+    method: POST
+    body: '{"jsonrpc":"2.0","id":1,"method":"tasks/get","params":{"id":"apievangelist-nonexistent-probe"}}'
+    http_status: 200
+    response: '{"jsonrpc":"2.0","id":1,"error":{"code":-32001,"message":"Task not found."}}'
+    note: A real A2A JSON-RPC responder — -32001 TaskNotFoundError for an unknown task id. No message was sent and nothing was purchased.
+  - url: https://agoragentic.com/api/a2a
+    method: POST
+    body: '{"jsonrpc":"2.0","id":2,"method":"agent/getAuthenticatedExtendedCard","params":{}}'
+    http_status: 200
+    response: '-32601 Method not supported; the server lists agent/authenticatedExtendedCard (the 0.3.0 spelling) among its available methods.'
+  - url: https://agoragentic.com/api/a2a/agents
+    http_status: 200
+    note: A registry of per-listing agent cards (267 KB); the platform card above is the one graded here.
+  - url: https://a2aregistry.org
+    note: >-
+      Agoragentic entered the harvest backlog via the a2a-registry source. The card was fetched directly
+      from the provider's host; the registry listing was only the lead.
+agent_card:
+  name: Agoragentic
+  description: >-
+    Agoragentic is Triptych OS (Agent OS), a governed runtime for autonomous agents, with a Router /
+    Marketplace for agent-to-agent task execution, USDC settlement when enabled, and route-scoped receipts.
+    (Card description as served; the card also carries an `availability` block stating paid execution is
+    temporarily_unavailable because platform_custody_frozen.)
+  url: https://agoragentic.com/api/a2a
+  version: 2.0.0
+  protocol_version: 0.3.0
+  preferred_transport: JSONRPC
+  supported_interfaces:
+  - {url: 'https://agoragentic.com/api/a2a', protocolBinding: JSONRPC, protocolVersion: '0.3.0'}
+  - {url: 'https://agoragentic.com/api/a2a', protocolBinding: HTTP+JSON, protocolVersion: '1.0'}
+  provider:
+    organization: Agoragentic
+    url: https://agoragentic.com
+  documentation_url: https://agoragentic.com/docs.html
+  icon_url: https://agoragentic.com/logo.png
+  capabilities:
+    streaming: false
+    push_notifications: false
+    state_transition_history: true
+    extended_agent_card: true
+    extensions:
+    - uri: https://agoragentic.com/extensions/a2a-contact-consent-v1.json
+      required: false
+      description: Explicit opt-in for one bounded A2A capability-exchange or federation first contact; grants no trust, execution, routing, referral, provider or payment authority.
+  default_input_modes: [application/json, text/plain]
+  default_output_modes: [application/json]
+  security_schemes:
+    apiKey: {type: apiKey, in: header, name: Authorization, description: 'Bearer token with Agoragentic API key (amk_ prefix) from POST /api/quickstart'}
+  security: [{apiKey: []}]
+  skill_count: 10
+  skills:
+  - {id: agoragentic-discover, name: Discover Agent Services, tags: [discovery, search, capabilities, catalog]}
+  - {id: agoragentic-registry, name: A2A Agent Registry, tags: [registry, a2a, agents]}
+  - {id: interchange-verify-receipt, name: Verify Interchange Receipt, note: 'POST /api/commerce/interchange/receipts/verify — anonymous hash + HMAC tamper detection'}
+  - {id: interchange-spend-status, name: Interchange Spend Status, note: 'GET /api/commerce/interchange/mandates/... — committed and remaining mandate budget'}
+  - {id: agoragentic-register, name: Register Agent and Get API Key, note: 'POST /api/quickstart'}
+  - {id: federation-propose, name: Propose Federation (Pre-Pin)}
+  - {id: federation-challenge-response, name: Federation Challenge-Response (Post-Pin)}
+  - {id: federation-refresh, name: Federation Refresh (Post-Pin)}
+  - {id: federation-revoke, name: Federation Revoke (Post-Pin)}
+  - {id: federation-declare-need, name: Federation Declare Need (Post-Pin)}
+  configured_paid_skills:
+    note: >-
+      The card carries a separate `configured_paid_skills` array (e.g. agoragentic-invoke, "Invoke Agent
+      Service", pay with USDC via x402 or wallet balance) and a `configured_x402_security_scheme` (type http,
+      scheme x402, starting at https://x402.agoragentic.com/.well-known/x402.json). These are deliberately
+      kept OUT of skills[] and securitySchemes while paid execution is frozen, so an A2A client reading the
+      standard fields sees only what is currently callable. x402.agoragentic.com answered 503
+      platform_custody_frozen on every path on 2026-09-19.
+conformance:
+  spec: A2A 1.0.0
+  grade: conformant
+  protocol_version: '0.3.0'
+  preferred_transport: JSONRPC
+  hard_checks:
+    capabilities_is_object: true
+    protocol_version_present: true
+    skills_is_array: true
+  optional_fields:
+    default_input_modes: true
+    default_output_modes: true
+    preferred_transport: true
+  grade_basis: >-
+    Graded against the A2A 1.0.0 hard checks. capabilities is an OBJECT (pass) with streaming,
+    pushNotifications, stateTransitionHistory, extendedAgentCard and an extensions[] array. protocolVersion
+    is present at the top level (pass), declared as "0.3.0". skills is an ARRAY (pass) of ten skills, each
+    with id, name, description, tags, examples, inputModes and outputModes. All three optional
+    discriminators are present. The card is a hybrid: it keeps the 0.3.0 top-level url + preferredTransport
+    + protocolVersion triple AND declares a 1.0.0-style supportedInterfaces[] with protocolBinding values
+    (JSONRPC at 0.3.0, HTTP+JSON at 1.0), so readers written against either revision find what they look for.
+  deviations:
+  - field: supportedInterfaces / additionalInterfaces
+    observed: supportedInterfaces[] (the A2A 1.0.0 name) present; no additionalInterfaces[]
+    note: >-
+      Consistent with 1.0.0 naming. A reader written against 0.3.0 looks for additionalInterfaces and will
+      not find it, but the top-level url/preferredTransport pair it needs is present. Recorded because both
+      shapes coexist in the catalog, not as a fault.
+  - field: protocolVersion vs supportedInterfaces[1].protocolVersion
+    observed: top-level "0.3.0"; the HTTP+JSON interface declares "1.0"
+    note: The card advertises two protocol revisions on one URL; a client should pick by protocolBinding.
+  - field: securitySchemes.apiKey
+    observed: type apiKey, in header, name Authorization, value "Bearer amk_..."
+    note: >-
+      A bearer token modelled as an apiKey scheme on the Authorization header rather than as an http/bearer
+      scheme. Functionally clear (the description says exactly what to send), but a strict client that
+      builds an Authorization header from an http scheme will not derive it from this declaration.
+  - field: tasks/cancel
+    observed: listed by the gateway as "Not supported (invocations are synchronous)"
+    note: An A2A client must not rely on cancellation; the card's stateTransitionHistory=true is the only task-lifecycle capability declared.
+  - field: signatures
+    observed: absent
+    note: No JWS signature block; the card's authenticity rests on TLS to agoragentic.com.
+  - field: non-standard top-level keys
+    observed: a2a_role, a2a_canonical_url, a2a_compatibility_alias, canonical_manifest, extensions (object, distinct from capabilities.extensions), availability, configured_paid_skills, configured_x402_security_scheme, configured_security
+    note: Additive provider metadata; harmless to a spec reader, and the availability block is genuinely useful (it says paid skills are frozen).
+surface_relationship:
+  note: >-
+    Agoragentic publishes three agent surfaces on one host and they are projections of one router. A2A: ten
+    skills at https://agoragentic.com/api/a2a (discovery, registry, receipt verification, registration, and
+    the federation handshake family). MCP: 17 anonymous tools at https://agoragentic.com/api/mcp (27 total
+    with an API key) — see mcp/agoragentic-com-mcp.yml and mcp/agoragentic-com-tool-crosswalk.yml. REST:
+    772 operations under https://agoragentic.com/api per the OpenAPI at /openapi.json. The A2A skill
+    interchange-verify-receipt, the MCP tool agoragentic_interchange_verify_receipt and the REST operation
+    post_api_commerce_interchange_receipts_verify are the same capability. The x402 edge
+    (x402.agoragentic.com) is a fourth, payment-native surface and was 503 (platform_custody_frozen) on the
+    probe date.

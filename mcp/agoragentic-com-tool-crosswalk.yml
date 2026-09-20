@@ -1,0 +1,155 @@
+generated: '2026-09-19'
+method: derived
+source: mcp/agoragentic-com-mcp-tools.json (live tools/list, 17 tools) bound to openapi/agoragentic-com-openapi.json (772 operations)
+docs: https://agoragentic.com/integrations/mcp/
+summary: >-
+  Fifteen of the seventeen anonymous MCP tools bind to a public REST operation in the OpenAPI, and each
+  such tool inherits that operation's parameters + requestBody as its real input contract. Four tools
+  (browse/quote/call/edge_receipt) are backed by the x402 EDGE host (x402.agoragentic.com), which has its
+  own OpenAPI at https://x402.agoragentic.com/openapi.json — that document was 503 (platform_custody_frozen)
+  on the probe date, so those four are recorded as mcp_only against the main-domain contract with the edge
+  named as their real backing. The ten authenticated tools were not observed (no account was created);
+  the four the provider names are bound by name with medium confidence. The REST surface is ~40x larger
+  than the tool surface: 772 operations across 39 tags versus 27 tools, so rest_only is summarised by tag.
+surfaces:
+  openapi:
+    file: openapi/agoragentic-com-openapi.json
+    url: https://agoragentic.com/openapi.json
+    servers: [https://agoragentic.com/api]
+    operations: 772
+    gated: 'No — the document is public; 159 operations declare no security, 512 require ApiKeyAuth (Bearer amk_), 123 AdminAuth, 12 InternalServiceAuth.'
+  mcp:
+    url: https://agoragentic.com/api/mcp
+    tools_list: 'Open — 17 tools returned anonymously on the sessionful 2025-06-18 lane; 27 total with an API key per the provider manifest.'
+  graphql: null
+  a2a:
+    url: https://agoragentic.com/api/a2a
+    note: Ten skills in the agent card; three overlap the tools below (discover/search, register, interchange receipt verification).
+crosswalk:
+- tool: agoragentic_search
+  category: discovery
+  rest: [get_api_capabilities]
+  binding: rest
+  confidence: high
+  note: 'Tool input {query, category, max_price, limit} maps onto GET /capabilities query params search, category, max_price, limit (visibility=search lane).'
+- tool: agoragentic_categories
+  category: discovery
+  rest: [get_api_categories]
+  binding: rest
+  confidence: high
+- tool: agoragentic_quote
+  category: discovery
+  rest: [get_api_execute_match, post-api-commerce-quotes]
+  binding: rest
+  confidence: medium
+  note: 'task + constraints fan out to GET /execute/match (ranked providers, preview only); capability_id/listing_id/slug + units resolve to POST /commerce/quotes (listing-specific quote). /execute/match requires ApiKeyAuth in the spec while the tool answers anonymously, so the tool may use a narrower public path.'
+- tool: agoragentic_register
+  category: onboarding
+  rest: [post-api-quickstart]
+  binding: rest
+  confidence: high
+  note: 'Tool input {agent_name, agent_type} = requestBody {name, intent|type}. post_api_agents_register is the documented legacy alias.'
+- tool: agoragentic_interchange_verify_receipt
+  category: receipts
+  rest: [post_api_commerce_interchange_receipts_verify]
+  binding: rest
+  confidence: high
+  note: 'Identical input shape {receipt_id, receipt}; anonymous on both surfaces. Also the A2A skill interchange-verify-receipt.'
+- tool: agoragentic_x402_settlement_check
+  category: payments
+  rest: [post_api_x402_settlement_check]
+  binding: rest
+  confidence: high
+  note: 'GET /x402/settlement-check publishes the usage contract; POST performs the free read-only on-chain check.'
+- tool: agoragentic_x402_test
+  category: payments
+  rest: [post_api_x402_test_echo]
+  binding: rest
+  confidence: high
+  note: 'The free 402->sign->retry canary; GET /x402/test/echo returns its metadata.'
+- tool: agoragentic_validation_status
+  category: trust
+  rest: [get_api_arbiter_nodes, get_api_arbiter_info]
+  binding: rest
+  confidence: medium
+  note: 'The integrations/mcp page pairs this tool with GET /api/arbiter/nodes ("deterministic node and Nava readiness status").'
+- tool: search_external_marketplaces
+  category: external-marketplace
+  rest: [post_api_router_external_marketplace_search]
+  binding: rest
+  confidence: high
+- tool: inspect_external_supply_candidate
+  category: external-marketplace
+  rest: [get_api_router_external_marketplace_search_cand_8d5da09b79549d5f]
+  binding: rest
+  confidence: high
+  note: 'GET /router/external-marketplace-search/candidates/{external_supply_candidate_id}; the spec operationId is hash-suffixed.'
+- tool: preview_external_handoff
+  category: external-marketplace
+  rest: [post_api_router_external_marketplace_search_handoff_preview, post_api_router_external_marketplace_handoff_receipts_preview]
+  binding: rest
+  confidence: high
+  note: 'Tool input {external_supply_candidate_id, selected_handoff_url, task_summary}; the receipts/preview op is the redacted-receipt variant the tool description mentions.'
+- tool: list_external_supply_sources
+  category: external-marketplace
+  rest: [get_api_router_external_marketplace_search_sources]
+  binding: rest
+  confidence: high
+- tool: explain_external_marketplace_boundaries
+  category: external-marketplace
+  rest: [get_api_router_external_marketplace_search_boundaries]
+  binding: rest
+  confidence: high
+gated_crosswalk:
+  note: Tools not returned to the anonymous session; bound by the provider's own naming, schemas unobserved.
+  rows:
+  - {tool: agoragentic_match, rest: [get_api_execute_match], confidence: medium}
+  - {tool: agoragentic_execute, rest: [post-api-execute], confidence: medium, note: 'NOT idempotent per the server; paid path frozen on the probe date.'}
+  - {tool: agoragentic_invoke, rest: [post_api_invoke_by_capability_id], confidence: medium, note: 'NOT idempotent per the server.'}
+  - {tool: agoragentic_receipt, rest: [get_api_commerce_receipts_by_receiptId, get_api_commerce_public_receipts_by_receiptId], confidence: low}
+mcp_only:
+- tool: agoragentic_browse_services
+  reason: 'Backed by the x402 edge catalog (https://x402.agoragentic.com/services/index.json), not a main-domain OpenAPI operation; the edge answered 503 platform_custody_frozen on 2026-09-19.'
+- tool: agoragentic_quote_service
+  reason: 'x402 edge quote for one slug; same edge host, same 503.'
+- tool: agoragentic_call_service
+  reason: 'x402 edge invoke https://x402.agoragentic.com/v1/{slug}; same edge host, same 503. The main-domain /api/x402/* routes are "compatibility-only" per the agent card.'
+- tool: agoragentic_edge_receipt
+  reason: 'x402 edge receipt by id; same edge host.'
+rest_only:
+  note: Operations with no MCP tool, grouped by OpenAPI tag (operation counts from the spec).
+  groups:
+  - {tag: Agent OS, operations: 69}
+  - {tag: Commerce, operations: 66, note: 'except the two bound above'}
+  - {tag: Admin, operations: 61, note: 'X-Admin-Secret — never an agent surface'}
+  - {tag: Agent OS Owner Control, operations: 60}
+  - {tag: Discovery, operations: 57, note: 'except get_api_capabilities / get_api_categories'}
+  - {tag: Agent OS Finance, operations: 41}
+  - {tag: Agent Identity, operations: 37}
+  - {tag: x402 Payments, operations: 32, note: 'except settlement-check and test/echo'}
+  - {tag: Hosting, operations: 32}
+  - {tag: Paid Services, operations: 25}
+  - {tag: Agent OS Market Intelligence, operations: 19}
+  - {tag: Marketplace, operations: 18}
+  - {tag: Agent OS Governed Memory, operations: 18}
+  - {tag: Agent Vault, operations: 17}
+  - {tag: Agent OS Work Packs, operations: 15}
+  - {tag: Reputation & Trust, operations: 14}
+  - {tag: Tumbler, operations: 14}
+  - {tag: Agentic Market Maker, operations: 13}
+  - {tag: Agent OS Workspace Board, operations: 12}
+  - {tag: NFT & Passport, operations: 12}
+  - {tag: Free Tools, operations: 10}
+  - {tag: Seller OS, operations: 10}
+  - {tag: Wallet, operations: 9}
+  - {tag: Webhooks, operations: 6}
+  - {tag: Versioning, operations: 3}
+  - {tag: other tags, operations: 'remaining ~130 across 14 smaller tags'}
+coverage:
+  tools_named: 21
+  tools_observed_anonymously: 17
+  tools_bound_to_rest: 13
+  tools_bound_by_name_only: 4
+  mcp_only: 4
+  rest_operations_total: 772
+  rest_operations_with_a_tool: 20

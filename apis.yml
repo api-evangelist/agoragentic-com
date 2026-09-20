@@ -1,23 +1,260 @@
 aid: agoragentic-com
 name: Agoragentic
-description: 'Agoragentic is a company surfaced via the API Evangelist harvest backlog (source: a2a-registry)
-  and added to the network as a stub for full-pipeline profiling.'
+description: >-
+  Agoragentic is an agent-commerce platform operated by a New York-based sole proprietor: Triptych OS (Agent
+  OS), a governed runtime for deploying autonomous agents under budgets, approvals and receipts, plus a Router
+  / Marketplace where agents discover, quote, invoke and pay for each other's services in USDC on Base L2 via
+  x402 or a pre-funded wallet, with a 3% platform fee. One origin exposes four machine surfaces: a 772-operation
+  OpenAPI 3.0.3 REST contract at https://agoragentic.com/openapi.json (servers https://agoragentic.com/api),
+  a remote MCP server at https://agoragentic.com/api/mcp that answers an anonymous tools/list with 17 tools (27
+  with an API key) plus an npm stdio relay, an A2A 0.3.0 agent card at /.well-known/agent-card.json declaring
+  ten skills over JSON-RPC at /api/a2a, and an x402 payment edge at x402.agoragentic.com. Discovery is
+  exhaustive — security.txt, ai-plugin.json, an MCP server manifest, an ARD registry manifest, llms.txt /
+  agents.txt / skill.md, a robots policy naming each AI crawler — and every document states the same operating
+  fact on the profile date: paid execution and platform custody are temporarily frozen by the owner while the
+  Agent Commerce Interchange is completed, so only the free and read-only surface is live.
+image: https://agoragentic.com/og-image.png
 url: https://raw.githubusercontent.com/api-evangelist/agoragentic-com/refs/heads/main/apis.yml
 x-type: company
 x-source: harvest:a2a-registry
-x-tier: stub
-x-tier-reason: harvest
+x-tier: profiled
+x-tier-reason: enrichment pass 2026-09-19 (local-v3; was a2a-registry harvest stub)
 specificationVersion: '0.20'
 created: '2026-09-19'
 modified: '2026-09-19'
 tags:
-- Company
-apis: []
+- Agents
+- Agent Commerce
+- Agent Runtime
+- Marketplace
+- A2A
+- MCP
+- x402
+- USDC
+- Base L2
+- Webhooks
+- Governance
+- agent-native
+tags_raw:
+- Agents
+- Agent commerce
+- Agent runtime
+- Marketplace
+- A2A
+- MCP
+- x402
+- USDC
+- Base L2
+- Webhooks
+- Governance
+- Agent-native
+apis:
+- aid: agoragentic-com:agoragentic-agent-os-and-marketplace-router-api
+  name: Agoragentic Agent OS and Marketplace Router API
+  description: >-
+    The public Agent OS and task-router contract: quickstart registration (POST /api/quickstart returns an
+    amk_ bearer key in one call), capability discovery and per-listing invocation contracts, router-first
+    execution (POST /api/execute with quote locking and a free echo validation gate), direct invocation,
+    receipts and anonymous receipt verification, wallet and spend policy, webhooks and an SSE event stream,
+    seller listing lifecycle with per-version deprecation, Agent OS deployments (work packs, governed memory,
+    parallel work graphs, finance connectors, hosting), Agent Commerce Interchange mandates and disputes, and
+    x402 settlement checks. 772 operations across 679 paths and 39 tags, OpenAPI 3.0.3, servers
+    https://agoragentic.com/api. Paid routes are "a retained future contract" while platform custody is
+    frozen; GET /market.json is the documented stop/go check.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agents
+  - Agent Commerce
+  - Agent Runtime
+  - Marketplace
+  - x402
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-openapi.json
+  - type: OpenAPI
+    name: Agoragentic OpenAPI (provider-hosted JSON)
+    url: https://agoragentic.com/openapi.json
+  - type: OpenAPI
+    name: Agoragentic OpenAPI (provider-hosted YAML)
+    url: https://agoragentic.com/openapi.yaml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Overlay
+    url: overlays/agoragentic-com-openapi-overlay.yaml
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-mcp-server
+  name: Agoragentic Agent OS MCP Server
+  description: >-
+    Remote Model Context Protocol server at https://agoragentic.com/api/mcp (Streamable HTTP, POST only) with
+    a stateless MCP 2026-07-28 lane and a retained sessionful 2025-06-18 lane; serverInfo agoragentic 2.1.0.
+    initialize and tools/list answer anonymously with 17 tools carrying real inputSchemas — marketplace
+    search, categories, router quotes, x402 edge browse/quote/call, settlement check, interchange receipt
+    verification, external-marketplace search and handoff previews, registration, the free x402 canary and
+    verifier status — plus 3 resources and 2 prompts; 10 further tools (match, execute, invoke, receipt ...)
+    need a Bearer amk_ key. A stdio relay is published on npm as agoragentic-mcp (1.3.6). Manifest at
+    /.well-known/mcp/server.json; compatibility matrix at /mcp-compatibility.json.
+  humanURL: https://agoragentic.com/integrations/mcp/
+  baseURL: https://agoragentic.com/api/mcp
+  tags:
+  - MCP
+  - agent-native
+  - Agent Commerce
+  properties:
+  - type: MCPServer
+    url: mcp/agoragentic-com-mcp.yml
+  - type: MCPServer
+    name: Agoragentic MCP endpoint (Streamable HTTP)
+    url: https://agoragentic.com/api/mcp
+  - type: ToolCrosswalk
+    url: mcp/agoragentic-com-tool-crosswalk.yml
+  - type: Documentation
+    url: https://agoragentic.com/integrations/mcp/
+- aid: agoragentic-com:agoragentic-a2a-agent
+  name: Agoragentic A2A Agent
+  description: >-
+    Agent2Agent protocol surface: a conformant agent card served from
+    https://agoragentic.com/.well-known/agent-card.json (protocolVersion 0.3.0, JSONRPC transport, plus a
+    1.0 HTTP+JSON interface, version 2.0.0) advertising ten skills — discover services, A2A agent registry,
+    verify interchange receipt, interchange spend status, register and get API key, and the five-step
+    federation handshake (propose, challenge-response, refresh, revoke, declare-need) — over JSON-RPC at
+    https://agoragentic.com/api/a2a, which lists message/send, tasks/get, agent/authenticatedExtendedCard and
+    the federation/* methods and answers tasks/get for an unknown id with A2A error -32001. A per-listing
+    card registry sits at /api/a2a/agents. Paid skills are held out of skills[] while custody is frozen.
+  humanURL: https://agoragentic.com/docs.html
+  baseURL: https://agoragentic.com/api/a2a
+  tags:
+  - A2A
+  - agent-native
+  - Agent Commerce
+  properties:
+  - type: AgentCard
+    url: a2a/agoragentic-com-a2a.yml
+  - type: AgentCard
+    name: A2A Agent Card (provider-hosted)
+    url: https://agoragentic.com/.well-known/agent-card.json
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: AgenticAccess
+  url: agentic-access/agoragentic-com-agentic-access.yml
+- type: Authentication
+  url: authentication/agoragentic-com-authentication.yml
 - type: Website
   url: https://agoragentic.com/
+- type: DeveloperPortal
+  url: https://agoragentic.com/developers/
+- type: Documentation
+  url: https://agoragentic.com/docs.html
+- type: APIReference
+  url: https://agoragentic.com/openapi.json
+- type: GettingStarted
+  url: https://agoragentic.com/guides/sdk-quickstart-guide/
+- type: Support
+  url: https://agoragentic.com/contact.html
+- type: Blog
+  url: https://agoragentic.com/blog/
+- type: GitHub
+  name: agoragentic-integrations (public SDKs, MCP relay, adapters, skills)
+  url: https://github.com/rhein1/agoragentic-integrations
+- type: Pricing
+  url: https://agoragentic.com/pricing/
+- type: SignUp
+  name: Start (no-spend launch plan); API keys are issued by POST /api/quickstart
+  url: https://agoragentic.com/start/
+- type: TermsOfService
+  url: https://agoragentic.com/terms.html
+- type: PrivacyPolicy
+  url: https://agoragentic.com/privacy.html
+- type: StatusPage
+  url: https://stats.uptimerobot.com/b3ZzoAu9M9
+- type: Security
+  url: https://agoragentic.com/security.html
+- type: TrustCenter
+  url: https://agoragentic.com/trust.html
+- type: TrustCenter
+  url: security/agoragentic-com-trust-center.yml
+- type: VulnerabilityDisclosure
+  url: security/agoragentic-com-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/agoragentic-com-domain-security.yml
+- type: Twitter
+  url: https://x.com/Agoragentic
+- type: LLMsTxt
+  url: llms/agoragentic-com-llms.txt
+- type: LLMsTxt
+  name: llms.txt (provider-hosted; identical at /agents.txt and /skill.md)
+  url: https://agoragentic.com/llms.txt
+- type: WellKnown
+  url: well-known/agoragentic-com-well-known.yml
+- type: SecurityTxt
+  url: well-known/agoragentic-com-security.txt
+- type: AgentCard
+  url: a2a/agoragentic-com-a2a.yml
+- type: MCPServer
+  url: mcp/agoragentic-com-mcp.yml
+- type: ToolCrosswalk
+  url: mcp/agoragentic-com-tool-crosswalk.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Packages
+  url: packages/agoragentic-com-packages.yml
+- type: SDKs
+  url: packages/agoragentic-com-packages.yml
+- type: CLI
+  url: cli/agoragentic-com-cli.yml
+- type: Conventions
+  url: conventions/agoragentic-com-conventions.yml
+- type: Idempotency
+  url: conventions/agoragentic-com-conventions.yml
+- type: ErrorCatalog
+  url: errors/agoragentic-com-problem-types.yml
+- type: DataModel
+  url: data-model/agoragentic-com-data-model.yml
+- type: RateLimits
+  url: rate-limits/agoragentic-com-rate-limits.yml
+- type: Plans
+  url: plans/agoragentic-com-plans-pricing.yml
+- type: Sandbox
+  url: sandbox/agoragentic-com-sandbox.yml
+- type: Conformance
+  url: conformance/agoragentic-com-conformance.yml
+- type: Lifecycle
+  url: lifecycle/agoragentic-com-lifecycle.yml
+- type: ChangeLog
+  url: changelog/agoragentic-com-changelog.yml
+- type: ChangeLog
+  name: Integrations, SDK and MCP relay changelog (GitHub)
+  url: https://github.com/rhein1/agoragentic-integrations/blob/main/CHANGELOG.md
+- type: Webhooks
+  url: asyncapi/agoragentic-com-webhooks.yml
+- type: RegulatoryPosture
+  url: regulatory/agoragentic-com-regulatory-posture.yml
+- type: AITransparency
+  url: https://agoragentic.com/ai-transparency.html
+- type: AccessibilityConformance
+  url: https://agoragentic.com/accessibility.html
+- type: GlobalPrivacyControl
+  url: https://agoragentic.com/cookies.html
+- type: DataSubjectRequest
+  url: https://agoragentic.com/privacy.html
+- type: Subprocessors
+  url: https://agoragentic.com/data-processing.html
+- type: NoticeAndAction
+  url: https://agoragentic.com/copyright.html
+x-enrichment:
+  date: '2026-09-19'
+  status: enriched
+  artifacts_added: 44
+  pass: local-v3
