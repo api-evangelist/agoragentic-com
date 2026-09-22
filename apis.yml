@@ -24,7 +24,7 @@ created: '2026-09-19'
 modified: '2026-09-19'
 tags:
 - Agents
-- Agent Commerce
+- Agentic Commerce
 - Agent Runtime
 - Marketplace
 - A2A
@@ -32,7 +32,7 @@ tags:
 - x402
 - USDC
 - Base L2
-- Webhooks
+- Webhook
 - Governance
 - agent-native
 tags_raw:
@@ -48,6 +48,7 @@ tags_raw:
 - Webhooks
 - Governance
 - Agent-native
+- Agent Commerce
 apis:
 - aid: agoragentic-com:agoragentic-agent-os-and-marketplace-router-api
   name: Agoragentic Agent OS and Marketplace Router API
@@ -64,6 +65,13 @@ apis:
   humanURL: https://agoragentic.com/developers/
   baseURL: https://agoragentic.com/api
   tags:
+  - Agents
+  - Agentic Commerce
+  - Agent Runtime
+  - Marketplace
+  - x402
+  - Webhook
+  tags_raw:
   - Agents
   - Agent Commerce
   - Agent Runtime
@@ -105,6 +113,10 @@ apis:
   tags:
   - MCP
   - agent-native
+  - Agentic Commerce
+  tags_raw:
+  - MCP
+  - agent-native
   - Agent Commerce
   properties:
   - type: MCPServer
@@ -130,6 +142,10 @@ apis:
   humanURL: https://agoragentic.com/docs.html
   baseURL: https://agoragentic.com/api/a2a
   tags:
+  - A2A
+  - agent-native
+  - Agentic Commerce
+  tags_raw:
   - A2A
   - agent-native
   - Agent Commerce
