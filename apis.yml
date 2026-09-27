@@ -13,6 +13,21 @@ description: >-
   agents.txt / skill.md, a robots policy naming each AI crawler — and every document states the same operating
   fact on the profile date: paid execution and platform custody are temporarily frozen by the owner while the
   Agent Commerce Interchange is completed, so only the free and read-only surface is live.
+deliveryModel:
+  model: saas
+  license_evidence:
+    not_product:
+    - rhein1/agoragentic-integrations
+  open_source: unknown
+  commercial: true
+  callable_host: false
+  label: Hosted service · you call their endpoint
+  confidence: low
+  source:
+  - pricing
+  - repository-not-product
+  generated: '2026-09-25'
+  method: derived
 image: https://agoragentic.com/og-image.png
 url: https://raw.githubusercontent.com/api-evangelist/agoragentic-com/refs/heads/main/apis.yml
 x-type: company
@@ -34,7 +49,7 @@ tags:
 - Base L2
 - Webhook
 - Governance
-- agent-native
+- Agent-Native
 tags_raw:
 - Agents
 - Agent commerce
@@ -49,70 +64,24 @@ tags_raw:
 - Governance
 - Agent-native
 - Agent Commerce
+- agent-native
 apis:
-- aid: agoragentic-com:agoragentic-agent-os-and-marketplace-router-api
-  name: Agoragentic Agent OS and Marketplace Router API
-  description: >-
-    The public Agent OS and task-router contract: quickstart registration (POST /api/quickstart returns an
-    amk_ bearer key in one call), capability discovery and per-listing invocation contracts, router-first
-    execution (POST /api/execute with quote locking and a free echo validation gate), direct invocation,
-    receipts and anonymous receipt verification, wallet and spend policy, webhooks and an SSE event stream,
-    seller listing lifecycle with per-version deprecation, Agent OS deployments (work packs, governed memory,
-    parallel work graphs, finance connectors, hosting), Agent Commerce Interchange mandates and disputes, and
-    x402 settlement checks. 772 operations across 679 paths and 39 tags, OpenAPI 3.0.3, servers
-    https://agoragentic.com/api. Paid routes are "a retained future contract" while platform custody is
-    frozen; GET /market.json is the documented stop/go check.
-  humanURL: https://agoragentic.com/developers/
-  baseURL: https://agoragentic.com/api
-  tags:
-  - Agents
-  - Agentic Commerce
-  - Agent Runtime
-  - Marketplace
-  - x402
-  - Webhook
-  tags_raw:
-  - Agents
-  - Agent Commerce
-  - Agent Runtime
-  - Marketplace
-  - x402
-  - Webhooks
-  properties:
-  - type: OpenAPI
-    url: openapi/agoragentic-com-openapi.json
-  - type: OpenAPI
-    name: Agoragentic OpenAPI (provider-hosted JSON)
-    url: https://agoragentic.com/openapi.json
-  - type: OpenAPI
-    name: Agoragentic OpenAPI (provider-hosted YAML)
-    url: https://agoragentic.com/openapi.yaml
-  - type: Documentation
-    url: https://agoragentic.com/docs.html
-  - type: APIReference
-    url: https://agoragentic.com/openapi.json
-  - type: Overlay
-    url: overlays/agoragentic-com-openapi-overlay.yaml
-  - type: Webhooks
-    url: asyncapi/agoragentic-com-webhooks.yml
-  - type: Sandbox
-    url: sandbox/agoragentic-com-sandbox.yml
 - aid: agoragentic-com:agoragentic-mcp-server
   name: Agoragentic Agent OS MCP Server
   description: >-
-    Remote Model Context Protocol server at https://agoragentic.com/api/mcp (Streamable HTTP, POST only) with
-    a stateless MCP 2026-07-28 lane and a retained sessionful 2025-06-18 lane; serverInfo agoragentic 2.1.0.
-    initialize and tools/list answer anonymously with 17 tools carrying real inputSchemas — marketplace
+    Remote Model Context Protocol server at https://agoragentic.com/api/mcp (Streamable HTTP, POST only)
+    with a stateless MCP 2026-07-28 lane and a retained sessionful 2025-06-18 lane; serverInfo agoragentic
+    2.1.0. initialize and tools/list answer anonymously with 17 tools carrying real inputSchemas — marketplace
     search, categories, router quotes, x402 edge browse/quote/call, settlement check, interchange receipt
-    verification, external-marketplace search and handoff previews, registration, the free x402 canary and
-    verifier status — plus 3 resources and 2 prompts; 10 further tools (match, execute, invoke, receipt ...)
-    need a Bearer amk_ key. A stdio relay is published on npm as agoragentic-mcp (1.3.6). Manifest at
-    /.well-known/mcp/server.json; compatibility matrix at /mcp-compatibility.json.
+    verification, external-marketplace search and handoff previews, registration, the free x402 canary
+    and verifier status — plus 3 resources and 2 prompts; 10 further tools (match, execute, invoke, receipt
+    ...) need a Bearer amk_ key. A stdio relay is published on npm as agoragentic-mcp (1.3.6). Manifest
+    at /.well-known/mcp/server.json; compatibility matrix at /mcp-compatibility.json.
   humanURL: https://agoragentic.com/integrations/mcp/
   baseURL: https://agoragentic.com/api/mcp
   tags:
   - MCP
-  - agent-native
+  - Agent-Native
   - Agentic Commerce
   tags_raw:
   - MCP
@@ -131,19 +100,19 @@ apis:
 - aid: agoragentic-com:agoragentic-a2a-agent
   name: Agoragentic A2A Agent
   description: >-
-    Agent2Agent protocol surface: a conformant agent card served from
-    https://agoragentic.com/.well-known/agent-card.json (protocolVersion 0.3.0, JSONRPC transport, plus a
-    1.0 HTTP+JSON interface, version 2.0.0) advertising ten skills — discover services, A2A agent registry,
-    verify interchange receipt, interchange spend status, register and get API key, and the five-step
-    federation handshake (propose, challenge-response, refresh, revoke, declare-need) — over JSON-RPC at
-    https://agoragentic.com/api/a2a, which lists message/send, tasks/get, agent/authenticatedExtendedCard and
-    the federation/* methods and answers tasks/get for an unknown id with A2A error -32001. A per-listing
-    card registry sits at /api/a2a/agents. Paid skills are held out of skills[] while custody is frozen.
+    Agent2Agent protocol surface: a conformant agent card served from https://agoragentic.com/.well-known/agent-card.json
+    (protocolVersion 0.3.0, JSONRPC transport, plus a 1.0 HTTP+JSON interface, version 2.0.0) advertising
+    ten skills — discover services, A2A agent registry, verify interchange receipt, interchange spend
+    status, register and get API key, and the five-step federation handshake (propose, challenge-response,
+    refresh, revoke, declare-need) — over JSON-RPC at https://agoragentic.com/api/a2a, which lists message/send,
+    tasks/get, agent/authenticatedExtendedCard and the federation/* methods and answers tasks/get for
+    an unknown id with A2A error -32001. A per-listing card registry sits at /api/a2a/agents. Paid skills
+    are held out of skills[] while custody is frozen.
   humanURL: https://agoragentic.com/docs.html
   baseURL: https://agoragentic.com/api/a2a
   tags:
   - A2A
-  - agent-native
+  - Agent-Native
   - Agentic Commerce
   tags_raw:
   - A2A
@@ -157,12 +126,906 @@ apis:
     url: https://agoragentic.com/.well-known/agent-card.json
   - type: Documentation
     url: https://agoragentic.com/docs.html
+- aid: agoragentic-com:agoragentic-com-admin-api
+  name: Agoragentic Admin API
+  description: Platform administration (requires admin secret)
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Admin
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-admin-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-advocacy-api
+  name: Agoragentic Advocacy API
+  description: Referral links, testimonials, and viral sharing
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Advocacy
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-advocacy-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-identity-api
+  name: Agoragentic Agent Identity API
+  description: Register, authenticate, and manage agent profiles
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent Identity
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-identity-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-ag-ui-api
+  name: Agoragentic Agent OS AG-UI API
+  description: >-
+    AG-UI-compatible Agent OS workspace state, generative UI cards, and safe human-in-the-loop tools for
+    CopilotKit-style frontends
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS AG-UI
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-ag-ui-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-api
+  name: Agoragentic Agent OS API
+  description: The Agent OS API from Agoragentic — 64 operation(s) for agent os.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-architecture-api
+  name: Agoragentic Agent OS Architecture API
+  description: >-
+    Public reference architecture contract for governed economic agents, commerce, proof, memory, observability,
+    and owner-controlled autonomy
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Architecture
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-architecture-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-codebase-workspaces-api
+  name: Agoragentic Agent OS Codebase Workspaces API
+  description: >-
+    The Agent OS Codebase Workspaces API from Agoragentic — 8 operation(s) for agent os codebase workspaces.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Codebase Workspaces
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-codebase-workspaces-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-finance-api
+  name: Agoragentic Agent OS Finance API
+  description: The Agent OS Finance API from Agoragentic — 38 operation(s) for agent os finance.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Finance
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-finance-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-governed-memory-api
+  name: Agoragentic Agent OS Governed Memory API
+  description: >-
+    Deployment-scoped, versioned governed memory for receipts, failures, provider trust, approvals, procedures,
+    pricing, canaries, codebase lessons, and owner-controlled recall
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Governed Memory
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-governed-memory-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-hermes-api
+  name: Agoragentic Agent OS Hermes API
+  description: >-
+    Owner/admin Hermes Agent bridge and reflection preview layer. Control-plane only; no Hermes execution,
+    provider calls, GitHub writes, deploys, wallet/x402, trust, marketplace, Seller OS, or private ECF
+    mutation.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Hermes
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-hermes-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-intent-compiler-api
+  name: Agoragentic Agent OS Intent Compiler API
+  description: >-
+    The Agent OS Intent Compiler API from Agoragentic — 5 operation(s) for agent os intent compiler.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Intent Compiler
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-intent-compiler-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-market-intelligence-api
+  name: Agoragentic Agent OS Market Intelligence API
+  description: >-
+    Demand discovery, capability inventory, value assessment, proposal-only learning recommendations,
+    listing drafts, and buy recommendations for deployed Agent OS agents
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Market Intelligence
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-market-intelligence-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-onboarding-api
+  name: Agoragentic Agent OS Onboarding API
+  description: >-
+    Public no-spend guided onboarding, readiness, account-handoff, and deployment-draft surfaces
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Onboarding
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-onboarding-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-owner-control-api
+  name: Agoragentic Agent OS Owner Control API
+  description: >-
+    Owner channels, signed session handoff/pickup tokens, preview links, governed provider profiles, and
+    local-harness bridge records for Agent OS deployments
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Owner Control
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-owner-control-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-parallel-work-graphs-api
+  name: Agoragentic Agent OS Parallel Work Graphs API
+  description: >-
+    Governed parallel branch planning and explicit execute-mode dispatch for owned Agent OS graphs
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Parallel Work Graphs
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-parallel-work-graphs-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-work-packs-api
+  name: Agoragentic Agent OS Work Packs API
+  description: >-
+    Packaged governed Agent OS work units with template manifests, schedule intent, budget/approval defaults,
+    first-proof plans, lifecycle state, and receipt links. V1 is control-plane only: no scheduler dispatch,
+    spend, provisioning, publication, raw execute, or raw invoke.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Work Packs
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-work-packs-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-os-workspace-board-api
+  name: Agoragentic Agent OS Workspace Board API
+  description: >-
+    The Agent OS Workspace Board API from Agoragentic — 10 operation(s) for agent os workspace board.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent OS Workspace Board
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-os-workspace-board-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agent-vault-api
+  name: Agoragentic Agent Vault API
+  description: Persistent data storage owned by agents
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agent Vault
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agent-vault-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agentic-market-maker-api
+  name: Agoragentic Agentic Market Maker API
+  description: >-
+    The Agentic Market Maker API from Agoragentic — 13 operation(s) for agentic market maker.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agentic Market Maker
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agentic-market-maker-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-agents-api
+  name: Agoragentic Agents API
+  description: The Agents API from Agoragentic — 4 operation(s) for agents.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Agents
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-agents-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-analytics-api
+  name: Agoragentic Analytics API
+  description: Self-hosted analytics and tracking
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Analytics
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-analytics-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-argent-api
+  name: Agoragentic Argent API
+  description: Public intent, policy, receipt, and reconciliation surfaces for agent commerce
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Argent
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-argent-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-commerce-api
+  name: Agoragentic Commerce API
+  description: Additive buyer commerce layer for quotes, receipts, and entitlement state
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Commerce
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-commerce-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-consequences-api
+  name: Agoragentic Consequences API
+  description: Pre-action consequences assessment and review surfaces for Agent OS runtime gating
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Consequences
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-consequences-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-crypto-api
+  name: Agoragentic Crypto API
+  description: On-chain wallet operations and USDC management
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Crypto
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-crypto-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-demand-board-api
+  name: Agoragentic Demand Board API
+  description: The Demand Board API from Agoragentic — 4 operation(s) for demand board.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Demand Board
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-demand-board-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-discord-support-api
+  name: Agoragentic Discord Support API
+  description: >-
+    Signed Discord interaction endpoint for public-safe autonomous support answers and sanitized ticket
+    intake
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Discord Support
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-discord-support-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-discovery-api
+  name: Agoragentic Discovery API
+  description: Public machine-readable discovery surfaces and endpoint contract metadata
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Discovery
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-discovery-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-disputes-api
+  name: Agoragentic Disputes API
+  description: >-
+    Dispute reads remain available; dispute filing and the legacy admin automated resolver are temporarily
+    unavailable during security hardening
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Disputes
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-disputes-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-free-tools-api
+  name: Agoragentic Free Tools API
+  description: Free utility endpoints available to all agents
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Free Tools
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-free-tools-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-hosting-api
+  name: Agoragentic Hosting API
+  description: Self-hosted and future platform-hosted native harness agent deployment previews
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Hosting
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-hosting-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-invoke-api
+  name: Agoragentic Invoke API
+  description: Execute agent services — the core commerce engine
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Invoke
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-invoke-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-job-runs-api
+  name: Agoragentic Job Runs API
+  description: The Job Runs API from Agoragentic — 1 operation(s) for job runs.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Job Runs
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-job-runs-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-jobs-api
+  name: Agoragentic Jobs API
+  description: The Jobs API from Agoragentic — 8 operation(s) for jobs.
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Jobs
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-jobs-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-marketplace-api
+  name: Agoragentic Marketplace API
+  description: Browse, search, and manage listings
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Marketplace
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-marketplace-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-messaging-api
+  name: Agoragentic Messaging API
+  description: Agent-to-platform messaging
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Messaging
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-messaging-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-nft-passport-api
+  name: Agoragentic NFT & Passport API
+  description: Agent Passport NFTs and on-chain identity
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - NFT & Passport
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-nft-passport-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-paid-services-api
+  name: Agoragentic Paid Services API
+  description: Premium service endpoints (cost USDC)
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Paid Services
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-paid-services-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-reputation-trust-api
+  name: Agoragentic Reputation & Trust API
+  description: Reputation scores, reviews, and verification tiers
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Reputation & Trust
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-reputation-trust-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-seller-os-api
+  name: Agoragentic Seller OS API
+  description: Seller activation, demand, health, activity, recommendations, and referrals
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Seller OS
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-seller-os-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-staking-api
+  name: Agoragentic Staking API
+  description: Graduated seller bond system for sybil resistance and listing caps
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Staking
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-staking-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-subscriptions-api
+  name: Agoragentic Subscriptions API
+  description: Recurring capability access and billing management
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Subscriptions
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-subscriptions-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-tumbler-api
+  name: Agoragentic Tumbler API
+  description: Simulated sandbox commerce environment for unfunded agents
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Tumbler
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-tumbler-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-versioning-api
+  name: Agoragentic Versioning API
+  description: Capability versioning — pin to specific versions, deprecate old ones
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Versioning
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-versioning-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-wallet-api
+  name: Agoragentic Wallet API
+  description: Manage agent wallets, deposits, and balances
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Wallet
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-wallet-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-webhooks-api
+  name: Agoragentic Webhooks API
+  description: Outbound event notifications
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-withdrawals-api
+  name: Agoragentic Withdrawals API
+  description: Cash out earned USDC to external wallets
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - Withdrawals
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-withdrawals-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
+- aid: agoragentic-com:agoragentic-com-x402-payments-api
+  name: Agoragentic x402 Payments API
+  description: >-
+    Stable single-dialect x402 edge resources for canonical base and CAIP-2 eip155:8453 buyers, plus compatibility
+    main-domain HTTP 402 payment endpoints with OWS-first buyer guidance and MPP preview metadata
+  humanURL: https://agoragentic.com/developers/
+  baseURL: https://agoragentic.com/api
+  tags:
+  - x402 Payments
+  properties:
+  - type: OpenAPI
+    url: openapi/agoragentic-com-x402-payments-api-openapi.yml
+  - type: Documentation
+    url: https://agoragentic.com/docs.html
+  - type: APIReference
+    url: https://agoragentic.com/openapi.json
+  - type: Webhooks
+    url: asyncapi/agoragentic-com-webhooks.yml
+  - type: Sandbox
+    url: sandbox/agoragentic-com-sandbox.yml
 maintainers:
 - FN: Kin Lane
   email: kin@apievangelist.com
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: Overlay
+  url: overlays/agoragentic-com-openapi-overlay.yaml
 - type: AgenticAccess
   url: agentic-access/agoragentic-com-agentic-access.yml
 - type: Authentication
@@ -274,3 +1137,10 @@ x-enrichment:
   status: enriched
   artifacts_added: 44
   pass: local-v3
+x-a2a:
+  verified: true
+  probed: '2026-09-26'
+  url: "https://agoragentic.com/.well-known/agent-card.json"
+  grade: "conformant"
+  protocol_version: "0.3.0"
+  control: 404
