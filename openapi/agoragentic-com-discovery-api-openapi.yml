@@ -2839,62 +2839,190 @@ paths:
           description: Public-safe marketplace federation index with authority flags
 components:
   schemas:
-    HandoffWriteRequest:
+    ArdEntry:
       type: object
-      additionalProperties: true
       required:
-      - write
-      - idempotency_key
-      properties:
-        write:
-          type: boolean
-        idempotency_key:
-          type: string
-      description: Existing local write controls only. These fields are not authentication or authorization credentials and grant no external authority.
-    ArdContext:
-      description: 'Canonical active JSON-LD context value. Inline objects and the two embedded
+      - identifier
+      - displayName
+      - type
+      additionalProperties: true
+      description: 'ARD resource entry. Exactly one of url or data is required; identifiers are
 
-        pinned URLs are accepted without a network request. During static manifest
+        anchored to the publisher domain. Ingested candidates remain source-attributed
 
-        ingestion, any other remote context and every JSON-LD `@import` (including an
+        and unverified. The normalizer rejects conflicting current authority claims and
 
-        import that names a pinned URL) are unsupported. The normalizer emits an
+        forces all ten discovery authority fields false. It also keeps the legacy
 
-        `UNSUPPORTED_CONTEXT_PRESERVED` warning, never fetches or dereferences the
+        `ag:executionAuthorityGranted`, `ag:paymentAuthorityGranted`,
 
-        context, replaces the active `@context` with the exact embedded pinned array
+        `ag:trustPromotionAuthorized`, `ag:publicationAuthorityGranted`, and
 
-        `["https://agenticresourcediscovery.org/context/v1",
+        `ag:networkDereferenceAllowed` fields false, along with
 
-        "https://agoragentic.com/ns/ard/v1"]`, drops non-core/non-canonical extension
+        `ag:liveExecutionAvailable`; context aliases and full IRIs cannot bypass that
 
-        keys from the sanitized candidate entry, and retains only structured
+        boundary. Declared trust is retained separately as `declared_unverified`, not
 
-        `contexts.unsupported` evidence plus a hash-only
-
-        `contexts.preserved_unresolved` record with `raw_included: false`. The
-
-        Agoragentic extension URL
-
-        `https://agoragentic.com/ns/ard/v1` serves the same exact 1,801-byte snapshot
-
-        whose SHA-256 is
-
-        `101836857e9a7863ca4b2f38b6c79779b26a1ba79cb5694d1446cf59e17164f7`.
+        cryptographically verified.
 
         '
-      oneOf:
-      - type: string
-        format: uri
-        enum:
-        - https://agenticresourcediscovery.org/context/v1
-        - https://agoragentic.com/ns/ard/v1
-      - type: object
-        additionalProperties: true
-      - type: array
-        items:
+      properties:
+        '@context':
           $ref: '#/components/schemas/ArdContext'
-    HandoffAuditRevoked:
+        '@id':
+          $ref: '#/components/schemas/ArdIdentifier'
+        identifier:
+          $ref: '#/components/schemas/ArdIdentifier'
+        displayName:
+          type: string
+        type:
+          type: string
+          description: Artifact media type, such as application/ai-registry+json, application/a2a-agent-card+json, application/mcp-server-card+json, application/ai-skill+md, or the mapped application/vnd.agoragentic.capability-card+json profile.
+        url:
+          type: string
+          format: uri
+          pattern: ^https://
+        data:
+          description: Arbitrary inline ARD data. For application/vnd.agoragentic.capability-card+json entries, the source helper emits the ArdMappedCapabilityCardData shape.
+          anyOf:
+          - $ref: '#/components/schemas/ArdMappedCapabilityCardData'
+          - type: object
+            additionalProperties: true
+        representativeQueries:
+          type: array
+          description: ARD recommends two through five representative natural-language queries; count deviations are warnings rather than trust signals.
+          items:
+            type: string
+        capabilities:
+          type: array
+          items:
+            type: string
+        description:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        version:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+        metadata:
+          type: object
+          additionalProperties:
+            oneOf:
+            - type: string
+            - type: number
+            - type: boolean
+        trustManifest:
+          $ref: '#/components/schemas/ArdTrustManifest'
+        ag:trustState:
+          type: string
+          enum:
+          - unverified
+          description: Agoragentic discovery state only; never a verified trust claim.
+        ag:riskLevel:
+          type: string
+          enum:
+          - unassessed
+        ag:executionAuthorizationRequired:
+          type: boolean
+          enum:
+          - true
+        ag:routeEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:rankingEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:listingEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:paymentEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:settlementEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:trustPromotedFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:executionAuthorizedFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:authenticationBypassGranted:
+          type: boolean
+          enum:
+          - false
+        ag:publicationAuthorizedFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:riskForkBypassGranted:
+          type: boolean
+          enum:
+          - false
+        ag:providerQualification:
+          type: string
+          description: Source-snapshot qualification label; never live provider qualification.
+        ag:liveExecutionAvailable:
+          type: boolean
+          enum:
+          - false
+      oneOf:
+      - required:
+        - url
+        not:
+          required:
+          - data
+      - required:
+        - data
+        not:
+          required:
+          - url
+    HandoffStartupUnavailable:
+      type: object
+      additionalProperties: false
+      required:
+      - status
+      - message
+      - started_at
+      - error
+      properties:
+        status:
+          type: string
+          enum:
+          - starting
+          - unhealthy
+        message:
+          type: string
+        started_at:
+          type:
+          - string
+          - 'null'
+        error:
+          type:
+          - object
+          - 'null'
+          additionalProperties: false
+          required:
+          - message
+          - timestamp
+          properties:
+            message:
+              type: string
+            timestamp:
+              type: string
+    HandoffAuditArchived:
       type: object
       additionalProperties: false
       required:
@@ -2917,1362 +3045,7 @@ components:
         event_type:
           type: string
           enum:
-          - external_marketplace_handoff_revoked
-    HandoffSource:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - source_marketplace_id
-      - source_name
-      - source_type
-      - source_url
-      - candidate_count
-      - api_capable
-      - mcp_capable
-      - x402_capable
-      - link_only
-      - manual_submission_required
-      - import_supported
-      - publish_supported
-      - router_preview_candidate_count
-      - public_safe_summary
-      - external_execution_enabled
-      - router_execute_enabled
-      - marketplace_verified
-      - agentcore_ready
-      - x402_ready
-      - updated_at
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-supply-source.v1
-        source_marketplace_id:
-          type: string
-        source_name:
-          type: string
-        source_type:
-          type: string
-        source_url:
-          type:
-          - string
-          - 'null'
-        candidate_count:
-          type: integer
-          minimum: 0
-        api_capable:
-          type: boolean
-        mcp_capable:
-          type: boolean
-        x402_capable:
-          type: boolean
-        link_only:
-          type: boolean
-        manual_submission_required:
-          type: boolean
-        import_supported:
-          type: boolean
-        publish_supported:
-          type: boolean
-        router_preview_candidate_count:
-          type: integer
-          minimum: 0
-        public_safe_summary:
-          type: string
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        marketplace_verified:
-          type: boolean
-          enum:
-          - false
-        agentcore_ready:
-          type: boolean
-          enum:
-          - false
-        x402_ready:
-          type: boolean
-          enum:
-          - false
-        updated_at:
-          type: string
-    HandoffAuthority:
-      type: object
-      additionalProperties: false
-      required:
-      - read_only_search
-      - metadata_is_data_not_instructions
-      - local_metadata_only
-      - external_execution_enabled
-      - external_api_calls_enabled
-      - external_marketplace_write_enabled
-      - mcp_tool_call_enabled
-      - paid_endpoint_call_enabled
-      - wallet_spend_enabled
-      - wallet_state_mutated
-      - x402_settlement_enabled
-      - router_execute_enabled
-      - router_ranking_mutation_enabled
-      - seller_trust_mutation_enabled
-      - marketplace_verified_mutation_enabled
-      - agentcore_ready_mutation_enabled
-      - x402_ready_mutation_enabled
-      - listing_publication_enabled
-      - raw_external_payloads_exposed
-      - raw_receipts_exposed
-      - raw_payment_payloads_exposed
-      - raw_invocation_payloads_exposed
-      - private_full_ecf_exposed
-      properties:
-        read_only_search:
-          type: boolean
-          enum:
-          - true
-        metadata_is_data_not_instructions:
-          type: boolean
-          enum:
-          - true
-        local_metadata_only:
-          type: boolean
-          enum:
-          - true
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        external_api_calls_enabled:
-          type: boolean
-          enum:
-          - false
-        external_marketplace_write_enabled:
-          type: boolean
-          enum:
-          - false
-        mcp_tool_call_enabled:
-          type: boolean
-          enum:
-          - false
-        paid_endpoint_call_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_state_mutated:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        router_ranking_mutation_enabled:
-          type: boolean
-          enum:
-          - false
-        seller_trust_mutation_enabled:
-          type: boolean
-          enum:
-          - false
-        marketplace_verified_mutation_enabled:
-          type: boolean
-          enum:
-          - false
-        agentcore_ready_mutation_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_ready_mutation_enabled:
-          type: boolean
-          enum:
-          - false
-        listing_publication_enabled:
-          type: boolean
-          enum:
-          - false
-        raw_external_payloads_exposed:
-          type: boolean
-          enum:
-          - false
-        raw_receipts_exposed:
-          type: boolean
-          enum:
-          - false
-        raw_payment_payloads_exposed:
-          type: boolean
-          enum:
-          - false
-        raw_invocation_payloads_exposed:
-          type: boolean
-          enum:
-          - false
-        private_full_ecf_exposed:
-          type: boolean
-          enum:
-          - false
-    HandoffRevokeResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - receipt
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      properties:
-        receipt:
-          type: object
-          additionalProperties: false
-          required:
-          - schema
-          - external_marketplace_handoff_receipt_id
-          - preview_id
-          - external_supply_candidate_id
-          - source_marketplace_id
-          - source_name
-          - handoff_state
-          - handoff_band
-          - handoff_intent
-          - handoff_url_hash
-          - handoff_url_redacted
-          - external_terms_apply
-          - external_execution_performed
-          - wallet_spend_performed
-          - x402_settlement_performed
-          - router_execute_enabled
-          - marketplace_verified
-          - agentcore_ready
-          - x402_ready
-          - public_safe_summary
-          - next_safe_action
-          - warning_summary
-          - evidence_id
-          - evidence_hash
-          - risk_card_id
-          - mutation_flags
-          properties:
-            schema:
-              type: string
-              enum:
-              - agoragentic.external-marketplace-handoff-public-summary.v1
-            external_marketplace_handoff_receipt_id:
-              type: string
-            preview_id:
-              type: string
-            external_supply_candidate_id:
-              type: string
-            source_marketplace_id:
-              type: string
-            source_name:
-              type: string
-            handoff_state:
-              type: string
-              enum:
-              - revoked
-            handoff_band:
-              type: string
-              enum:
-              - x402_metadata_handoff
-              - mcp_metadata_handoff
-              - api_metadata_handoff
-              - link_only_handoff
-            handoff_intent:
-              type: string
-              enum:
-              - inspect_external_listing
-              - open_external_marketplace
-              - inspect_external_agent_card
-              - inspect_external_openapi
-              - inspect_external_mcp
-              - inspect_external_x402_metadata
-              - contact_external_provider
-              - compare_external_supply
-            handoff_url_hash:
-              type: string
-            handoff_url_redacted:
-              type:
-              - string
-              - 'null'
-            external_terms_apply:
-              type: boolean
-              enum:
-              - true
-            external_execution_performed:
-              type: boolean
-              enum:
-              - false
-            wallet_spend_performed:
-              type: boolean
-              enum:
-              - false
-            x402_settlement_performed:
-              type: boolean
-              enum:
-              - false
-            router_execute_enabled:
-              type: boolean
-              enum:
-              - false
-            marketplace_verified:
-              type: boolean
-              enum:
-              - false
-            agentcore_ready:
-              type: boolean
-              enum:
-              - false
-            x402_ready:
-              type: boolean
-              enum:
-              - false
-            public_safe_summary:
-              type: string
-            next_safe_action:
-              type: string
-            warning_summary:
-              type: array
-              items:
-                type: string
-            evidence_id:
-              type:
-              - string
-              - 'null'
-            evidence_hash:
-              type:
-              - string
-              - 'null'
-            risk_card_id:
-              type:
-              - string
-              - 'null'
-            mutation_flags:
-              $ref: '#/components/schemas/HandoffMutationFlags'
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-    HandoffPublicReceipt:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - external_marketplace_handoff_receipt_id
-      - preview_id
-      - external_supply_candidate_id
-      - source_marketplace_id
-      - source_name
-      - handoff_state
-      - handoff_band
-      - handoff_intent
-      - handoff_url_hash
-      - handoff_url_redacted
-      - external_terms_apply
-      - external_execution_performed
-      - wallet_spend_performed
-      - x402_settlement_performed
-      - router_execute_enabled
-      - marketplace_verified
-      - agentcore_ready
-      - x402_ready
-      - public_safe_summary
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-handoff-public-summary.v1
-        external_marketplace_handoff_receipt_id:
-          type: string
-        preview_id:
-          type: string
-        external_supply_candidate_id:
-          type: string
-        source_marketplace_id:
-          type: string
-        source_name:
-          type: string
-        handoff_state:
-          type: string
-          enum:
-          - receipt_recorded
-          - revoked
-          - archived
-        handoff_band:
-          type: string
-          enum:
-          - x402_metadata_handoff
-          - mcp_metadata_handoff
-          - api_metadata_handoff
-          - link_only_handoff
-        handoff_intent:
-          type: string
-          enum:
-          - inspect_external_listing
-          - open_external_marketplace
-          - inspect_external_agent_card
-          - inspect_external_openapi
-          - inspect_external_mcp
-          - inspect_external_x402_metadata
-          - contact_external_provider
-          - compare_external_supply
-        handoff_url_hash:
-          type: string
-        handoff_url_redacted:
-          type:
-          - string
-          - 'null'
-        external_terms_apply:
-          type: boolean
-          enum:
-          - true
-        external_execution_performed:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_performed:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_performed:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        marketplace_verified:
-          type: boolean
-          enum:
-          - false
-        agentcore_ready:
-          type: boolean
-          enum:
-          - false
-        x402_ready:
-          type: boolean
-          enum:
-          - false
-        public_safe_summary:
-          type: string
-    HandoffInactiveRecorded:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - external_marketplace_handoff_receipt_id
-      - request_id
-      - preview_id
-      - external_supply_candidate_id
-      - source_marketplace_id
-      - source_name
-      - source_type
-      - handoff_state
-      - handoff_band
-      - handoff_intent
-      - handoff_method
-      - handoff_url_ref
-      - handoff_url_hash
-      - handoff_url_redacted
-      - selected_handoff_url
-      - listing_url_ref
-      - agent_card_url_ref
-      - openapi_url_ref
-      - mcp_url_ref
-      - x402_url_ref
-      - selected_candidate_summary
-      - pricing_model
-      - free_tier_available
-      - micropayment_supported
-      - x402_supported
-      - receipt_supported
-      - external_auth_may_be_required
-      - external_payment_may_be_required
-      - external_terms_apply
-      - agoragentic_execution_performed
-      - external_execution_performed
-      - wallet_spend_performed
-      - x402_settlement_performed
-      - router_execute_enabled
-      - router_ranking_mutation_enabled
-      - marketplace_verified
-      - agentcore_ready
-      - x402_ready
-      - evidence_id
-      - risk_card_id
-      - evidence_hash
-      - public_safe_summary
-      - blocker_summary
-      - warning_summary
-      - next_safe_action
-      - mutation_flags
-      - created_at
-      - updated_at
-      - archived_at
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-handoff-receipt.v1
-        external_marketplace_handoff_receipt_id:
-          type: string
-        request_id:
-          type: string
-        preview_id:
-          type: string
-        external_supply_candidate_id:
-          type: string
-        source_marketplace_id:
-          type: string
-        source_name:
-          type: string
-        source_type:
-          type: string
-        handoff_state:
-          type: string
-          enum:
-          - revoked
-          - archived
-        handoff_band:
-          type: string
-          enum:
-          - x402_metadata_handoff
-          - mcp_metadata_handoff
-          - api_metadata_handoff
-          - link_only_handoff
-        handoff_intent:
-          type: string
-          enum:
-          - inspect_external_listing
-          - open_external_marketplace
-          - inspect_external_agent_card
-          - inspect_external_openapi
-          - inspect_external_mcp
-          - inspect_external_x402_metadata
-          - contact_external_provider
-          - compare_external_supply
-        handoff_method:
-          type: string
-        handoff_url_ref:
-          type: string
-        handoff_url_hash:
-          type: string
-        handoff_url_redacted:
-          type:
-          - string
-          - 'null'
-        selected_handoff_url:
-          type:
-          - string
-          - 'null'
-        listing_url_ref:
-          type:
-          - string
-          - 'null'
-        agent_card_url_ref:
-          type:
-          - string
-          - 'null'
-        openapi_url_ref:
-          type:
-          - string
-          - 'null'
-        mcp_url_ref:
-          type:
-          - string
-          - 'null'
-        x402_url_ref:
-          type:
-          - string
-          - 'null'
-        selected_candidate_summary:
-          $ref: '#/components/schemas/HandoffSelectedCandidate'
-        pricing_model:
-          type: string
-        free_tier_available:
-          type: boolean
-        micropayment_supported:
-          type: boolean
-        x402_supported:
-          type: boolean
-        receipt_supported:
-          type: boolean
-        external_auth_may_be_required:
-          type: boolean
-        external_payment_may_be_required:
-          type: boolean
-        external_terms_apply:
-          type: boolean
-          enum:
-          - true
-        agoragentic_execution_performed:
-          type: boolean
-          enum:
-          - false
-        external_execution_performed:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_performed:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_performed:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        router_ranking_mutation_enabled:
-          type: boolean
-          enum:
-          - false
-        marketplace_verified:
-          type: boolean
-          enum:
-          - false
-        agentcore_ready:
-          type: boolean
-          enum:
-          - false
-        x402_ready:
-          type: boolean
-          enum:
-          - false
-        evidence_id:
-          type: string
-        risk_card_id:
-          type: string
-        evidence_hash:
-          type:
-          - string
-          - 'null'
-        public_safe_summary:
-          type: string
-        blocker_summary:
-          type: array
-          items:
-            type: string
-        warning_summary:
-          type: array
-          items:
-            type: string
-        next_safe_action:
-          type: string
-        mutation_flags:
-          $ref: '#/components/schemas/HandoffMutationFlags'
-        created_at:
-          type: string
-        updated_at:
-          type: string
-        archived_at:
-          type:
-          - string
-          - 'null'
-    HandoffNavigationPreview:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - handoff_url
-      - handoff_method
-      - handoff_state
-      - handoff_requires_external_account
-      - handoff_requires_external_payment
-      - handoff_requires_external_auth
-      - handoff_receipt_supported
-      - agoragentic_handoff_receipt_supported
-      - handoff_receipt_preview_route
-      - handoff_receipt_create_route
-      - agoragentic_receipt_supported
-      - external_terms_apply
-      - public_safe_summary
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-router-handoff-preview.v1
-        handoff_url:
-          type:
-          - string
-          - 'null'
-        handoff_method:
-          type: string
-          enum:
-          - mcp_install_review
-          - mcp_directory_review
-          - openapi_or_sdk_review
-          - x402_external_review
-          - link_only_review
-          - external_url_review
-          - unavailable
-        handoff_state:
-          type: string
-          enum:
-          - available_review_only
-          - missing_handoff_url
-        handoff_requires_external_account:
-          type: boolean
-          enum:
-          - true
-        handoff_requires_external_payment:
-          type: boolean
-        handoff_requires_external_auth:
-          type: boolean
-        handoff_receipt_supported:
-          type: boolean
-        agoragentic_handoff_receipt_supported:
-          type: boolean
-          enum:
-          - true
-        handoff_receipt_preview_route:
-          type: string
-        handoff_receipt_create_route:
-          type: string
-        agoragentic_receipt_supported:
-          type: boolean
-          enum:
-          - false
-        external_terms_apply:
-          type: boolean
-          enum:
-          - true
-        public_safe_summary:
-          type: string
-    HandoffCreateResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - receipt
-      - handoff_url
-      - handoff_navigation
-      - public_safe_summary
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      properties:
-        receipt:
-          $ref: '#/components/schemas/HandoffRecorded'
-        handoff_url:
-          type:
-          - string
-          - 'null'
-        handoff_navigation:
-          type: string
-          enum:
-          - client_side_only
-        public_safe_summary:
-          type: string
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-    HandoffArchiveResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - receipt
-      - hard_deleted
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      properties:
-        receipt:
-          type: object
-          additionalProperties: false
-          required:
-          - schema
-          - external_marketplace_handoff_receipt_id
-          - preview_id
-          - external_supply_candidate_id
-          - source_marketplace_id
-          - source_name
-          - handoff_state
-          - handoff_band
-          - handoff_intent
-          - handoff_url_hash
-          - handoff_url_redacted
-          - external_terms_apply
-          - external_execution_performed
-          - wallet_spend_performed
-          - x402_settlement_performed
-          - router_execute_enabled
-          - marketplace_verified
-          - agentcore_ready
-          - x402_ready
-          - public_safe_summary
-          - next_safe_action
-          - warning_summary
-          - evidence_id
-          - evidence_hash
-          - risk_card_id
-          - mutation_flags
-          properties:
-            schema:
-              type: string
-              enum:
-              - agoragentic.external-marketplace-handoff-public-summary.v1
-            external_marketplace_handoff_receipt_id:
-              type: string
-            preview_id:
-              type: string
-            external_supply_candidate_id:
-              type: string
-            source_marketplace_id:
-              type: string
-            source_name:
-              type: string
-            handoff_state:
-              type: string
-              enum:
-              - archived
-            handoff_band:
-              type: string
-              enum:
-              - x402_metadata_handoff
-              - mcp_metadata_handoff
-              - api_metadata_handoff
-              - link_only_handoff
-            handoff_intent:
-              type: string
-              enum:
-              - inspect_external_listing
-              - open_external_marketplace
-              - inspect_external_agent_card
-              - inspect_external_openapi
-              - inspect_external_mcp
-              - inspect_external_x402_metadata
-              - contact_external_provider
-              - compare_external_supply
-            handoff_url_hash:
-              type: string
-            handoff_url_redacted:
-              type:
-              - string
-              - 'null'
-            external_terms_apply:
-              type: boolean
-              enum:
-              - true
-            external_execution_performed:
-              type: boolean
-              enum:
-              - false
-            wallet_spend_performed:
-              type: boolean
-              enum:
-              - false
-            x402_settlement_performed:
-              type: boolean
-              enum:
-              - false
-            router_execute_enabled:
-              type: boolean
-              enum:
-              - false
-            marketplace_verified:
-              type: boolean
-              enum:
-              - false
-            agentcore_ready:
-              type: boolean
-              enum:
-              - false
-            x402_ready:
-              type: boolean
-              enum:
-              - false
-            public_safe_summary:
-              type: string
-            next_safe_action:
-              type: string
-            warning_summary:
-              type: array
-              items:
-                type: string
-            evidence_id:
-              type:
-              - string
-              - 'null'
-            evidence_hash:
-              type:
-              - string
-              - 'null'
-            risk_card_id:
-              type:
-              - string
-              - 'null'
-            mutation_flags:
-              $ref: '#/components/schemas/HandoffMutationFlags'
-        hard_deleted:
-          type: boolean
-          enum:
-          - false
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-    HandoffPreviewRefusal:
-      type: object
-      additionalProperties: false
-      required:
-      - preview
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      properties:
-        preview:
-          $ref: '#/components/schemas/HandoffRefusal'
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-    ArdMappedCapabilityCardData:
-      type: object
-      required:
-      - schema
-      - capability_card_id
-      - capability_card_hash
-      - source_type
-      - source_ref_hash
-      - source_hash
-      - source_registry
-      - source_manifest
-      - retrieved_at
-      - lifecycle_status
-      - eligibility_hash
-      - raw_payload_included
-      additionalProperties: false
-      description: 'Public-safe inline data emitted by the source helper
-
-        `mapPublicCapabilityCardToArdEntry()` for an Agent Commerce Interchange
-
-        capability card. The mapper requires every Interchange authority flag to be
-
-        false, emits hashes instead of a raw source reference, never includes the raw
-
-        payload, reuses bounded ARD normalization, and does not automatically publish
-
-        the entry into the canonical manifest, search index, Router, or marketplace.
-
-        '
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.agent-commerce.capability-card.v1
-        capability_card_id:
-          type: string
-          minLength: 1
-          maxLength: 512
-        capability_card_hash:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-        source_type:
-          type: string
-        source_ref_hash:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-        source_hash:
-          type: string
-        source_registry:
-          $ref: '#/components/schemas/ArdIdentifier'
-        source_manifest:
-          type: string
-          format: uri
-          pattern: ^https://
-        retrieved_at:
-          type: string
-          description: Bounded retrieval label; the mapper defaults this to the current ISO timestamp but accepts a caller-supplied source label.
-        lifecycle_status:
-          type: string
-        eligibility_hash:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-        raw_payload_included:
-          type: boolean
-          enum:
-          - false
-    ArdManifest:
-      type: object
-      required:
-      - specVersion
-      - host
-      - entries
-      additionalProperties: true
-      description: The generated fixed four-entry Agoragentic body is simultaneously an ARD entries document and a predecessor-compatible ai-catalog document. Capability-card mappings are source-helper outputs and are not automatically appended.
-      properties:
-        specVersion:
-          type: string
-          enum:
-          - '1.0'
-          description: Predecessor ai-catalog compatibility marker in the shared generated body.
-        host:
-          $ref: '#/components/schemas/ArdManifestHost'
-        entries:
-          type: array
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/ArdEntry'
-    HandoffEvidenceResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - evidence
-      - raw_receipt_payload_exposed
-      - raw_payment_payload_exposed
-      - wallet_private_data_exposed
-      - settlement_internals_exposed
-      properties:
-        evidence:
-          $ref: '#/components/schemas/HandoffNullableEvidence'
-        raw_receipt_payload_exposed:
-          type: boolean
-          enum:
-          - false
-        raw_payment_payload_exposed:
-          type: boolean
-          enum:
-          - false
-        wallet_private_data_exposed:
-          type: boolean
-          enum:
-          - false
-        settlement_internals_exposed:
-          type: boolean
-          enum:
-          - false
-    HandoffRateLimited:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      - retry_after_ms
-      - next_steps
-      properties:
-        error:
-          type: string
-          enum:
-          - rate_limited
-        message:
-          type: string
-        retry_after_ms:
-          type: number
-          minimum: 0
-        next_steps:
-          type: object
-          additionalProperties: false
-          required:
-          - wait
-          - tip
-          - limits
-          - note
-          properties:
-            wait:
-              type: string
-            tip:
-              type: string
-            limits:
-              type: string
-            note:
-              type: string
-    ArdError:
-      type: object
-      required:
-      - errorCode
-      - message
-      additionalProperties: false
-      properties:
-        errorCode:
-          type: string
-          description: Stable request codes include INVALID_ARGUMENT, FEDERATION_MODE_DISABLED, INVALID_PAGE_TOKEN, and UNSUPPORTED_CONTEXT. Oversized parsed requests use REQUEST_TOO_LARGE; unexpected failures use INTERNAL_ERROR.
-          example: FEDERATION_MODE_DISABLED
-        message:
-          type: string
-    HandoffNullableEvidence:
-      type:
-      - object
-      - 'null'
-      additionalProperties: false
-      required:
-      - schema
-      - external_marketplace_handoff_evidence_id
-      - external_marketplace_handoff_receipt_id
-      - evidence_type
-      - preview_ref
-      - candidate_ref
-      - source_ref
-      - handoff_url_hash
-      - task_hash
-      - policy_ref
-      - no_execution_evidence
-      - no_payment_evidence
-      - no_settlement_evidence
-      - no_wallet_spend_evidence
-      - no_router_ranking_mutation_evidence
-      - no_verification_claim_evidence
-      - public_safe_summary
-      - created_at
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-handoff-evidence.v1
-        external_marketplace_handoff_evidence_id:
-          type: string
-        external_marketplace_handoff_receipt_id:
-          type: string
-        evidence_type:
-          type: string
-          enum:
-          - external_marketplace_handoff_no_execution
-        preview_ref:
-          type: string
-        candidate_ref:
-          type: string
-        source_ref:
-          type: string
-        handoff_url_hash:
-          type: string
-        task_hash:
-          type:
-          - string
-          - 'null'
-        policy_ref:
-          type: string
-          enum:
-          - /external-marketplace-handoff-policy.json
-        no_execution_evidence:
-          type: boolean
-          enum:
-          - true
-        no_payment_evidence:
-          type: boolean
-          enum:
-          - true
-        no_settlement_evidence:
-          type: boolean
-          enum:
-          - true
-        no_wallet_spend_evidence:
-          type: boolean
-          enum:
-          - true
-        no_router_ranking_mutation_evidence:
-          type: boolean
-          enum:
-          - true
-        no_verification_claim_evidence:
-          type: boolean
-          enum:
-          - true
-        public_safe_summary:
-          type: string
-        created_at:
-          type: string
-    HandoffCandidate:
-      type: object
-      additionalProperties: false
-      required:
-      - candidate_id
-      - external_supply_candidate_id
-      - source_marketplace_id
-      - source_name
-      - source_type
-      - protocols
-      - supports_mcp
-      - supports_a2a
-      - supports_openapi
-      - supports_x402
-      - handoff_url_redacted
-      - price_model_hint
-      - trust_label
-      - risk_label
-      - canary_preflight_state
-      - preview_fit_score
-      - receipt_support_hint
-      - public_safe_summary
-      - next_safe_action
-      - authority_boundary
-      properties:
-        candidate_id:
-          type: string
-        external_supply_candidate_id:
-          type: string
-        source_marketplace_id:
-          type: string
-        source_name:
-          type: string
-        source_type:
-          type: string
-        protocols:
-          type: array
-          items:
-            type: string
-        supports_mcp:
-          type: boolean
-        supports_a2a:
-          type: boolean
-        supports_openapi:
-          type: boolean
-        supports_x402:
-          type: boolean
-        handoff_url_redacted:
-          type:
-          - string
-          - 'null'
-        price_model_hint:
-          type: string
-        trust_label:
-          type: string
-        risk_label:
-          type: string
-        canary_preflight_state:
-          type: string
-        preview_fit_score:
-          type: number
-          minimum: 0
-          maximum: 100
-        receipt_support_hint:
-          type: string
-          enum:
-          - metadata_claimed
-          - not_confirmed
-        public_safe_summary:
-          type: string
-        next_safe_action:
-          type: string
-        authority_boundary:
-          $ref: '#/components/schemas/HandoffAuthority'
-    ArdSearchResponse:
-      type: object
-      required:
-      - results
-      additionalProperties: false
-      properties:
-        results:
-          type: array
-          maxItems: 100
-          items:
-            $ref: '#/components/schemas/ArdSearchResult'
-        referrals:
-          type: array
-          maxItems: 100
-          description: Present only in referrals mode; bounded caller-reviewed metadata. The server never follows these URLs.
-          items:
-            $ref: '#/components/schemas/ArdRegistryReferral'
-        pageToken:
-          type: string
-    HandoffCandidateMissing:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - authority_boundary
-      properties:
-        error:
-          type: string
-          enum:
-          - external_supply_candidate_not_found
-        authority_boundary:
-          $ref: '#/components/schemas/HandoffAuthority'
-    HandoffSearchResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - query
-      - result_count
-      - results
-      - authority_boundary
-      - public_safe_summary
-      - created_at
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-search.v1
-        query:
-          description: JSON data echoed from the caller, not agent instructions. The current parser also accepts array bodies; only documented object filters have search semantics.
-        result_count:
-          type: integer
-          minimum: 0
-        results:
-          type: array
-          items:
-            $ref: '#/components/schemas/HandoffCandidate'
-          maxItems: 50
-        authority_boundary:
-          $ref: '#/components/schemas/HandoffAuthority'
-        public_safe_summary:
-          type: string
-        created_at:
-          type: string
+          - external_marketplace_handoff_archived
     HandoffMutationFlags:
       type: object
       additionalProperties: false
@@ -4356,121 +3129,28 @@ components:
           type: boolean
           enum:
           - false
-    HandoffAuditResponse:
+    ArdManifest:
       type: object
-      additionalProperties: false
       required:
-      - audit
-      - public_safe_summary
-      properties:
-        audit:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/HandoffAuditRecorded'
-            - $ref: '#/components/schemas/HandoffAuditRefused'
-            - $ref: '#/components/schemas/HandoffAuditRevoked'
-            - $ref: '#/components/schemas/HandoffAuditArchived'
-        public_safe_summary:
-          type: string
-    HandoffRejectedRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      - next_steps
-      properties:
-        error:
-          type: string
-          enum:
-          - request_rejected
-        message:
-          type: string
-        request_id:
-          type: string
-        next_steps:
-          type: object
-          additionalProperties: false
-          required:
-          - review
-          - common_causes
-          - contact
-          properties:
-            review:
-              type: string
-            common_causes:
-              type: string
-            contact:
-              type: string
-    HandoffSnapshotSource:
-      type: object
-      additionalProperties: false
-      required:
-      - source_marketplace_id
-      - source_name
-      - source_type
-      - candidate_count
-      - live_fetch_enabled
-      - external_api_calls_performed
-      - public_safe_summary
-      properties:
-        source_marketplace_id:
-          type: string
-        source_name:
-          type: string
-        source_type:
-          type: string
-        candidate_count:
-          type: integer
-          minimum: 0
-        live_fetch_enabled:
-          type: boolean
-        external_api_calls_performed:
-          type: boolean
-          enum:
-          - false
-        public_safe_summary:
-          type: string
-    HandoffSearchRequest:
-      type: object
+      - specVersion
+      - host
+      - entries
       additionalProperties: true
-      description: Recommended local metadata query. query/q/search are text aliases. protocol is singular; the old task/protocols fields do not filter in the current handler. tags influence preview-fit scoring, not filtering. Unknown fields are echoed as data. No query can enable external execution. The handler coerces limit numerically and floors at array slicing; integer values 1-50 are recommended.
+      description: The generated fixed four-entry Agoragentic body is simultaneously an ARD entries document and a predecessor-compatible ai-catalog document. Capability-card mappings are source-helper outputs and are not automatically appended.
       properties:
-        query:
+        specVersion:
           type: string
-        q:
-          type: string
-        search:
-          type: string
-        source_marketplace_id:
-          type: string
-        source_type:
-          type: string
-        category:
-          type: string
-        protocol:
-          type: string
-        tags:
-          anyOf:
-          - type: array
-            items:
-              type: string
-          - type: string
-        supports_mcp:
-          type: boolean
-        supports_a2a:
-          type: boolean
-        supports_openapi:
-          type: boolean
-        supports_x402:
-          type: boolean
-        limit:
-          type: integer
-          minimum: 1
-          maximum: 50
-          default: 10
-    HandoffAuditRefused:
+          enum:
+          - '1.0'
+          description: Predecessor ai-catalog compatibility marker in the shared generated body.
+        host:
+          $ref: '#/components/schemas/ArdManifestHost'
+        entries:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ArdEntry'
+    HandoffAuditRecorded:
       type: object
       additionalProperties: false
       required:
@@ -4482,685 +3162,24 @@ components:
       - request_id
       - preview_id
       - external_supply_candidate_id
-      - blocker_summary
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-handoff-audit-event.v1
-        external_marketplace_handoff_receipt_id:
-          type: string
-        public_safe_summary:
-          type: string
-        created_at:
-          type: string
-        event_type:
-          type: string
-          enum:
-          - external_marketplace_handoff_refused
-        request_id:
-          type: string
-        preview_id:
-          type:
-          - string
-          - 'null'
-        external_supply_candidate_id:
-          type:
-          - string
-          - 'null'
-        blocker_summary:
-          type: array
-          items:
-            type: string
-    HandoffSearchPreviewResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - preview
-      - authority_boundary
-      properties:
-        preview:
-          $ref: '#/components/schemas/HandoffPreview'
-        authority_boundary:
-          $ref: '#/components/schemas/HandoffAuthority'
-    ArdSearchContext:
-      description: 'Strict JSON-LD context accepted in `query.@context`. Inline objects and the two
-
-        embedded pinned URLs are accepted without a network request. Every JSON-LD
-
-        `@import` at any depth is rejected with `UNSUPPORTED_CONTEXT`, even when the
-
-        import names an embedded pinned URL. To use a pinned context, provide its URL
-
-        directly as the `@context` string or as an array item, for example
-
-        `["https://agenticresourcediscovery.org/context/v1",
-
-        "https://agoragentic.com/ns/ard/v1"]`; do not wrap it in an `@import` object.
-
-        Other remote URLs are also rejected, and search never fetches or dereferences
-
-        any context URL.
-
-        '
-      oneOf:
-      - type: string
-        format: uri
-        enum:
-        - https://agenticresourcediscovery.org/context/v1
-        - https://agoragentic.com/ns/ard/v1
-      - $ref: '#/components/schemas/ArdSearchInlineContext'
-      - type: array
-        items:
-          $ref: '#/components/schemas/ArdSearchContext'
-    ArdRegistryReferral:
-      type: object
-      required:
-      - identifier
-      - displayName
-      - type
-      - url
-      additionalProperties: true
-      description: Caller-reviewed registry metadata with all ten Agoragentic discovery authority fields forced false. The server never follows the referral or treats it as routing, ranking, listing, execution, payment, settlement, trust, authentication-bypass, publication, or Risk Fork-bypass authority.
-      properties:
-        identifier:
-          $ref: '#/components/schemas/ArdIdentifier'
-        displayName:
-          type: string
-        type:
-          type: string
-          enum:
-          - application/ai-registry
-          - application/ai-registry+json
-        url:
-          type: string
-          format: uri
-          pattern: ^https://
-          description: Search endpoint for a caller-reviewed registry. Agoragentic never follows it server-side.
-        ag:routeEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:rankingEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:listingEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:paymentEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:settlementEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:trustPromotedFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:executionAuthorizedFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:authenticationBypassGranted:
-          type: boolean
-          enum:
-          - false
-        ag:publicationAuthorizedFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:riskForkBypassGranted:
-          type: boolean
-          enum:
-          - false
-    HandoffNullableRiskCard:
-      type:
-      - object
-      - 'null'
-      additionalProperties: false
-      required:
-      - schema
-      - external_marketplace_handoff_risk_card_id
-      - external_marketplace_handoff_receipt_id
-      - risk_card_type
-      - external_terms_apply
-      - external_execution_not_controlled_by_agoragentic
-      - external_receipts_not_guaranteed_by_agoragentic
-      - agoragentic_verification_not_implied
-      - x402_readiness_not_implied
-      - settlement_finality_not_implied
-      - external_auth_may_be_required
-      - external_payment_may_be_required
-      - risk_summary
-      - blocker_summary
-      - warning_summary
-      - public_safe_summary
-      - created_at
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-handoff-risk-card.v1
-        external_marketplace_handoff_risk_card_id:
-          type: string
-        external_marketplace_handoff_receipt_id:
-          type: string
-        risk_card_type:
-          type: string
-          enum:
-          - external_marketplace_handoff
-        external_terms_apply:
-          type: boolean
-          enum:
-          - true
-        external_execution_not_controlled_by_agoragentic:
-          type: boolean
-          enum:
-          - true
-        external_receipts_not_guaranteed_by_agoragentic:
-          type: boolean
-          enum:
-          - true
-        agoragentic_verification_not_implied:
-          type: boolean
-          enum:
-          - true
-        x402_readiness_not_implied:
-          type: boolean
-          enum:
-          - true
-        settlement_finality_not_implied:
-          type: boolean
-          enum:
-          - true
-        external_auth_may_be_required:
-          type: boolean
-        external_payment_may_be_required:
-          type: boolean
-        risk_summary:
-          type: string
-        blocker_summary:
-          type: array
-          items:
-            type: string
-        warning_summary:
-          type: array
-          items:
-            type: string
-        public_safe_summary:
-          type: string
-        created_at:
-          type: string
-    HandoffCreateRefusal:
-      type: object
-      additionalProperties: false
-      required:
-      - receipt
-      - handoff_url
-      - handoff_navigation
-      - public_safe_summary
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      properties:
-        receipt:
-          $ref: '#/components/schemas/HandoffRefusal'
-        handoff_url:
-          type:
-          - string
-          - 'null'
-          enum:
-          - null
-        handoff_navigation:
-          type: string
-          enum:
-          - unavailable
-        public_safe_summary:
-          type: string
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-    HandoffSelectedCandidate:
-      type: object
-      additionalProperties: false
-      required:
-      - external_supply_candidate_id
       - source_marketplace_id
-      - source_name
-      - source_type
-      - title
-      - category
-      - tags
-      - invoke_method
-      - pricing_model
-      - trust_status
-      - canary_status
-      - router_preview_eligible
-      - router_execute_enabled
-      - external_execution_enabled
-      - marketplace_verified
-      - agentcore_ready
-      - x402_ready
-      properties:
-        external_supply_candidate_id:
-          type: string
-        source_marketplace_id:
-          type: string
-        source_name:
-          type: string
-        source_type:
-          type: string
-        title:
-          type: string
-        category:
-          type: string
-        tags:
-          type: array
-          items:
-            type: string
-        invoke_method:
-          type: string
-        pricing_model:
-          type: string
-        trust_status:
-          type: string
-        canary_status:
-          type: string
-        router_preview_eligible:
-          type: boolean
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        marketplace_verified:
-          type: boolean
-          enum:
-          - false
-        agentcore_ready:
-          type: boolean
-          enum:
-          - false
-        x402_ready:
-          type: boolean
-          enum:
-          - false
-    HandoffUriTooLong:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      properties:
-        error:
-          type: string
-          enum:
-          - uri_too_long
-        message:
-          type: string
-    ArdManifestHost:
-      type: object
-      required:
-      - displayName
-      - identifier
-      - documentationUrl
-      - logoUrl
-      additionalProperties: false
-      properties:
-        displayName:
-          type: string
-        identifier:
-          $ref: '#/components/schemas/ArdIdentifier'
-        documentationUrl:
-          type: string
-          format: uri
-        logoUrl:
-          type: string
-          format: uri
-    HandoffPayloadTooLarge:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      - max_size_kb
-      - next_steps
-      properties:
-        error:
-          type: string
-          enum:
-          - payload_too_large
-        message:
-          type: string
-        request_id:
-          type: string
-        max_size_kb:
-          type: number
-          enum:
-          - 256
-        next_steps:
-          type: object
-          additionalProperties: false
-          required:
-          - reduce
-          - chunking
-          - limits
-          properties:
-            reduce:
-              type: string
-            chunking:
-              type: string
-            limits:
-              type: string
-    HandoffPreviewResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - preview
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      properties:
-        preview:
-          $ref: '#/components/schemas/HandoffPreview'
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-    HandoffBoundariesResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - authority_boundary
-      - forbidden_behavior
-      - next_safe_action
-      - public_safe_summary
-      properties:
-        authority_boundary:
-          $ref: '#/components/schemas/HandoffAuthority'
-        forbidden_behavior:
-          type: array
-          items:
-            type: string
-        next_safe_action:
-          type: string
-        public_safe_summary:
-          type: string
-    HandoffMissing:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      properties:
-        error:
-          type: string
-          enum:
-          - external_marketplace_handoff_receipt_not_found
-    HandoffSummaryResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - handoff_receipt_count
-      - source_summary
-      - public_safe_summary
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      properties:
-        handoff_receipt_count:
-          type: integer
-          minimum: 0
-        source_summary:
-          type: array
-          items:
-            type: object
-            additionalProperties: false
-            required:
-            - source_marketplace_id
-            - source_name
-            - receipt_count
-            properties:
-              source_marketplace_id:
-                type: string
-              source_name:
-                type: string
-              receipt_count:
-                type: integer
-                minimum: 0
-        public_safe_summary:
-          type: string
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-    ArdSearchInlineContext:
-      type: object
-      description: 'Recursive inline JSON-LD context object. `@import` is prohibited on this
-
-        object and on every nested object reached through an object property or array.
-
-        '
-      not:
-        required:
-        - '@import'
-      properties:
-        '@context':
-          $ref: '#/components/schemas/ArdSearchContext'
-      additionalProperties:
-        $ref: '#/components/schemas/ArdSearchContextNode'
-    HandoffAuditArchived:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - external_marketplace_handoff_receipt_id
-      - public_safe_summary
-      - created_at
-      - event_type
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.external-marketplace-handoff-audit-event.v1
-        external_marketplace_handoff_receipt_id:
-          type: string
-        public_safe_summary:
-          type: string
-        created_at:
-          type: string
-        event_type:
-          type: string
-          enum:
-          - external_marketplace_handoff_archived
-    ArdSearchContextNode:
-      description: Recursive JSON-LD value used inside a strict inline search context.
-      anyOf:
-      - type:
-        - string
-        - 'null'
-      - type: number
-      - type: boolean
-      - type: array
-        items:
-          $ref: '#/components/schemas/ArdSearchContextNode'
-      - $ref: '#/components/schemas/ArdSearchInlineContext'
-    HandoffProbeRateLimited:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      - probe_rule
-      - rate_limit
-      - retry_after_seconds
-      - template_rule
-      - valid_paths
-      - x402_edge_catalog
-      - x402_edge_invoke
-      - compatibility_catalog
-      - catalog_alt
-      - quickstart
-      - docs
-      properties:
-        error:
-          type: string
-          enum:
-          - rate_limited
-        message:
-          type: string
-        probe_rule:
-          type: string
-        rate_limit:
-          type: string
-        retry_after_seconds:
-          type: integer
-          minimum: 1
-        template_rule:
-          type: string
-        valid_paths:
-          type: array
-          items:
-            type: string
-        x402_edge_catalog:
-          type: string
-        x402_edge_invoke:
-          type: string
-        compatibility_catalog:
-          type: string
-        catalog_alt:
-          type: string
-        quickstart:
-          type: string
-        docs:
-          type: string
-    HandoffReadMissing:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - external_execution_enabled
-      - router_execute_enabled
-      properties:
-        error:
-          type: string
-          enum:
-          - external_marketplace_handoff_receipt_not_found
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-    HandoffPreview:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - external_marketplace_handoff_receipt_id
-      - request_id
-      - preview_id
-      - external_supply_candidate_id
-      - source_marketplace_id
-      - source_name
-      - source_type
-      - handoff_state
-      - handoff_band
-      - handoff_intent
-      - handoff_method
-      - handoff_url_ref
-      - handoff_url_hash
-      - handoff_url_redacted
-      - selected_handoff_url
-      - listing_url_ref
-      - agent_card_url_ref
-      - openapi_url_ref
-      - mcp_url_ref
-      - x402_url_ref
-      - selected_candidate_summary
-      - pricing_model
-      - free_tier_available
-      - micropayment_supported
-      - x402_supported
-      - receipt_supported
-      - external_auth_may_be_required
-      - external_payment_may_be_required
-      - external_terms_apply
-      - agoragentic_execution_performed
-      - external_execution_performed
-      - wallet_spend_performed
-      - x402_settlement_performed
-      - router_execute_enabled
-      - router_ranking_mutation_enabled
-      - marketplace_verified
-      - agentcore_ready
-      - x402_ready
       - evidence_id
       - risk_card_id
-      - evidence_hash
-      - public_safe_summary
-      - blocker_summary
-      - warning_summary
-      - next_safe_action
-      - mutation_flags
-      - created_at
-      - updated_at
-      - archived_at
       properties:
         schema:
           type: string
           enum:
-          - agoragentic.external-marketplace-handoff-receipt.v1
+          - agoragentic.external-marketplace-handoff-audit-event.v1
         external_marketplace_handoff_receipt_id:
           type: string
+        public_safe_summary:
+          type: string
+        created_at:
+          type: string
+        event_type:
+          type: string
+          enum:
+          - external_marketplace_handoff_receipt_recorded
         request_id:
           type: string
         preview_id:
@@ -5169,269 +3188,9 @@ components:
           type: string
         source_marketplace_id:
           type: string
-        source_name:
-          type: string
-        source_type:
-          type: string
-        handoff_state:
-          type: string
-          enum:
-          - previewed
-        handoff_band:
-          type: string
-          enum:
-          - x402_metadata_handoff
-          - mcp_metadata_handoff
-          - api_metadata_handoff
-          - link_only_handoff
-        handoff_intent:
-          type: string
-          enum:
-          - inspect_external_listing
-          - open_external_marketplace
-          - inspect_external_agent_card
-          - inspect_external_openapi
-          - inspect_external_mcp
-          - inspect_external_x402_metadata
-          - contact_external_provider
-          - compare_external_supply
-        handoff_method:
-          type: string
-        handoff_url_ref:
-          type: string
-        handoff_url_hash:
-          type: string
-        handoff_url_redacted:
-          type:
-          - string
-          - 'null'
-        selected_handoff_url:
-          type:
-          - string
-          - 'null'
-        listing_url_ref:
-          type:
-          - string
-          - 'null'
-        agent_card_url_ref:
-          type:
-          - string
-          - 'null'
-        openapi_url_ref:
-          type:
-          - string
-          - 'null'
-        mcp_url_ref:
-          type:
-          - string
-          - 'null'
-        x402_url_ref:
-          type:
-          - string
-          - 'null'
-        selected_candidate_summary:
-          $ref: '#/components/schemas/HandoffSelectedCandidate'
-        pricing_model:
-          type: string
-        free_tier_available:
-          type: boolean
-        micropayment_supported:
-          type: boolean
-        x402_supported:
-          type: boolean
-        receipt_supported:
-          type: boolean
-        external_auth_may_be_required:
-          type: boolean
-        external_payment_may_be_required:
-          type: boolean
-        external_terms_apply:
-          type: boolean
-          enum:
-          - true
-        agoragentic_execution_performed:
-          type: boolean
-          enum:
-          - false
-        external_execution_performed:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_performed:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_performed:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        router_ranking_mutation_enabled:
-          type: boolean
-          enum:
-          - false
-        marketplace_verified:
-          type: boolean
-          enum:
-          - false
-        agentcore_ready:
-          type: boolean
-          enum:
-          - false
-        x402_ready:
-          type: boolean
-          enum:
-          - false
         evidence_id:
           type: string
         risk_card_id:
-          type: string
-        evidence_hash:
-          type:
-          - string
-          - 'null'
-        public_safe_summary:
-          type: string
-        blocker_summary:
-          type: array
-          items:
-            type: string
-        warning_summary:
-          type: array
-          items:
-            type: string
-        next_safe_action:
-          type: string
-        mutation_flags:
-          type: object
-          additionalProperties: false
-          required:
-          - external_handoff_receipt_created
-          - external_execution_enabled
-          - external_execution_performed
-          - router_execute_enabled
-          - router_ranking_mutation_enabled
-          - global_execute_mutation_enabled
-          - global_invoke_mutation_enabled
-          - wallet_spend_enabled
-          - wallet_mutation_enabled
-          - x402_settlement_enabled
-          - x402_readiness_mutation_enabled
-          - marketplace_verified_mutation_enabled
-          - agentcore_ready_mutation_enabled
-          - seller_trust_mutation_enabled
-          - capability_publication_enabled
-          - listing_publication_enabled
-          properties:
-            external_handoff_receipt_created:
-              type: boolean
-              enum:
-              - false
-            external_execution_enabled:
-              type: boolean
-              enum:
-              - false
-            external_execution_performed:
-              type: boolean
-              enum:
-              - false
-            router_execute_enabled:
-              type: boolean
-              enum:
-              - false
-            router_ranking_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            global_execute_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            global_invoke_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            wallet_spend_enabled:
-              type: boolean
-              enum:
-              - false
-            wallet_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            x402_settlement_enabled:
-              type: boolean
-              enum:
-              - false
-            x402_readiness_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            marketplace_verified_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            agentcore_ready_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            seller_trust_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            capability_publication_enabled:
-              type: boolean
-              enum:
-              - false
-            listing_publication_enabled:
-              type: boolean
-              enum:
-              - false
-        created_at:
-          type: string
-        updated_at:
-          type: string
-        archived_at:
-          type:
-          - string
-          - 'null'
-    HandoffInspectResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - candidate
-      - handoff_preview
-      - authority_boundary
-      - public_safe_summary
-      properties:
-        candidate:
-          $ref: '#/components/schemas/HandoffCandidate'
-        handoff_preview:
-          $ref: '#/components/schemas/HandoffNavigationPreview'
-        authority_boundary:
-          $ref: '#/components/schemas/HandoffAuthority'
-        public_safe_summary:
-          type: string
-    HandoffSourcesResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - sources
-      - authority_boundary
-      - public_safe_summary
-      properties:
-        sources:
-          type: array
-          items:
-            oneOf:
-            - $ref: '#/components/schemas/HandoffSource'
-            - $ref: '#/components/schemas/HandoffSnapshotSource'
-        authority_boundary:
-          $ref: '#/components/schemas/HandoffAuthority'
-        public_safe_summary:
           type: string
     ArdSearchResult:
       type: object
@@ -5518,34 +3277,59 @@ components:
           type: boolean
           enum:
           - false
-    HandoffRequest:
+    HandoffRateLimited:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      - retry_after_ms
+      - next_steps
+      properties:
+        error:
+          type: string
+          enum:
+          - rate_limited
+        message:
+          type: string
+        retry_after_ms:
+          type: number
+          minimum: 0
+        next_steps:
+          type: object
+          additionalProperties: false
+          required:
+          - wait
+          - tip
+          - limits
+          - note
+          properties:
+            wait:
+              type: string
+            tip:
+              type: string
+            limits:
+              type: string
+            note:
+              type: string
+    HandoffSearchRequest:
       type: object
       additionalProperties: true
-      required: []
+      description: Recommended local metadata query. query/q/search are text aliases. protocol is singular; the old task/protocols fields do not filter in the current handler. tags influence preview-fit scoring, not filtering. Unknown fields are echoed as data. No query can enable external execution. The handler coerces limit numerically and floors at array slicing; integer values 1-50 are recommended.
       properties:
-        request_id:
+        query:
           type: string
-        preview_id:
+        q:
           type: string
-        external_supply_candidate_id:
+        search:
           type: string
         source_marketplace_id:
           type: string
-        selected_handoff_url:
-          type: string
-        selected_handoff_url_hash:
-          type: string
-        task_summary:
-          type: string
-        task:
-          type: string
-        task_hash:
+        source_type:
           type: string
         category:
           type: string
-        caller_ref:
-          type: string
-        idempotency_key:
+        protocol:
           type: string
         tags:
           anyOf:
@@ -5553,129 +3337,119 @@ components:
             items:
               type: string
           - type: string
-        caller_type:
-          type: string
-          enum:
-          - human
-          - developer
-          - autonomous_agent
-          - admin
-          - internal_test
-        handoff_intent:
-          type: string
-          enum:
-          - inspect_external_listing
-          - open_external_marketplace
-          - inspect_external_agent_card
-          - inspect_external_openapi
-          - inspect_external_mcp
-          - inspect_external_x402_metadata
-          - contact_external_provider
-          - compare_external_supply
-        acknowledge_external_terms:
+        supports_mcp:
           type: boolean
-        acknowledge_external_execution_not_agoragentic:
+        supports_a2a:
           type: boolean
-        acknowledge_external_payment_not_agoragentic:
+        supports_openapi:
           type: boolean
-        write:
+        supports_x402:
           type: boolean
-      description: Recommended handoff request. Preview success requires nonempty preview_id, a registry candidate ID, selected_handoff_url exactly in that candidate, and all three acknowledgements. Create additionally requires write:true and a nonempty idempotency_key. Extra execution/payment/private-payload fields are refused by the existing boundary. The preview ID is a caller reference, not an authenticated proof that a preview occurred.
-    HandoffStartupUnavailable:
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 50
+          default: 10
+    HandoffReadMissing:
       type: object
       additionalProperties: false
       required:
-      - status
-      - message
-      - started_at
       - error
+      - external_execution_enabled
+      - router_execute_enabled
       properties:
-        status:
+        error:
           type: string
           enum:
-          - starting
-          - unhealthy
-        message:
-          type: string
-        started_at:
-          type:
-          - string
-          - 'null'
-        error:
-          type:
-          - object
-          - 'null'
-          additionalProperties: false
-          required:
-          - message
-          - timestamp
-          properties:
-            message:
-              type: string
-            timestamp:
-              type: string
-    ArdTrustManifest:
+          - external_marketplace_handoff_receipt_not_found
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+    ArdSearchResponse:
       type: object
       required:
-      - identity
-      description: Publisher-declared trust metadata. Presence does not confer Agoragentic verification, routing, ranking, listing, payment, settlement, execution, authentication bypass, or publication eligibility.
+      - results
+      additionalProperties: false
       properties:
-        identity:
+        results:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/ArdSearchResult'
+        referrals:
+          type: array
+          maxItems: 100
+          description: Present only in referrals mode; bounded caller-reviewed metadata. The server never follows these URLs.
+          items:
+            $ref: '#/components/schemas/ArdRegistryReferral'
+        pageToken:
           type: string
-          description: A did:web, HTTPS, or SPIFFE identity whose domain must match the entry identifier publisher. This static binding is not cryptographic verification and remains declared_unverified.
-        identityType:
+    HandoffCandidateMissing:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - authority_boundary
+      properties:
+        error:
           type: string
-        trustSchema:
+          enum:
+          - external_supply_candidate_not_found
+        authority_boundary:
+          $ref: '#/components/schemas/HandoffAuthority'
+    ArdSearchRequest:
+      type: object
+      required:
+      - query
+      additionalProperties: false
+      properties:
+        query:
           type: object
-          additionalProperties: true
+          required:
+          - text
+          additionalProperties: false
           properties:
-            identifier:
+            '@context':
+              $ref: '#/components/schemas/ArdSearchContext'
+            text:
               type: string
-            version:
-              type: string
-            governanceUri:
-              type: string
-              format: uri
-            verificationMethods:
-              type: array
-              items:
-                type: string
-        attestations:
-          type: array
-          items:
-            type: object
-            required:
-            - type
-            - uri
-            additionalProperties: true
-            properties:
-              type:
-                type: string
-              uri:
-                type: string
-                format: uri
-              mediaType:
-                type: string
-              digest:
-                type: string
-        provenance:
-          type: array
-          items:
-            type: object
-            required:
-            - relation
-            - sourceId
-            additionalProperties: true
-            properties:
-              relation:
-                type: string
-              sourceId:
-                type: string
-              sourceDigest:
-                type: string
-        signature:
+              minLength: 1
+              maxLength: 4096
+            filter:
+              type: object
+              additionalProperties:
+                oneOf:
+                - type: string
+                  minLength: 1
+                  maxLength: 4096
+                - type: array
+                  minItems: 1
+                  maxItems: 100
+                  items:
+                    type: string
+                    minLength: 1
+                    maxLength: 4096
+        federation:
           type: string
-      additionalProperties: true
+          enum:
+          - none
+          - referrals
+          default: none
+          description: Agoragentic safety-profile modes. The upstream auto mode is deliberately rejected with FEDERATION_MODE_DISABLED, and omission defaults to none rather than the upstream auto default.
+        pageSize:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+        pageToken:
+          type: string
+          minLength: 1
+          maxLength: 2048
     HandoffRecorded:
       type: object
       additionalProperties: false
@@ -5974,6 +3748,593 @@ components:
           type:
           - string
           - 'null'
+    HandoffInspectResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - candidate
+      - handoff_preview
+      - authority_boundary
+      - public_safe_summary
+      properties:
+        candidate:
+          $ref: '#/components/schemas/HandoffCandidate'
+        handoff_preview:
+          $ref: '#/components/schemas/HandoffNavigationPreview'
+        authority_boundary:
+          $ref: '#/components/schemas/HandoffAuthority'
+        public_safe_summary:
+          type: string
+    HandoffPreviewRefusal:
+      type: object
+      additionalProperties: false
+      required:
+      - preview
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        preview:
+          $ref: '#/components/schemas/HandoffRefusal'
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    HandoffCandidate:
+      type: object
+      additionalProperties: false
+      required:
+      - candidate_id
+      - external_supply_candidate_id
+      - source_marketplace_id
+      - source_name
+      - source_type
+      - protocols
+      - supports_mcp
+      - supports_a2a
+      - supports_openapi
+      - supports_x402
+      - handoff_url_redacted
+      - price_model_hint
+      - trust_label
+      - risk_label
+      - canary_preflight_state
+      - preview_fit_score
+      - receipt_support_hint
+      - public_safe_summary
+      - next_safe_action
+      - authority_boundary
+      properties:
+        candidate_id:
+          type: string
+        external_supply_candidate_id:
+          type: string
+        source_marketplace_id:
+          type: string
+        source_name:
+          type: string
+        source_type:
+          type: string
+        protocols:
+          type: array
+          items:
+            type: string
+        supports_mcp:
+          type: boolean
+        supports_a2a:
+          type: boolean
+        supports_openapi:
+          type: boolean
+        supports_x402:
+          type: boolean
+        handoff_url_redacted:
+          type:
+          - string
+          - 'null'
+        price_model_hint:
+          type: string
+        trust_label:
+          type: string
+        risk_label:
+          type: string
+        canary_preflight_state:
+          type: string
+        preview_fit_score:
+          type: number
+          minimum: 0
+          maximum: 100
+        receipt_support_hint:
+          type: string
+          enum:
+          - metadata_claimed
+          - not_confirmed
+        public_safe_summary:
+          type: string
+        next_safe_action:
+          type: string
+        authority_boundary:
+          $ref: '#/components/schemas/HandoffAuthority'
+    HandoffRequest:
+      type: object
+      additionalProperties: true
+      required: []
+      properties:
+        request_id:
+          type: string
+        preview_id:
+          type: string
+        external_supply_candidate_id:
+          type: string
+        source_marketplace_id:
+          type: string
+        selected_handoff_url:
+          type: string
+        selected_handoff_url_hash:
+          type: string
+        task_summary:
+          type: string
+        task:
+          type: string
+        task_hash:
+          type: string
+        category:
+          type: string
+        caller_ref:
+          type: string
+        idempotency_key:
+          type: string
+        tags:
+          anyOf:
+          - type: array
+            items:
+              type: string
+          - type: string
+        caller_type:
+          type: string
+          enum:
+          - human
+          - developer
+          - autonomous_agent
+          - admin
+          - internal_test
+        handoff_intent:
+          type: string
+          enum:
+          - inspect_external_listing
+          - open_external_marketplace
+          - inspect_external_agent_card
+          - inspect_external_openapi
+          - inspect_external_mcp
+          - inspect_external_x402_metadata
+          - contact_external_provider
+          - compare_external_supply
+        acknowledge_external_terms:
+          type: boolean
+        acknowledge_external_execution_not_agoragentic:
+          type: boolean
+        acknowledge_external_payment_not_agoragentic:
+          type: boolean
+        write:
+          type: boolean
+      description: Recommended handoff request. Preview success requires nonempty preview_id, a registry candidate ID, selected_handoff_url exactly in that candidate, and all three acknowledgements. Create additionally requires write:true and a nonempty idempotency_key. Extra execution/payment/private-payload fields are refused by the existing boundary. The preview ID is a caller reference, not an authenticated proof that a preview occurred.
+    HandoffPayloadTooLarge:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      - max_size_kb
+      - next_steps
+      properties:
+        error:
+          type: string
+          enum:
+          - payload_too_large
+        message:
+          type: string
+        request_id:
+          type: string
+        max_size_kb:
+          type: number
+          enum:
+          - 256
+        next_steps:
+          type: object
+          additionalProperties: false
+          required:
+          - reduce
+          - chunking
+          - limits
+          properties:
+            reduce:
+              type: string
+            chunking:
+              type: string
+            limits:
+              type: string
+    HandoffRevokeResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - receipt
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        receipt:
+          type: object
+          additionalProperties: false
+          required:
+          - schema
+          - external_marketplace_handoff_receipt_id
+          - preview_id
+          - external_supply_candidate_id
+          - source_marketplace_id
+          - source_name
+          - handoff_state
+          - handoff_band
+          - handoff_intent
+          - handoff_url_hash
+          - handoff_url_redacted
+          - external_terms_apply
+          - external_execution_performed
+          - wallet_spend_performed
+          - x402_settlement_performed
+          - router_execute_enabled
+          - marketplace_verified
+          - agentcore_ready
+          - x402_ready
+          - public_safe_summary
+          - next_safe_action
+          - warning_summary
+          - evidence_id
+          - evidence_hash
+          - risk_card_id
+          - mutation_flags
+          properties:
+            schema:
+              type: string
+              enum:
+              - agoragentic.external-marketplace-handoff-public-summary.v1
+            external_marketplace_handoff_receipt_id:
+              type: string
+            preview_id:
+              type: string
+            external_supply_candidate_id:
+              type: string
+            source_marketplace_id:
+              type: string
+            source_name:
+              type: string
+            handoff_state:
+              type: string
+              enum:
+              - revoked
+            handoff_band:
+              type: string
+              enum:
+              - x402_metadata_handoff
+              - mcp_metadata_handoff
+              - api_metadata_handoff
+              - link_only_handoff
+            handoff_intent:
+              type: string
+              enum:
+              - inspect_external_listing
+              - open_external_marketplace
+              - inspect_external_agent_card
+              - inspect_external_openapi
+              - inspect_external_mcp
+              - inspect_external_x402_metadata
+              - contact_external_provider
+              - compare_external_supply
+            handoff_url_hash:
+              type: string
+            handoff_url_redacted:
+              type:
+              - string
+              - 'null'
+            external_terms_apply:
+              type: boolean
+              enum:
+              - true
+            external_execution_performed:
+              type: boolean
+              enum:
+              - false
+            wallet_spend_performed:
+              type: boolean
+              enum:
+              - false
+            x402_settlement_performed:
+              type: boolean
+              enum:
+              - false
+            router_execute_enabled:
+              type: boolean
+              enum:
+              - false
+            marketplace_verified:
+              type: boolean
+              enum:
+              - false
+            agentcore_ready:
+              type: boolean
+              enum:
+              - false
+            x402_ready:
+              type: boolean
+              enum:
+              - false
+            public_safe_summary:
+              type: string
+            next_safe_action:
+              type: string
+            warning_summary:
+              type: array
+              items:
+                type: string
+            evidence_id:
+              type:
+              - string
+              - 'null'
+            evidence_hash:
+              type:
+              - string
+              - 'null'
+            risk_card_id:
+              type:
+              - string
+              - 'null'
+            mutation_flags:
+              $ref: '#/components/schemas/HandoffMutationFlags'
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    HandoffPreviewResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - preview
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        preview:
+          $ref: '#/components/schemas/HandoffPreview'
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    HandoffAuditRevoked:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - external_marketplace_handoff_receipt_id
+      - public_safe_summary
+      - created_at
+      - event_type
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-handoff-audit-event.v1
+        external_marketplace_handoff_receipt_id:
+          type: string
+        public_safe_summary:
+          type: string
+        created_at:
+          type: string
+        event_type:
+          type: string
+          enum:
+          - external_marketplace_handoff_revoked
+    ArdContext:
+      description: 'Canonical active JSON-LD context value. Inline objects and the two embedded
+
+        pinned URLs are accepted without a network request. During static manifest
+
+        ingestion, any other remote context and every JSON-LD `@import` (including an
+
+        import that names a pinned URL) are unsupported. The normalizer emits an
+
+        `UNSUPPORTED_CONTEXT_PRESERVED` warning, never fetches or dereferences the
+
+        context, replaces the active `@context` with the exact embedded pinned array
+
+        `["https://agenticresourcediscovery.org/context/v1",
+
+        "https://agoragentic.com/ns/ard/v1"]`, drops non-core/non-canonical extension
+
+        keys from the sanitized candidate entry, and retains only structured
+
+        `contexts.unsupported` evidence plus a hash-only
+
+        `contexts.preserved_unresolved` record with `raw_included: false`. The
+
+        Agoragentic extension URL
+
+        `https://agoragentic.com/ns/ard/v1` serves the same exact 1,801-byte snapshot
+
+        whose SHA-256 is
+
+        `101836857e9a7863ca4b2f38b6c79779b26a1ba79cb5694d1446cf59e17164f7`.
+
+        '
+      oneOf:
+      - type: string
+        format: uri
+        enum:
+        - https://agenticresourcediscovery.org/context/v1
+        - https://agoragentic.com/ns/ard/v1
+      - type: object
+        additionalProperties: true
+      - type: array
+        items:
+          $ref: '#/components/schemas/ArdContext'
+    HandoffWriteControlsError:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - blocker_summary
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      - public_safe_summary
+      properties:
+        error:
+          type: string
+          enum:
+          - external_marketplace_handoff_write_controls_required
+        blocker_summary:
+          type: array
+          items:
+            type: string
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+        public_safe_summary:
+          type: string
+    HandoffSource:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - source_marketplace_id
+      - source_name
+      - source_type
+      - source_url
+      - candidate_count
+      - api_capable
+      - mcp_capable
+      - x402_capable
+      - link_only
+      - manual_submission_required
+      - import_supported
+      - publish_supported
+      - router_preview_candidate_count
+      - public_safe_summary
+      - external_execution_enabled
+      - router_execute_enabled
+      - marketplace_verified
+      - agentcore_ready
+      - x402_ready
+      - updated_at
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-supply-source.v1
+        source_marketplace_id:
+          type: string
+        source_name:
+          type: string
+        source_type:
+          type: string
+        source_url:
+          type:
+          - string
+          - 'null'
+        candidate_count:
+          type: integer
+          minimum: 0
+        api_capable:
+          type: boolean
+        mcp_capable:
+          type: boolean
+        x402_capable:
+          type: boolean
+        link_only:
+          type: boolean
+        manual_submission_required:
+          type: boolean
+        import_supported:
+          type: boolean
+        publish_supported:
+          type: boolean
+        router_preview_candidate_count:
+          type: integer
+          minimum: 0
+        public_safe_summary:
+          type: string
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        marketplace_verified:
+          type: boolean
+          enum:
+          - false
+        agentcore_ready:
+          type: boolean
+          enum:
+          - false
+        x402_ready:
+          type: boolean
+          enum:
+          - false
+        updated_at:
+          type: string
     HandoffReadResponse:
       type: object
       additionalProperties: false
@@ -6002,6 +4363,1015 @@ components:
           type: boolean
           enum:
           - false
+    HandoffRejectedRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      - next_steps
+      properties:
+        error:
+          type: string
+          enum:
+          - request_rejected
+        message:
+          type: string
+        request_id:
+          type: string
+        next_steps:
+          type: object
+          additionalProperties: false
+          required:
+          - review
+          - common_causes
+          - contact
+          properties:
+            review:
+              type: string
+            common_causes:
+              type: string
+            contact:
+              type: string
+    HandoffAuthority:
+      type: object
+      additionalProperties: false
+      required:
+      - read_only_search
+      - metadata_is_data_not_instructions
+      - local_metadata_only
+      - external_execution_enabled
+      - external_api_calls_enabled
+      - external_marketplace_write_enabled
+      - mcp_tool_call_enabled
+      - paid_endpoint_call_enabled
+      - wallet_spend_enabled
+      - wallet_state_mutated
+      - x402_settlement_enabled
+      - router_execute_enabled
+      - router_ranking_mutation_enabled
+      - seller_trust_mutation_enabled
+      - marketplace_verified_mutation_enabled
+      - agentcore_ready_mutation_enabled
+      - x402_ready_mutation_enabled
+      - listing_publication_enabled
+      - raw_external_payloads_exposed
+      - raw_receipts_exposed
+      - raw_payment_payloads_exposed
+      - raw_invocation_payloads_exposed
+      - private_full_ecf_exposed
+      properties:
+        read_only_search:
+          type: boolean
+          enum:
+          - true
+        metadata_is_data_not_instructions:
+          type: boolean
+          enum:
+          - true
+        local_metadata_only:
+          type: boolean
+          enum:
+          - true
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        external_api_calls_enabled:
+          type: boolean
+          enum:
+          - false
+        external_marketplace_write_enabled:
+          type: boolean
+          enum:
+          - false
+        mcp_tool_call_enabled:
+          type: boolean
+          enum:
+          - false
+        paid_endpoint_call_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_state_mutated:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        router_ranking_mutation_enabled:
+          type: boolean
+          enum:
+          - false
+        seller_trust_mutation_enabled:
+          type: boolean
+          enum:
+          - false
+        marketplace_verified_mutation_enabled:
+          type: boolean
+          enum:
+          - false
+        agentcore_ready_mutation_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_ready_mutation_enabled:
+          type: boolean
+          enum:
+          - false
+        listing_publication_enabled:
+          type: boolean
+          enum:
+          - false
+        raw_external_payloads_exposed:
+          type: boolean
+          enum:
+          - false
+        raw_receipts_exposed:
+          type: boolean
+          enum:
+          - false
+        raw_payment_payloads_exposed:
+          type: boolean
+          enum:
+          - false
+        raw_invocation_payloads_exposed:
+          type: boolean
+          enum:
+          - false
+        private_full_ecf_exposed:
+          type: boolean
+          enum:
+          - false
+    ArdSearchContext:
+      description: 'Strict JSON-LD context accepted in `query.@context`. Inline objects and the two
+
+        embedded pinned URLs are accepted without a network request. Every JSON-LD
+
+        `@import` at any depth is rejected with `UNSUPPORTED_CONTEXT`, even when the
+
+        import names an embedded pinned URL. To use a pinned context, provide its URL
+
+        directly as the `@context` string or as an array item, for example
+
+        `["https://agenticresourcediscovery.org/context/v1",
+
+        "https://agoragentic.com/ns/ard/v1"]`; do not wrap it in an `@import` object.
+
+        Other remote URLs are also rejected, and search never fetches or dereferences
+
+        any context URL.
+
+        '
+      oneOf:
+      - type: string
+        format: uri
+        enum:
+        - https://agenticresourcediscovery.org/context/v1
+        - https://agoragentic.com/ns/ard/v1
+      - $ref: '#/components/schemas/ArdSearchInlineContext'
+      - type: array
+        items:
+          $ref: '#/components/schemas/ArdSearchContext'
+    HandoffSearchPreviewRefusal:
+      type: object
+      additionalProperties: false
+      required:
+      - preview
+      - authority_boundary
+      properties:
+        preview:
+          $ref: '#/components/schemas/HandoffRefusal'
+        authority_boundary:
+          $ref: '#/components/schemas/HandoffAuthority'
+    HandoffCreateResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - receipt
+      - handoff_url
+      - handoff_navigation
+      - public_safe_summary
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        receipt:
+          $ref: '#/components/schemas/HandoffRecorded'
+        handoff_url:
+          type:
+          - string
+          - 'null'
+        handoff_navigation:
+          type: string
+          enum:
+          - client_side_only
+        public_safe_summary:
+          type: string
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    HandoffSearchResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - query
+      - result_count
+      - results
+      - authority_boundary
+      - public_safe_summary
+      - created_at
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-search.v1
+        query:
+          description: JSON data echoed from the caller, not agent instructions. The current parser also accepts array bodies; only documented object filters have search semantics.
+        result_count:
+          type: integer
+          minimum: 0
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/HandoffCandidate'
+          maxItems: 50
+        authority_boundary:
+          $ref: '#/components/schemas/HandoffAuthority'
+        public_safe_summary:
+          type: string
+        created_at:
+          type: string
+    HandoffInvalidJson:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          enum:
+          - invalid_json
+        message:
+          type: string
+        request_id:
+          type: string
+    ArdIdentifier:
+      type: string
+      pattern: ^urn:air:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+:[a-zA-Z0-9._-]+(?::[a-zA-Z0-9._-]+)+$
+      description: Case-sensitive urn:air identifier with a lower-case FQDN publisher and at least namespace and terminal-name resource segments; nested namespace segments are accepted.
+      example: urn:air:agoragentic.com:registry:interchange
+    HandoffSnapshotSource:
+      type: object
+      additionalProperties: false
+      required:
+      - source_marketplace_id
+      - source_name
+      - source_type
+      - candidate_count
+      - live_fetch_enabled
+      - external_api_calls_performed
+      - public_safe_summary
+      properties:
+        source_marketplace_id:
+          type: string
+        source_name:
+          type: string
+        source_type:
+          type: string
+        candidate_count:
+          type: integer
+          minimum: 0
+        live_fetch_enabled:
+          type: boolean
+        external_api_calls_performed:
+          type: boolean
+          enum:
+          - false
+        public_safe_summary:
+          type: string
+    HandoffProbeRateLimited:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      - probe_rule
+      - rate_limit
+      - retry_after_seconds
+      - template_rule
+      - valid_paths
+      - x402_edge_catalog
+      - x402_edge_invoke
+      - compatibility_catalog
+      - catalog_alt
+      - quickstart
+      - docs
+      properties:
+        error:
+          type: string
+          enum:
+          - rate_limited
+        message:
+          type: string
+        probe_rule:
+          type: string
+        rate_limit:
+          type: string
+        retry_after_seconds:
+          type: integer
+          minimum: 1
+        template_rule:
+          type: string
+        valid_paths:
+          type: array
+          items:
+            type: string
+        x402_edge_catalog:
+          type: string
+        x402_edge_invoke:
+          type: string
+        compatibility_catalog:
+          type: string
+        catalog_alt:
+          type: string
+        quickstart:
+          type: string
+        docs:
+          type: string
+    ArdTrustManifest:
+      type: object
+      required:
+      - identity
+      description: Publisher-declared trust metadata. Presence does not confer Agoragentic verification, routing, ranking, listing, payment, settlement, execution, authentication bypass, or publication eligibility.
+      properties:
+        identity:
+          type: string
+          description: A did:web, HTTPS, or SPIFFE identity whose domain must match the entry identifier publisher. This static binding is not cryptographic verification and remains declared_unverified.
+        identityType:
+          type: string
+        trustSchema:
+          type: object
+          additionalProperties: true
+          properties:
+            identifier:
+              type: string
+            version:
+              type: string
+            governanceUri:
+              type: string
+              format: uri
+            verificationMethods:
+              type: array
+              items:
+                type: string
+        attestations:
+          type: array
+          items:
+            type: object
+            required:
+            - type
+            - uri
+            additionalProperties: true
+            properties:
+              type:
+                type: string
+              uri:
+                type: string
+                format: uri
+              mediaType:
+                type: string
+              digest:
+                type: string
+        provenance:
+          type: array
+          items:
+            type: object
+            required:
+            - relation
+            - sourceId
+            additionalProperties: true
+            properties:
+              relation:
+                type: string
+              sourceId:
+                type: string
+              sourceDigest:
+                type: string
+        signature:
+          type: string
+      additionalProperties: true
+    HandoffSourcesResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - sources
+      - authority_boundary
+      - public_safe_summary
+      properties:
+        sources:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/HandoffSource'
+            - $ref: '#/components/schemas/HandoffSnapshotSource'
+        authority_boundary:
+          $ref: '#/components/schemas/HandoffAuthority'
+        public_safe_summary:
+          type: string
+    HandoffMissing:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      properties:
+        error:
+          type: string
+          enum:
+          - external_marketplace_handoff_receipt_not_found
+    ArdRegistryReferral:
+      type: object
+      required:
+      - identifier
+      - displayName
+      - type
+      - url
+      additionalProperties: true
+      description: Caller-reviewed registry metadata with all ten Agoragentic discovery authority fields forced false. The server never follows the referral or treats it as routing, ranking, listing, execution, payment, settlement, trust, authentication-bypass, publication, or Risk Fork-bypass authority.
+      properties:
+        identifier:
+          $ref: '#/components/schemas/ArdIdentifier'
+        displayName:
+          type: string
+        type:
+          type: string
+          enum:
+          - application/ai-registry
+          - application/ai-registry+json
+        url:
+          type: string
+          format: uri
+          pattern: ^https://
+          description: Search endpoint for a caller-reviewed registry. Agoragentic never follows it server-side.
+        ag:routeEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:rankingEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:listingEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:paymentEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:settlementEligibleFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:trustPromotedFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:executionAuthorizedFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:authenticationBypassGranted:
+          type: boolean
+          enum:
+          - false
+        ag:publicationAuthorizedFromDiscovery:
+          type: boolean
+          enum:
+          - false
+        ag:riskForkBypassGranted:
+          type: boolean
+          enum:
+          - false
+    HandoffInactiveRecorded:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - external_marketplace_handoff_receipt_id
+      - request_id
+      - preview_id
+      - external_supply_candidate_id
+      - source_marketplace_id
+      - source_name
+      - source_type
+      - handoff_state
+      - handoff_band
+      - handoff_intent
+      - handoff_method
+      - handoff_url_ref
+      - handoff_url_hash
+      - handoff_url_redacted
+      - selected_handoff_url
+      - listing_url_ref
+      - agent_card_url_ref
+      - openapi_url_ref
+      - mcp_url_ref
+      - x402_url_ref
+      - selected_candidate_summary
+      - pricing_model
+      - free_tier_available
+      - micropayment_supported
+      - x402_supported
+      - receipt_supported
+      - external_auth_may_be_required
+      - external_payment_may_be_required
+      - external_terms_apply
+      - agoragentic_execution_performed
+      - external_execution_performed
+      - wallet_spend_performed
+      - x402_settlement_performed
+      - router_execute_enabled
+      - router_ranking_mutation_enabled
+      - marketplace_verified
+      - agentcore_ready
+      - x402_ready
+      - evidence_id
+      - risk_card_id
+      - evidence_hash
+      - public_safe_summary
+      - blocker_summary
+      - warning_summary
+      - next_safe_action
+      - mutation_flags
+      - created_at
+      - updated_at
+      - archived_at
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-handoff-receipt.v1
+        external_marketplace_handoff_receipt_id:
+          type: string
+        request_id:
+          type: string
+        preview_id:
+          type: string
+        external_supply_candidate_id:
+          type: string
+        source_marketplace_id:
+          type: string
+        source_name:
+          type: string
+        source_type:
+          type: string
+        handoff_state:
+          type: string
+          enum:
+          - revoked
+          - archived
+        handoff_band:
+          type: string
+          enum:
+          - x402_metadata_handoff
+          - mcp_metadata_handoff
+          - api_metadata_handoff
+          - link_only_handoff
+        handoff_intent:
+          type: string
+          enum:
+          - inspect_external_listing
+          - open_external_marketplace
+          - inspect_external_agent_card
+          - inspect_external_openapi
+          - inspect_external_mcp
+          - inspect_external_x402_metadata
+          - contact_external_provider
+          - compare_external_supply
+        handoff_method:
+          type: string
+        handoff_url_ref:
+          type: string
+        handoff_url_hash:
+          type: string
+        handoff_url_redacted:
+          type:
+          - string
+          - 'null'
+        selected_handoff_url:
+          type:
+          - string
+          - 'null'
+        listing_url_ref:
+          type:
+          - string
+          - 'null'
+        agent_card_url_ref:
+          type:
+          - string
+          - 'null'
+        openapi_url_ref:
+          type:
+          - string
+          - 'null'
+        mcp_url_ref:
+          type:
+          - string
+          - 'null'
+        x402_url_ref:
+          type:
+          - string
+          - 'null'
+        selected_candidate_summary:
+          $ref: '#/components/schemas/HandoffSelectedCandidate'
+        pricing_model:
+          type: string
+        free_tier_available:
+          type: boolean
+        micropayment_supported:
+          type: boolean
+        x402_supported:
+          type: boolean
+        receipt_supported:
+          type: boolean
+        external_auth_may_be_required:
+          type: boolean
+        external_payment_may_be_required:
+          type: boolean
+        external_terms_apply:
+          type: boolean
+          enum:
+          - true
+        agoragentic_execution_performed:
+          type: boolean
+          enum:
+          - false
+        external_execution_performed:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_performed:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_performed:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        router_ranking_mutation_enabled:
+          type: boolean
+          enum:
+          - false
+        marketplace_verified:
+          type: boolean
+          enum:
+          - false
+        agentcore_ready:
+          type: boolean
+          enum:
+          - false
+        x402_ready:
+          type: boolean
+          enum:
+          - false
+        evidence_id:
+          type: string
+        risk_card_id:
+          type: string
+        evidence_hash:
+          type:
+          - string
+          - 'null'
+        public_safe_summary:
+          type: string
+        blocker_summary:
+          type: array
+          items:
+            type: string
+        warning_summary:
+          type: array
+          items:
+            type: string
+        next_safe_action:
+          type: string
+        mutation_flags:
+          $ref: '#/components/schemas/HandoffMutationFlags'
+        created_at:
+          type: string
+        updated_at:
+          type: string
+        archived_at:
+          type:
+          - string
+          - 'null'
+    HandoffWriteRequest:
+      type: object
+      additionalProperties: true
+      required:
+      - write
+      - idempotency_key
+      properties:
+        write:
+          type: boolean
+        idempotency_key:
+          type: string
+      description: Existing local write controls only. These fields are not authentication or authorization credentials and grant no external authority.
+    HandoffBoundariesResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - authority_boundary
+      - forbidden_behavior
+      - next_safe_action
+      - public_safe_summary
+      properties:
+        authority_boundary:
+          $ref: '#/components/schemas/HandoffAuthority'
+        forbidden_behavior:
+          type: array
+          items:
+            type: string
+        next_safe_action:
+          type: string
+        public_safe_summary:
+          type: string
+    HandoffSummaryResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - handoff_receipt_count
+      - source_summary
+      - public_safe_summary
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        handoff_receipt_count:
+          type: integer
+          minimum: 0
+        source_summary:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - source_marketplace_id
+            - source_name
+            - receipt_count
+            properties:
+              source_marketplace_id:
+                type: string
+              source_name:
+                type: string
+              receipt_count:
+                type: integer
+                minimum: 0
+        public_safe_summary:
+          type: string
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    HandoffUriTooLong:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          enum:
+          - uri_too_long
+        message:
+          type: string
+    HandoffRiskCardResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - risk_card
+      properties:
+        risk_card:
+          $ref: '#/components/schemas/HandoffNullableRiskCard'
+    HandoffArchiveResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - receipt
+      - hard_deleted
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        receipt:
+          type: object
+          additionalProperties: false
+          required:
+          - schema
+          - external_marketplace_handoff_receipt_id
+          - preview_id
+          - external_supply_candidate_id
+          - source_marketplace_id
+          - source_name
+          - handoff_state
+          - handoff_band
+          - handoff_intent
+          - handoff_url_hash
+          - handoff_url_redacted
+          - external_terms_apply
+          - external_execution_performed
+          - wallet_spend_performed
+          - x402_settlement_performed
+          - router_execute_enabled
+          - marketplace_verified
+          - agentcore_ready
+          - x402_ready
+          - public_safe_summary
+          - next_safe_action
+          - warning_summary
+          - evidence_id
+          - evidence_hash
+          - risk_card_id
+          - mutation_flags
+          properties:
+            schema:
+              type: string
+              enum:
+              - agoragentic.external-marketplace-handoff-public-summary.v1
+            external_marketplace_handoff_receipt_id:
+              type: string
+            preview_id:
+              type: string
+            external_supply_candidate_id:
+              type: string
+            source_marketplace_id:
+              type: string
+            source_name:
+              type: string
+            handoff_state:
+              type: string
+              enum:
+              - archived
+            handoff_band:
+              type: string
+              enum:
+              - x402_metadata_handoff
+              - mcp_metadata_handoff
+              - api_metadata_handoff
+              - link_only_handoff
+            handoff_intent:
+              type: string
+              enum:
+              - inspect_external_listing
+              - open_external_marketplace
+              - inspect_external_agent_card
+              - inspect_external_openapi
+              - inspect_external_mcp
+              - inspect_external_x402_metadata
+              - contact_external_provider
+              - compare_external_supply
+            handoff_url_hash:
+              type: string
+            handoff_url_redacted:
+              type:
+              - string
+              - 'null'
+            external_terms_apply:
+              type: boolean
+              enum:
+              - true
+            external_execution_performed:
+              type: boolean
+              enum:
+              - false
+            wallet_spend_performed:
+              type: boolean
+              enum:
+              - false
+            x402_settlement_performed:
+              type: boolean
+              enum:
+              - false
+            router_execute_enabled:
+              type: boolean
+              enum:
+              - false
+            marketplace_verified:
+              type: boolean
+              enum:
+              - false
+            agentcore_ready:
+              type: boolean
+              enum:
+              - false
+            x402_ready:
+              type: boolean
+              enum:
+              - false
+            public_safe_summary:
+              type: string
+            next_safe_action:
+              type: string
+            warning_summary:
+              type: array
+              items:
+                type: string
+            evidence_id:
+              type:
+              - string
+              - 'null'
+            evidence_hash:
+              type:
+              - string
+              - 'null'
+            risk_card_id:
+              type:
+              - string
+              - 'null'
+            mutation_flags:
+              $ref: '#/components/schemas/HandoffMutationFlags'
+        hard_deleted:
+          type: boolean
+          enum:
+          - false
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    HandoffAuditResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - audit
+      - public_safe_summary
+      properties:
+        audit:
+          type: array
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/HandoffAuditRecorded'
+            - $ref: '#/components/schemas/HandoffAuditRefused'
+            - $ref: '#/components/schemas/HandoffAuditRevoked'
+            - $ref: '#/components/schemas/HandoffAuditArchived'
+        public_safe_summary:
+          type: string
     HandoffRefusal:
       type: object
       additionalProperties: false
@@ -6259,117 +5629,137 @@ components:
           - 'null'
           enum:
           - null
-    HandoffCreateInactive:
+    HandoffNavigationPreview:
       type: object
       additionalProperties: false
       required:
-      - receipt
+      - schema
       - handoff_url
-      - handoff_navigation
+      - handoff_method
+      - handoff_state
+      - handoff_requires_external_account
+      - handoff_requires_external_payment
+      - handoff_requires_external_auth
+      - handoff_receipt_supported
+      - agoragentic_handoff_receipt_supported
+      - handoff_receipt_preview_route
+      - handoff_receipt_create_route
+      - agoragentic_receipt_supported
+      - external_terms_apply
       - public_safe_summary
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
       properties:
-        receipt:
-          $ref: '#/components/schemas/HandoffInactiveRecorded'
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-router-handoff-preview.v1
         handoff_url:
           type:
           - string
           - 'null'
-          enum:
-          - null
-        handoff_navigation:
+        handoff_method:
           type: string
           enum:
+          - mcp_install_review
+          - mcp_directory_review
+          - openapi_or_sdk_review
+          - x402_external_review
+          - link_only_review
+          - external_url_review
           - unavailable
+        handoff_state:
+          type: string
+          enum:
+          - available_review_only
+          - missing_handoff_url
+        handoff_requires_external_account:
+          type: boolean
+          enum:
+          - true
+        handoff_requires_external_payment:
+          type: boolean
+        handoff_requires_external_auth:
+          type: boolean
+        handoff_receipt_supported:
+          type: boolean
+        agoragentic_handoff_receipt_supported:
+          type: boolean
+          enum:
+          - true
+        handoff_receipt_preview_route:
+          type: string
+        handoff_receipt_create_route:
+          type: string
+        agoragentic_receipt_supported:
+          type: boolean
+          enum:
+          - false
+        external_terms_apply:
+          type: boolean
+          enum:
+          - true
         public_safe_summary:
           type: string
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-    HandoffWriteControlsError:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - blocker_summary
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      - public_safe_summary
-      properties:
-        error:
-          type: string
-          enum:
-          - external_marketplace_handoff_write_controls_required
-        blocker_summary:
-          type: array
-          items:
-            type: string
-        external_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        router_execute_enabled:
-          type: boolean
-          enum:
-          - false
-        wallet_spend_enabled:
-          type: boolean
-          enum:
-          - false
-        x402_settlement_enabled:
-          type: boolean
-          enum:
-          - false
-        public_safe_summary:
-          type: string
-    HandoffAuditRecorded:
+    HandoffPreview:
       type: object
       additionalProperties: false
       required:
       - schema
       - external_marketplace_handoff_receipt_id
-      - public_safe_summary
-      - created_at
-      - event_type
       - request_id
       - preview_id
       - external_supply_candidate_id
       - source_marketplace_id
+      - source_name
+      - source_type
+      - handoff_state
+      - handoff_band
+      - handoff_intent
+      - handoff_method
+      - handoff_url_ref
+      - handoff_url_hash
+      - handoff_url_redacted
+      - selected_handoff_url
+      - listing_url_ref
+      - agent_card_url_ref
+      - openapi_url_ref
+      - mcp_url_ref
+      - x402_url_ref
+      - selected_candidate_summary
+      - pricing_model
+      - free_tier_available
+      - micropayment_supported
+      - x402_supported
+      - receipt_supported
+      - external_auth_may_be_required
+      - external_payment_may_be_required
+      - external_terms_apply
+      - agoragentic_execution_performed
+      - external_execution_performed
+      - wallet_spend_performed
+      - x402_settlement_performed
+      - router_execute_enabled
+      - router_ranking_mutation_enabled
+      - marketplace_verified
+      - agentcore_ready
+      - x402_ready
       - evidence_id
       - risk_card_id
+      - evidence_hash
+      - public_safe_summary
+      - blocker_summary
+      - warning_summary
+      - next_safe_action
+      - mutation_flags
+      - created_at
+      - updated_at
+      - archived_at
       properties:
         schema:
           type: string
           enum:
-          - agoragentic.external-marketplace-handoff-audit-event.v1
+          - agoragentic.external-marketplace-handoff-receipt.v1
         external_marketplace_handoff_receipt_id:
           type: string
-        public_safe_summary:
-          type: string
-        created_at:
-          type: string
-        event_type:
-          type: string
-          enum:
-          - external_marketplace_handoff_receipt_recorded
         request_id:
           type: string
         preview_id:
@@ -6378,51 +5768,99 @@ components:
           type: string
         source_marketplace_id:
           type: string
-        evidence_id:
+        source_name:
           type: string
-        risk_card_id:
+        source_type:
           type: string
-    HandoffInternalError:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      properties:
-        error:
+        handoff_state:
           type: string
           enum:
-          - internal
-        message:
+          - previewed
+        handoff_band:
           type: string
-        request_id:
+          enum:
+          - x402_metadata_handoff
+          - mcp_metadata_handoff
+          - api_metadata_handoff
+          - link_only_handoff
+        handoff_intent:
           type: string
-    HandoffRiskCardResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - risk_card
-      properties:
-        risk_card:
-          $ref: '#/components/schemas/HandoffNullableRiskCard'
-    HandoffListResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - receipts
-      - public_safe_summary
-      - external_execution_enabled
-      - router_execute_enabled
-      - wallet_spend_enabled
-      - x402_settlement_enabled
-      properties:
-        receipts:
-          type: array
-          items:
-            $ref: '#/components/schemas/HandoffPublicReceipt'
-        public_safe_summary:
+          enum:
+          - inspect_external_listing
+          - open_external_marketplace
+          - inspect_external_agent_card
+          - inspect_external_openapi
+          - inspect_external_mcp
+          - inspect_external_x402_metadata
+          - contact_external_provider
+          - compare_external_supply
+        handoff_method:
           type: string
-        external_execution_enabled:
+        handoff_url_ref:
+          type: string
+        handoff_url_hash:
+          type: string
+        handoff_url_redacted:
+          type:
+          - string
+          - 'null'
+        selected_handoff_url:
+          type:
+          - string
+          - 'null'
+        listing_url_ref:
+          type:
+          - string
+          - 'null'
+        agent_card_url_ref:
+          type:
+          - string
+          - 'null'
+        openapi_url_ref:
+          type:
+          - string
+          - 'null'
+        mcp_url_ref:
+          type:
+          - string
+          - 'null'
+        x402_url_ref:
+          type:
+          - string
+          - 'null'
+        selected_candidate_summary:
+          $ref: '#/components/schemas/HandoffSelectedCandidate'
+        pricing_model:
+          type: string
+        free_tier_available:
+          type: boolean
+        micropayment_supported:
+          type: boolean
+        x402_supported:
+          type: boolean
+        receipt_supported:
+          type: boolean
+        external_auth_may_be_required:
+          type: boolean
+        external_payment_may_be_required:
+          type: boolean
+        external_terms_apply:
+          type: boolean
+          enum:
+          - true
+        agoragentic_execution_performed:
+          type: boolean
+          enum:
+          - false
+        external_execution_performed:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_performed:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_performed:
           type: boolean
           enum:
           - false
@@ -6430,243 +5868,135 @@ components:
           type: boolean
           enum:
           - false
-        wallet_spend_enabled:
+        router_ranking_mutation_enabled:
           type: boolean
           enum:
           - false
-        x402_settlement_enabled:
+        marketplace_verified:
           type: boolean
           enum:
           - false
-    HandoffInvalidJson:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      properties:
-        error:
-          type: string
+        agentcore_ready:
+          type: boolean
           enum:
-          - invalid_json
-        message:
+          - false
+        x402_ready:
+          type: boolean
+          enum:
+          - false
+        evidence_id:
           type: string
-        request_id:
+        risk_card_id:
           type: string
-    ArdIdentifier:
-      type: string
-      pattern: ^urn:air:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)+:[a-zA-Z0-9._-]+(?::[a-zA-Z0-9._-]+)+$
-      description: Case-sensitive urn:air identifier with a lower-case FQDN publisher and at least namespace and terminal-name resource segments; nested namespace segments are accepted.
-      example: urn:air:agoragentic.com:registry:interchange
-    ArdEntry:
-      type: object
-      required:
-      - identifier
-      - displayName
-      - type
-      additionalProperties: true
-      description: 'ARD resource entry. Exactly one of url or data is required; identifiers are
-
-        anchored to the publisher domain. Ingested candidates remain source-attributed
-
-        and unverified. The normalizer rejects conflicting current authority claims and
-
-        forces all ten discovery authority fields false. It also keeps the legacy
-
-        `ag:executionAuthorityGranted`, `ag:paymentAuthorityGranted`,
-
-        `ag:trustPromotionAuthorized`, `ag:publicationAuthorityGranted`, and
-
-        `ag:networkDereferenceAllowed` fields false, along with
-
-        `ag:liveExecutionAvailable`; context aliases and full IRIs cannot bypass that
-
-        boundary. Declared trust is retained separately as `declared_unverified`, not
-
-        cryptographically verified.
-
-        '
-      properties:
-        '@context':
-          $ref: '#/components/schemas/ArdContext'
-        '@id':
-          $ref: '#/components/schemas/ArdIdentifier'
-        identifier:
-          $ref: '#/components/schemas/ArdIdentifier'
-        displayName:
+        evidence_hash:
+          type:
+          - string
+          - 'null'
+        public_safe_summary:
           type: string
-        type:
-          type: string
-          description: Artifact media type, such as application/ai-registry+json, application/a2a-agent-card+json, application/mcp-server-card+json, application/ai-skill+md, or the mapped application/vnd.agoragentic.capability-card+json profile.
-        url:
-          type: string
-          format: uri
-          pattern: ^https://
-        data:
-          description: Arbitrary inline ARD data. For application/vnd.agoragentic.capability-card+json entries, the source helper emits the ArdMappedCapabilityCardData shape.
-          anyOf:
-          - $ref: '#/components/schemas/ArdMappedCapabilityCardData'
-          - type: object
-            additionalProperties: true
-        representativeQueries:
-          type: array
-          description: ARD recommends two through five representative natural-language queries; count deviations are warnings rather than trust signals.
-          items:
-            type: string
-        capabilities:
+        blocker_summary:
           type: array
           items:
             type: string
-        description:
-          type: string
-        tags:
+        warning_summary:
           type: array
           items:
             type: string
-        version:
+        next_safe_action:
           type: string
-        updatedAt:
-          type: string
-          format: date-time
-        metadata:
+        mutation_flags:
           type: object
-          additionalProperties:
-            oneOf:
-            - type: string
-            - type: number
-            - type: boolean
-        trustManifest:
-          $ref: '#/components/schemas/ArdTrustManifest'
-        ag:trustState:
-          type: string
-          enum:
-          - unverified
-          description: Agoragentic discovery state only; never a verified trust claim.
-        ag:riskLevel:
-          type: string
-          enum:
-          - unassessed
-        ag:executionAuthorizationRequired:
-          type: boolean
-          enum:
-          - true
-        ag:routeEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:rankingEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:listingEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:paymentEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:settlementEligibleFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:trustPromotedFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:executionAuthorizedFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:authenticationBypassGranted:
-          type: boolean
-          enum:
-          - false
-        ag:publicationAuthorizedFromDiscovery:
-          type: boolean
-          enum:
-          - false
-        ag:riskForkBypassGranted:
-          type: boolean
-          enum:
-          - false
-        ag:providerQualification:
-          type: string
-          description: Source-snapshot qualification label; never live provider qualification.
-        ag:liveExecutionAvailable:
-          type: boolean
-          enum:
-          - false
-      oneOf:
-      - required:
-        - url
-        not:
-          required:
-          - data
-      - required:
-        - data
-        not:
-          required:
-          - url
-    ArdSearchRequest:
-      type: object
-      required:
-      - query
-      additionalProperties: false
-      properties:
-        query:
-          type: object
-          required:
-          - text
           additionalProperties: false
+          required:
+          - external_handoff_receipt_created
+          - external_execution_enabled
+          - external_execution_performed
+          - router_execute_enabled
+          - router_ranking_mutation_enabled
+          - global_execute_mutation_enabled
+          - global_invoke_mutation_enabled
+          - wallet_spend_enabled
+          - wallet_mutation_enabled
+          - x402_settlement_enabled
+          - x402_readiness_mutation_enabled
+          - marketplace_verified_mutation_enabled
+          - agentcore_ready_mutation_enabled
+          - seller_trust_mutation_enabled
+          - capability_publication_enabled
+          - listing_publication_enabled
           properties:
-            '@context':
-              $ref: '#/components/schemas/ArdSearchContext'
-            text:
-              type: string
-              minLength: 1
-              maxLength: 4096
-            filter:
-              type: object
-              additionalProperties:
-                oneOf:
-                - type: string
-                  minLength: 1
-                  maxLength: 4096
-                - type: array
-                  minItems: 1
-                  maxItems: 100
-                  items:
-                    type: string
-                    minLength: 1
-                    maxLength: 4096
-        federation:
+            external_handoff_receipt_created:
+              type: boolean
+              enum:
+              - false
+            external_execution_enabled:
+              type: boolean
+              enum:
+              - false
+            external_execution_performed:
+              type: boolean
+              enum:
+              - false
+            router_execute_enabled:
+              type: boolean
+              enum:
+              - false
+            router_ranking_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            global_execute_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            global_invoke_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            wallet_spend_enabled:
+              type: boolean
+              enum:
+              - false
+            wallet_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            x402_settlement_enabled:
+              type: boolean
+              enum:
+              - false
+            x402_readiness_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            marketplace_verified_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            agentcore_ready_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            seller_trust_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            capability_publication_enabled:
+              type: boolean
+              enum:
+              - false
+            listing_publication_enabled:
+              type: boolean
+              enum:
+              - false
+        created_at:
           type: string
-          enum:
-          - none
-          - referrals
-          default: none
-          description: Agoragentic safety-profile modes. The upstream auto mode is deliberately rejected with FEDERATION_MODE_DISABLED, and omission defaults to none rather than the upstream auto default.
-        pageSize:
-          type: integer
-          minimum: 1
-          maximum: 100
-          default: 10
-        pageToken:
+        updated_at:
           type: string
-          minLength: 1
-          maxLength: 2048
-    HandoffSearchPreviewRefusal:
-      type: object
-      additionalProperties: false
-      required:
-      - preview
-      - authority_boundary
-      properties:
-        preview:
-          $ref: '#/components/schemas/HandoffRefusal'
-        authority_boundary:
-          $ref: '#/components/schemas/HandoffAuthority'
+        archived_at:
+          type:
+          - string
+          - 'null'
     HandoffAgentReceipt:
       type: object
       additionalProperties: false
@@ -6778,6 +6108,676 @@ components:
           type: array
           items:
             type: string
+    HandoffEvidenceResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - evidence
+      - raw_receipt_payload_exposed
+      - raw_payment_payload_exposed
+      - wallet_private_data_exposed
+      - settlement_internals_exposed
+      properties:
+        evidence:
+          $ref: '#/components/schemas/HandoffNullableEvidence'
+        raw_receipt_payload_exposed:
+          type: boolean
+          enum:
+          - false
+        raw_payment_payload_exposed:
+          type: boolean
+          enum:
+          - false
+        wallet_private_data_exposed:
+          type: boolean
+          enum:
+          - false
+        settlement_internals_exposed:
+          type: boolean
+          enum:
+          - false
+    HandoffCreateInactive:
+      type: object
+      additionalProperties: false
+      required:
+      - receipt
+      - handoff_url
+      - handoff_navigation
+      - public_safe_summary
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        receipt:
+          $ref: '#/components/schemas/HandoffInactiveRecorded'
+        handoff_url:
+          type:
+          - string
+          - 'null'
+          enum:
+          - null
+        handoff_navigation:
+          type: string
+          enum:
+          - unavailable
+        public_safe_summary:
+          type: string
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    HandoffNullableEvidence:
+      type:
+      - object
+      - 'null'
+      additionalProperties: false
+      required:
+      - schema
+      - external_marketplace_handoff_evidence_id
+      - external_marketplace_handoff_receipt_id
+      - evidence_type
+      - preview_ref
+      - candidate_ref
+      - source_ref
+      - handoff_url_hash
+      - task_hash
+      - policy_ref
+      - no_execution_evidence
+      - no_payment_evidence
+      - no_settlement_evidence
+      - no_wallet_spend_evidence
+      - no_router_ranking_mutation_evidence
+      - no_verification_claim_evidence
+      - public_safe_summary
+      - created_at
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-handoff-evidence.v1
+        external_marketplace_handoff_evidence_id:
+          type: string
+        external_marketplace_handoff_receipt_id:
+          type: string
+        evidence_type:
+          type: string
+          enum:
+          - external_marketplace_handoff_no_execution
+        preview_ref:
+          type: string
+        candidate_ref:
+          type: string
+        source_ref:
+          type: string
+        handoff_url_hash:
+          type: string
+        task_hash:
+          type:
+          - string
+          - 'null'
+        policy_ref:
+          type: string
+          enum:
+          - /external-marketplace-handoff-policy.json
+        no_execution_evidence:
+          type: boolean
+          enum:
+          - true
+        no_payment_evidence:
+          type: boolean
+          enum:
+          - true
+        no_settlement_evidence:
+          type: boolean
+          enum:
+          - true
+        no_wallet_spend_evidence:
+          type: boolean
+          enum:
+          - true
+        no_router_ranking_mutation_evidence:
+          type: boolean
+          enum:
+          - true
+        no_verification_claim_evidence:
+          type: boolean
+          enum:
+          - true
+        public_safe_summary:
+          type: string
+        created_at:
+          type: string
+    HandoffListResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - receipts
+      - public_safe_summary
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        receipts:
+          type: array
+          items:
+            $ref: '#/components/schemas/HandoffPublicReceipt'
+        public_safe_summary:
+          type: string
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    ArdMappedCapabilityCardData:
+      type: object
+      required:
+      - schema
+      - capability_card_id
+      - capability_card_hash
+      - source_type
+      - source_ref_hash
+      - source_hash
+      - source_registry
+      - source_manifest
+      - retrieved_at
+      - lifecycle_status
+      - eligibility_hash
+      - raw_payload_included
+      additionalProperties: false
+      description: 'Public-safe inline data emitted by the source helper
+
+        `mapPublicCapabilityCardToArdEntry()` for an Agent Commerce Interchange
+
+        capability card. The mapper requires every Interchange authority flag to be
+
+        false, emits hashes instead of a raw source reference, never includes the raw
+
+        payload, reuses bounded ARD normalization, and does not automatically publish
+
+        the entry into the canonical manifest, search index, Router, or marketplace.
+
+        '
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.agent-commerce.capability-card.v1
+        capability_card_id:
+          type: string
+          minLength: 1
+          maxLength: 512
+        capability_card_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+        source_type:
+          type: string
+        source_ref_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+        source_hash:
+          type: string
+        source_registry:
+          $ref: '#/components/schemas/ArdIdentifier'
+        source_manifest:
+          type: string
+          format: uri
+          pattern: ^https://
+        retrieved_at:
+          type: string
+          description: Bounded retrieval label; the mapper defaults this to the current ISO timestamp but accepts a caller-supplied source label.
+        lifecycle_status:
+          type: string
+        eligibility_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+        raw_payload_included:
+          type: boolean
+          enum:
+          - false
+    ArdSearchInlineContext:
+      type: object
+      description: 'Recursive inline JSON-LD context object. `@import` is prohibited on this
+
+        object and on every nested object reached through an object property or array.
+
+        '
+      not:
+        required:
+        - '@import'
+      properties:
+        '@context':
+          $ref: '#/components/schemas/ArdSearchContext'
+      additionalProperties:
+        $ref: '#/components/schemas/ArdSearchContextNode'
+    HandoffCreateRefusal:
+      type: object
+      additionalProperties: false
+      required:
+      - receipt
+      - handoff_url
+      - handoff_navigation
+      - public_safe_summary
+      - external_execution_enabled
+      - router_execute_enabled
+      - wallet_spend_enabled
+      - x402_settlement_enabled
+      properties:
+        receipt:
+          $ref: '#/components/schemas/HandoffRefusal'
+        handoff_url:
+          type:
+          - string
+          - 'null'
+          enum:
+          - null
+        handoff_navigation:
+          type: string
+          enum:
+          - unavailable
+        public_safe_summary:
+          type: string
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_enabled:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_enabled:
+          type: boolean
+          enum:
+          - false
+    HandoffInternalError:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          enum:
+          - internal
+        message:
+          type: string
+        request_id:
+          type: string
+    HandoffPublicReceipt:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - external_marketplace_handoff_receipt_id
+      - preview_id
+      - external_supply_candidate_id
+      - source_marketplace_id
+      - source_name
+      - handoff_state
+      - handoff_band
+      - handoff_intent
+      - handoff_url_hash
+      - handoff_url_redacted
+      - external_terms_apply
+      - external_execution_performed
+      - wallet_spend_performed
+      - x402_settlement_performed
+      - router_execute_enabled
+      - marketplace_verified
+      - agentcore_ready
+      - x402_ready
+      - public_safe_summary
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-handoff-public-summary.v1
+        external_marketplace_handoff_receipt_id:
+          type: string
+        preview_id:
+          type: string
+        external_supply_candidate_id:
+          type: string
+        source_marketplace_id:
+          type: string
+        source_name:
+          type: string
+        handoff_state:
+          type: string
+          enum:
+          - receipt_recorded
+          - revoked
+          - archived
+        handoff_band:
+          type: string
+          enum:
+          - x402_metadata_handoff
+          - mcp_metadata_handoff
+          - api_metadata_handoff
+          - link_only_handoff
+        handoff_intent:
+          type: string
+          enum:
+          - inspect_external_listing
+          - open_external_marketplace
+          - inspect_external_agent_card
+          - inspect_external_openapi
+          - inspect_external_mcp
+          - inspect_external_x402_metadata
+          - contact_external_provider
+          - compare_external_supply
+        handoff_url_hash:
+          type: string
+        handoff_url_redacted:
+          type:
+          - string
+          - 'null'
+        external_terms_apply:
+          type: boolean
+          enum:
+          - true
+        external_execution_performed:
+          type: boolean
+          enum:
+          - false
+        wallet_spend_performed:
+          type: boolean
+          enum:
+          - false
+        x402_settlement_performed:
+          type: boolean
+          enum:
+          - false
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        marketplace_verified:
+          type: boolean
+          enum:
+          - false
+        agentcore_ready:
+          type: boolean
+          enum:
+          - false
+        x402_ready:
+          type: boolean
+          enum:
+          - false
+        public_safe_summary:
+          type: string
+    HandoffNullableRiskCard:
+      type:
+      - object
+      - 'null'
+      additionalProperties: false
+      required:
+      - schema
+      - external_marketplace_handoff_risk_card_id
+      - external_marketplace_handoff_receipt_id
+      - risk_card_type
+      - external_terms_apply
+      - external_execution_not_controlled_by_agoragentic
+      - external_receipts_not_guaranteed_by_agoragentic
+      - agoragentic_verification_not_implied
+      - x402_readiness_not_implied
+      - settlement_finality_not_implied
+      - external_auth_may_be_required
+      - external_payment_may_be_required
+      - risk_summary
+      - blocker_summary
+      - warning_summary
+      - public_safe_summary
+      - created_at
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-handoff-risk-card.v1
+        external_marketplace_handoff_risk_card_id:
+          type: string
+        external_marketplace_handoff_receipt_id:
+          type: string
+        risk_card_type:
+          type: string
+          enum:
+          - external_marketplace_handoff
+        external_terms_apply:
+          type: boolean
+          enum:
+          - true
+        external_execution_not_controlled_by_agoragentic:
+          type: boolean
+          enum:
+          - true
+        external_receipts_not_guaranteed_by_agoragentic:
+          type: boolean
+          enum:
+          - true
+        agoragentic_verification_not_implied:
+          type: boolean
+          enum:
+          - true
+        x402_readiness_not_implied:
+          type: boolean
+          enum:
+          - true
+        settlement_finality_not_implied:
+          type: boolean
+          enum:
+          - true
+        external_auth_may_be_required:
+          type: boolean
+        external_payment_may_be_required:
+          type: boolean
+        risk_summary:
+          type: string
+        blocker_summary:
+          type: array
+          items:
+            type: string
+        warning_summary:
+          type: array
+          items:
+            type: string
+        public_safe_summary:
+          type: string
+        created_at:
+          type: string
+    HandoffSearchPreviewResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - preview
+      - authority_boundary
+      properties:
+        preview:
+          $ref: '#/components/schemas/HandoffPreview'
+        authority_boundary:
+          $ref: '#/components/schemas/HandoffAuthority'
+    HandoffAuditRefused:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - external_marketplace_handoff_receipt_id
+      - public_safe_summary
+      - created_at
+      - event_type
+      - request_id
+      - preview_id
+      - external_supply_candidate_id
+      - blocker_summary
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.external-marketplace-handoff-audit-event.v1
+        external_marketplace_handoff_receipt_id:
+          type: string
+        public_safe_summary:
+          type: string
+        created_at:
+          type: string
+        event_type:
+          type: string
+          enum:
+          - external_marketplace_handoff_refused
+        request_id:
+          type: string
+        preview_id:
+          type:
+          - string
+          - 'null'
+        external_supply_candidate_id:
+          type:
+          - string
+          - 'null'
+        blocker_summary:
+          type: array
+          items:
+            type: string
+    ArdError:
+      type: object
+      required:
+      - errorCode
+      - message
+      additionalProperties: false
+      properties:
+        errorCode:
+          type: string
+          description: Stable request codes include INVALID_ARGUMENT, FEDERATION_MODE_DISABLED, INVALID_PAGE_TOKEN, and UNSUPPORTED_CONTEXT. Oversized parsed requests use REQUEST_TOO_LARGE; unexpected failures use INTERNAL_ERROR.
+          example: FEDERATION_MODE_DISABLED
+        message:
+          type: string
+    ArdManifestHost:
+      type: object
+      required:
+      - displayName
+      - identifier
+      - documentationUrl
+      - logoUrl
+      additionalProperties: false
+      properties:
+        displayName:
+          type: string
+        identifier:
+          $ref: '#/components/schemas/ArdIdentifier'
+        documentationUrl:
+          type: string
+          format: uri
+        logoUrl:
+          type: string
+          format: uri
+    ArdSearchContextNode:
+      description: Recursive JSON-LD value used inside a strict inline search context.
+      anyOf:
+      - type:
+        - string
+        - 'null'
+      - type: number
+      - type: boolean
+      - type: array
+        items:
+          $ref: '#/components/schemas/ArdSearchContextNode'
+      - $ref: '#/components/schemas/ArdSearchInlineContext'
+    HandoffSelectedCandidate:
+      type: object
+      additionalProperties: false
+      required:
+      - external_supply_candidate_id
+      - source_marketplace_id
+      - source_name
+      - source_type
+      - title
+      - category
+      - tags
+      - invoke_method
+      - pricing_model
+      - trust_status
+      - canary_status
+      - router_preview_eligible
+      - router_execute_enabled
+      - external_execution_enabled
+      - marketplace_verified
+      - agentcore_ready
+      - x402_ready
+      properties:
+        external_supply_candidate_id:
+          type: string
+        source_marketplace_id:
+          type: string
+        source_name:
+          type: string
+        source_type:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        invoke_method:
+          type: string
+        pricing_model:
+          type: string
+        trust_status:
+          type: string
+        canary_status:
+          type: string
+        router_preview_eligible:
+          type: boolean
+        router_execute_enabled:
+          type: boolean
+          enum:
+          - false
+        external_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        marketplace_verified:
+          type: boolean
+          enum:
+          - false
+        agentcore_ready:
+          type: boolean
+          enum:
+          - false
+        x402_ready:
+          type: boolean
+          enum:
+          - false
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

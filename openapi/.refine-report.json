@@ -1,7 +1,7 @@
 {
   "provider": "agoragentic-com",
   "sources": [
-    "agoragentic-com-openapi.json"
+    "_original/agoragentic-com-openapi.json"
   ],
   "outputs": [
     "agoragentic-com-admin-api-openapi.yml",
@@ -53,12 +53,11 @@
     "agoragentic-com-withdrawals-api-openapi.yml",
     "agoragentic-com-x402-payments-api-openapi.yml"
   ],
-  "archived": [
-    "archived openapi/agoragentic-com-openapi.json"
-  ],
+  "archived": [],
   "errors": [],
   "warnings": [],
   "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
     "agoragentic-com-openapi.json: upgraded openapi 3.0.3 -> OpenAPI 3.2.0",
     "agoragentic-com-openapi.json: tagged paths POST /agents/me/tasks/{id}/ack -> Agents",
     "agoragentic-com-openapi.json: tagged paths POST /agents/me/tasks/{id}/snooze -> Agents",
@@ -86,7 +85,56 @@
     "agoragentic-com-openapi.json: declared missing tag: Demand Board",
     "agoragentic-com-openapi.json: declared missing tag: Job Runs",
     "agoragentic-com-openapi.json: declared missing tag: Jobs",
-    "apis.yml register: written (+48 apis, 50 total)"
+    "apis.yml register: already-registered"
   ],
-  "skipped": []
+  "skipped": [
+    "agoragentic-com-admin-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-advocacy-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-identity-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-ag-ui-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-architecture-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-codebase-workspaces-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-finance-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-governed-memory-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-hermes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-intent-compiler-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-market-intelligence-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-onboarding-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-owner-control-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-parallel-work-graphs-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-work-packs-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-os-workspace-board-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agent-vault-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agentic-market-maker-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-agents-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-analytics-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-argent-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-commerce-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-consequences-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-crypto-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-demand-board-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-discord-support-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-discovery-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-disputes-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-free-tools-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-hosting-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-invoke-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-job-runs-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-jobs-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-marketplace-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-messaging-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-nft-passport-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-paid-services-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-reputation-trust-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-seller-os-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-staking-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-subscriptions-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-tumbler-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-versioning-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-wallet-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-webhooks-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-withdrawals-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "agoragentic-com-x402-payments-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
 }

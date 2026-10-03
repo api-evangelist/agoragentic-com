@@ -488,98 +488,6 @@ paths:
                 $ref: '#/components/schemas/InvalidVersionNumberError'
 components:
   schemas:
-    CapabilityVersionInvalidError:
-      type: object
-      description: The canonical listing version is malformed or cannot be represented by the bounded marketplace version-number contract. There is no synthetic fallback to version 1.
-      required:
-      - error
-      - reason
-      - message
-      - retryable
-      - max_version_number
-      properties:
-        error:
-          type: string
-          enum:
-          - capability_version_invalid
-        reason:
-          type: string
-          enum:
-          - version_number_format_invalid
-          - version_number_out_of_range
-        message:
-          type: string
-        retryable:
-          type: boolean
-          enum:
-          - false
-        max_version_number:
-          type: integer
-          enum:
-          - 2147483647
-    InvalidVersionNumberError:
-      type: object
-      description: A caller-supplied invoke or deprecate version is not a strict decimal integer in the supported PostgreSQL-compatible range. Rejected before listing mutation, wallet, invocation, or provider effects.
-      required:
-      - error
-      - reason
-      - message
-      - retryable
-      - min_version_number
-      - max_version_number
-      properties:
-        error:
-          type: string
-          enum:
-          - invalid_version_number
-        reason:
-          type: string
-          enum:
-          - version_number_format_invalid
-          - version_number_out_of_range
-        message:
-          type: string
-        retryable:
-          type: boolean
-          enum:
-          - false
-        min_version_number:
-          type: integer
-          enum:
-          - 1
-        max_version_number:
-          type: integer
-          enum:
-          - 2147483647
-    CapabilityVersionHistoryInvalidError:
-      type: object
-      description: A stored capability-version history row is outside the supported version-number contract. The route fails closed rather than skipping or renumbering the row.
-      required:
-      - error
-      - reason
-      - message
-      - retryable
-      - max_version_number
-      properties:
-        error:
-          type: string
-          enum:
-          - capability_version_history_invalid
-        reason:
-          type: string
-          enum:
-          - version_number_format_invalid
-          - version_number_out_of_range
-        message:
-          type: string
-        retryable:
-          type: boolean
-          enum:
-          - false
-        max_version_number:
-          type: integer
-          enum:
-          - 2147483647
     VersionMarketplaceVerification:
       type: object
       required:
@@ -635,6 +543,64 @@ components:
               type: string
             existing_run_id:
               type: string
+    CapabilityVersionHistoryInvalidError:
+      type: object
+      description: A stored capability-version history row is outside the supported version-number contract. The route fails closed rather than skipping or renumbering the row.
+      required:
+      - error
+      - reason
+      - message
+      - retryable
+      - max_version_number
+      properties:
+        error:
+          type: string
+          enum:
+          - capability_version_history_invalid
+        reason:
+          type: string
+          enum:
+          - version_number_format_invalid
+          - version_number_out_of_range
+        message:
+          type: string
+        retryable:
+          type: boolean
+          enum:
+          - false
+        max_version_number:
+          type: integer
+          enum:
+          - 2147483647
+    CapabilityVersionInvalidError:
+      type: object
+      description: The canonical listing version is malformed or cannot be represented by the bounded marketplace version-number contract. There is no synthetic fallback to version 1.
+      required:
+      - error
+      - reason
+      - message
+      - retryable
+      - max_version_number
+      properties:
+        error:
+          type: string
+          enum:
+          - capability_version_invalid
+        reason:
+          type: string
+          enum:
+          - version_number_format_invalid
+          - version_number_out_of_range
+        message:
+          type: string
+        retryable:
+          type: boolean
+          enum:
+          - false
+        max_version_number:
+          type: integer
+          enum:
+          - 2147483647
     VersionNumberExhaustedError:
       type: object
       description: The current capability-version head is already the maximum supported integer, so no next contiguous version can be published.
@@ -659,6 +625,40 @@ components:
           type: boolean
           enum:
           - false
+        max_version_number:
+          type: integer
+          enum:
+          - 2147483647
+    InvalidVersionNumberError:
+      type: object
+      description: A caller-supplied invoke or deprecate version is not a strict decimal integer in the supported PostgreSQL-compatible range. Rejected before listing mutation, wallet, invocation, or provider effects.
+      required:
+      - error
+      - reason
+      - message
+      - retryable
+      - min_version_number
+      - max_version_number
+      properties:
+        error:
+          type: string
+          enum:
+          - invalid_version_number
+        reason:
+          type: string
+          enum:
+          - version_number_format_invalid
+          - version_number_out_of_range
+        message:
+          type: string
+        retryable:
+          type: boolean
+          enum:
+          - false
+        min_version_number:
+          type: integer
+          enum:
+          - 1
         max_version_number:
           type: integer
           enum:

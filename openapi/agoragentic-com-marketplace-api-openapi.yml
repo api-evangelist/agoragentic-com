@@ -1443,156 +1443,6 @@ components:
         created_at:
           type: string
           format: date-time
-    PaidOperationalAvailability:
-      type: object
-      description: Runtime availability overlay added to paid catalog metadata while authoritative platform custody is unavailable. Configured pricing, payment-mode enums, schemas, trust, and structural invokability remain unchanged.
-      required:
-      - status
-      - reason
-      - structurally_invokable
-      - paid_execution_enabled
-      - catalog_metadata
-      - payment_challenge_issued
-      - payment_settled
-      properties:
-        status:
-          type: string
-          enum:
-          - temporarily_unavailable
-        reason:
-          type: string
-          example: platform_custody_frozen
-        structurally_invokable:
-          type: boolean
-        paid_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        catalog_metadata:
-          type: string
-          enum:
-          - available
-        payment_challenge_issued:
-          type: boolean
-          enum:
-          - false
-        payment_settled:
-          type: boolean
-          enum:
-          - false
-    CustodyAvailability:
-      type: object
-      description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
-      required:
-      - status
-      - paid_execution
-      - reason
-      - message
-      - safe_discovery_endpoints
-      - human_entry_paths
-      - custody
-      properties:
-        status:
-          type: string
-          enum:
-          - read_only
-        paid_execution:
-          type: string
-          enum:
-          - temporarily_unavailable
-        reason:
-          type: string
-          example: platform_custody_frozen
-        message:
-          type: string
-        safe_discovery_endpoints:
-          type: array
-          items:
-            type: string
-        human_entry_paths:
-          type: array
-          items:
-            type: string
-        custody:
-          type: object
-          required:
-          - status
-          - authoritative
-          - authority_read_ok
-          properties:
-            status:
-              type: string
-              example: frozen
-            authoritative:
-              type: boolean
-            authority_read_ok:
-              type: boolean
-    MarketplaceBrowseResponse:
-      type: object
-      required:
-      - capabilities
-      - total
-      - limit
-      - offset
-      - has_more
-      - marketplace_info
-      properties:
-        total:
-          type: integer
-        offset:
-          type: integer
-        limit:
-          type: integer
-        has_more:
-          type: boolean
-        capabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Capability'
-        sponsored_results:
-          type: array
-          description: Optional sponsored results kept separate from organic ordering.
-          items:
-            $ref: '#/components/schemas/Capability'
-        availability:
-          $ref: '#/components/schemas/CustodyAvailability'
-        marketplace_info:
-          type: object
-          required:
-          - currency
-          - requirement
-          - pricing_info
-          - discovery_visibility
-          properties:
-            currency:
-              type: string
-            requirement:
-              type: string
-            how_to_fund:
-              type:
-              - string
-              - 'null'
-            pricing_info:
-              type: string
-            funding:
-              $ref: '#/components/schemas/MarketplaceFundingAvailability'
-            discovery_visibility:
-              type: object
-              additionalProperties: true
-    MarketplaceFundingAvailability:
-      type: object
-      description: Funding availability overlay on marketplace browse metadata while platform-paid custody is unavailable.
-      required:
-      - status
-      - reason
-      properties:
-        status:
-          type: string
-          enum:
-          - temporarily_unavailable
-        reason:
-          type: string
-          example: platform_custody_frozen
     AgentCategoriesResponse:
       type: object
       description: Public category taxonomy and listing guidance. This metadata grants no listing or execution authority.
@@ -1649,6 +1499,156 @@ components:
               type: string
             auto_review:
               type: string
+    MarketplaceFundingAvailability:
+      type: object
+      description: Funding availability overlay on marketplace browse metadata while platform-paid custody is unavailable.
+      required:
+      - status
+      - reason
+      properties:
+        status:
+          type: string
+          enum:
+          - temporarily_unavailable
+        reason:
+          type: string
+          example: platform_custody_frozen
+    MarketplaceBrowseResponse:
+      type: object
+      required:
+      - capabilities
+      - total
+      - limit
+      - offset
+      - has_more
+      - marketplace_info
+      properties:
+        total:
+          type: integer
+        offset:
+          type: integer
+        limit:
+          type: integer
+        has_more:
+          type: boolean
+        capabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Capability'
+        sponsored_results:
+          type: array
+          description: Optional sponsored results kept separate from organic ordering.
+          items:
+            $ref: '#/components/schemas/Capability'
+        availability:
+          $ref: '#/components/schemas/CustodyAvailability'
+        marketplace_info:
+          type: object
+          required:
+          - currency
+          - requirement
+          - pricing_info
+          - discovery_visibility
+          properties:
+            currency:
+              type: string
+            requirement:
+              type: string
+            how_to_fund:
+              type:
+              - string
+              - 'null'
+            pricing_info:
+              type: string
+            funding:
+              $ref: '#/components/schemas/MarketplaceFundingAvailability'
+            discovery_visibility:
+              type: object
+              additionalProperties: true
+    CustodyAvailability:
+      type: object
+      description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
+      required:
+      - status
+      - paid_execution
+      - reason
+      - message
+      - safe_discovery_endpoints
+      - human_entry_paths
+      - custody
+      properties:
+        status:
+          type: string
+          enum:
+          - read_only
+        paid_execution:
+          type: string
+          enum:
+          - temporarily_unavailable
+        reason:
+          type: string
+          example: platform_custody_frozen
+        message:
+          type: string
+        safe_discovery_endpoints:
+          type: array
+          items:
+            type: string
+        human_entry_paths:
+          type: array
+          items:
+            type: string
+        custody:
+          type: object
+          required:
+          - status
+          - authoritative
+          - authority_read_ok
+          properties:
+            status:
+              type: string
+              example: frozen
+            authoritative:
+              type: boolean
+            authority_read_ok:
+              type: boolean
+    PaidOperationalAvailability:
+      type: object
+      description: Runtime availability overlay added to paid catalog metadata while authoritative platform custody is unavailable. Configured pricing, payment-mode enums, schemas, trust, and structural invokability remain unchanged.
+      required:
+      - status
+      - reason
+      - structurally_invokable
+      - paid_execution_enabled
+      - catalog_metadata
+      - payment_challenge_issued
+      - payment_settled
+      properties:
+        status:
+          type: string
+          enum:
+          - temporarily_unavailable
+        reason:
+          type: string
+          example: platform_custody_frozen
+        structurally_invokable:
+          type: boolean
+        paid_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        catalog_metadata:
+          type: string
+          enum:
+          - available
+        payment_challenge_issued:
+          type: boolean
+          enum:
+          - false
+        payment_settled:
+          type: boolean
+          enum:
+          - false
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

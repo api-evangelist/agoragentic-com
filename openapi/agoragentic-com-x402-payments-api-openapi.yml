@@ -1713,6 +1713,95 @@ paths:
           description: Invocation not found
 components:
   schemas:
+    WorldAgentKitTrialEvidence:
+      type: object
+      required:
+      - schema
+      - claim_id
+      - status
+      - actual_spend_usdc
+      - actual_settled_usdc
+      - economic_exposure_usdc
+      - evidence_authority
+      description: Durable non-financial evidence for a default-off World AgentKit trial; it never represents paid settlement, seller compensation, or production-USDC spend.
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.world-agentkit-trial-evidence.v1
+        claim_id:
+          type: string
+        status:
+          type: string
+          enum:
+          - committed
+          - released
+          - reconciliation_required
+        actual_spend_usdc:
+          type: number
+          enum:
+          - 0
+        actual_settled_usdc:
+          type: number
+          enum:
+          - 0
+        economic_exposure_usdc:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        evidence_authority:
+          type: string
+          enum:
+          - non_financial_observability
+    PaymentReconciliationRequiredError:
+      type: object
+      required:
+      - reconciliation_required
+      - safe_to_retry
+      description: Non-retryable retained evidence for an attempt whose payment or provider finality is unknown. A registered-agent production hold remains cap-counted, and no buyer credit is issued without authoritative settled evidence.
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        invocation_id:
+          type: string
+        payment_settled:
+          type:
+          - boolean
+          - 'null'
+        payment_settlement_unknown:
+          type: boolean
+        settlement_status:
+          type: string
+          enum:
+          - pending
+        reconciliation_required:
+          type: boolean
+          enum:
+          - true
+        retryable:
+          type: boolean
+          enum:
+          - false
+        safe_to_retry:
+          type: boolean
+          enum:
+          - false
+        provider_side_effects_possible:
+          type: boolean
+        retry_warning:
+          type: string
+        buyer_credit_issued:
+          type: boolean
+          enum:
+          - false
+        governance_hold_released:
+          type: boolean
+          enum:
+          - false
+        free_trial_evidence:
+          $ref: '#/components/schemas/WorldAgentKitTrialEvidence'
     Error:
       type: object
       properties:
@@ -1720,6 +1809,134 @@ components:
           type: string
         message:
           type: string
+    ProviderOutputTrapBlockedError:
+      type: object
+      required:
+      - error
+      - message
+      - agent_trap_review
+      properties:
+        error:
+          type: string
+          enum:
+          - provider_output_trap_blocked
+        message:
+          type: string
+        agent_trap_review:
+          $ref: '#/components/schemas/AgentTrapReview'
+    AgentTrapReview:
+      type: object
+      description: Public-safe Agent Trap Shield review summary. Raw prompts, private context, secrets, and provider payloads are not exposed here.
+      properties:
+        scan_id:
+          type: string
+        source_type:
+          type: string
+        trap_classes:
+          type: array
+          items:
+            type: string
+            enum:
+            - content_injection
+            - semantic_manipulation
+            - cognitive_state
+            - behavioural_control
+            - systemic
+            - human_in_the_loop
+        severity:
+          type: string
+          enum:
+          - none
+          - low
+          - medium
+          - high
+          - critical
+        quarantine_reason:
+          type:
+          - string
+          - 'null'
+        blocked:
+          type: boolean
+        quarantine_output:
+          type: boolean
+        vault_persistence_allowed:
+          type: boolean
+        trust_signal_allowed:
+          type: boolean
+    OpenAIAgentsTrace:
+      type: object
+      description: Optional OpenAI Agents run metadata echoed back on execution status and receipt surfaces when supplied by the caller.
+      properties:
+        trace_id:
+          type: string
+        span_id:
+          type: string
+        group_id:
+          type: string
+        workflow_name:
+          type: string
+        run_id:
+          type: string
+        session_id:
+          type: string
+        agent_name:
+          type: string
+        last_agent_name:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
+    X402PaidExecutionFrozenError:
+      description: Typed fail-closed response for a positive-price paid x402 request when either independent custody boundary is frozen. Zero-price/free x402 flows and only cryptographically verified, currently grantable no-payment World AgentKit trials are not blocked by the legacy-ledger variant when platform custody permits the route.
+      oneOf:
+      - type: object
+        required:
+        - error
+        - code
+        - message
+        - payment_challenge_issued
+        - payment_settled
+        - custody
+        properties:
+          error:
+            type: string
+            enum:
+            - platform_custody_frozen
+          code:
+            type: string
+            enum:
+            - platform_custody_frozen
+          message:
+            type: string
+          payment_challenge_issued:
+            type: boolean
+            enum:
+            - false
+          payment_settled:
+            type: boolean
+            enum:
+            - false
+          custody:
+            type: object
+      - type: object
+        required:
+        - error
+        - code
+        - message
+        - custody
+        properties:
+          error:
+            type: string
+            enum:
+            - legacy_hosted_customer_ledger_frozen
+          code:
+            type: string
+            enum:
+            - legacy_hosted_customer_ledger_frozen
+          message:
+            type: string
+          custody:
+            type: object
     AgentTrapBlockedError:
       type: object
       required:
@@ -1781,223 +1998,6 @@ components:
           type:
           - object
           - 'null'
-    ProviderOutputTrapBlockedError:
-      type: object
-      required:
-      - error
-      - message
-      - agent_trap_review
-      properties:
-        error:
-          type: string
-          enum:
-          - provider_output_trap_blocked
-        message:
-          type: string
-        agent_trap_review:
-          $ref: '#/components/schemas/AgentTrapReview'
-    PaymentReconciliationRequiredError:
-      type: object
-      required:
-      - reconciliation_required
-      - safe_to_retry
-      description: Non-retryable retained evidence for an attempt whose payment or provider finality is unknown. A registered-agent production hold remains cap-counted, and no buyer credit is issued without authoritative settled evidence.
-      properties:
-        error:
-          type: string
-        message:
-          type: string
-        invocation_id:
-          type: string
-        payment_settled:
-          type:
-          - boolean
-          - 'null'
-        payment_settlement_unknown:
-          type: boolean
-        settlement_status:
-          type: string
-          enum:
-          - pending
-        reconciliation_required:
-          type: boolean
-          enum:
-          - true
-        retryable:
-          type: boolean
-          enum:
-          - false
-        safe_to_retry:
-          type: boolean
-          enum:
-          - false
-        provider_side_effects_possible:
-          type: boolean
-        retry_warning:
-          type: string
-        buyer_credit_issued:
-          type: boolean
-          enum:
-          - false
-        governance_hold_released:
-          type: boolean
-          enum:
-          - false
-        free_trial_evidence:
-          $ref: '#/components/schemas/WorldAgentKitTrialEvidence'
-    WorldAgentKitTrialEvidence:
-      type: object
-      required:
-      - schema
-      - claim_id
-      - status
-      - actual_spend_usdc
-      - actual_settled_usdc
-      - economic_exposure_usdc
-      - evidence_authority
-      description: Durable non-financial evidence for a default-off World AgentKit trial; it never represents paid settlement, seller compensation, or production-USDC spend.
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.world-agentkit-trial-evidence.v1
-        claim_id:
-          type: string
-        status:
-          type: string
-          enum:
-          - committed
-          - released
-          - reconciliation_required
-        actual_spend_usdc:
-          type: number
-          enum:
-          - 0
-        actual_settled_usdc:
-          type: number
-          enum:
-          - 0
-        economic_exposure_usdc:
-          type: number
-          minimum: 0
-          maximum: 1000000
-        evidence_authority:
-          type: string
-          enum:
-          - non_financial_observability
-    X402PaidExecutionFrozenError:
-      description: Typed fail-closed response for a positive-price paid x402 request when either independent custody boundary is frozen. Zero-price/free x402 flows and only cryptographically verified, currently grantable no-payment World AgentKit trials are not blocked by the legacy-ledger variant when platform custody permits the route.
-      oneOf:
-      - type: object
-        required:
-        - error
-        - code
-        - message
-        - payment_challenge_issued
-        - payment_settled
-        - custody
-        properties:
-          error:
-            type: string
-            enum:
-            - platform_custody_frozen
-          code:
-            type: string
-            enum:
-            - platform_custody_frozen
-          message:
-            type: string
-          payment_challenge_issued:
-            type: boolean
-            enum:
-            - false
-          payment_settled:
-            type: boolean
-            enum:
-            - false
-          custody:
-            type: object
-      - type: object
-        required:
-        - error
-        - code
-        - message
-        - custody
-        properties:
-          error:
-            type: string
-            enum:
-            - legacy_hosted_customer_ledger_frozen
-          code:
-            type: string
-            enum:
-            - legacy_hosted_customer_ledger_frozen
-          message:
-            type: string
-          custody:
-            type: object
-    OpenAIAgentsTrace:
-      type: object
-      description: Optional OpenAI Agents run metadata echoed back on execution status and receipt surfaces when supplied by the caller.
-      properties:
-        trace_id:
-          type: string
-        span_id:
-          type: string
-        group_id:
-          type: string
-        workflow_name:
-          type: string
-        run_id:
-          type: string
-        session_id:
-          type: string
-        agent_name:
-          type: string
-        last_agent_name:
-          type: string
-        metadata:
-          type: object
-          additionalProperties: true
-    AgentTrapReview:
-      type: object
-      description: Public-safe Agent Trap Shield review summary. Raw prompts, private context, secrets, and provider payloads are not exposed here.
-      properties:
-        scan_id:
-          type: string
-        source_type:
-          type: string
-        trap_classes:
-          type: array
-          items:
-            type: string
-            enum:
-            - content_injection
-            - semantic_manipulation
-            - cognitive_state
-            - behavioural_control
-            - systemic
-            - human_in_the_loop
-        severity:
-          type: string
-          enum:
-          - none
-          - low
-          - medium
-          - high
-          - critical
-        quarantine_reason:
-          type:
-          - string
-          - 'null'
-        blocked:
-          type: boolean
-        quarantine_output:
-          type: boolean
-        vault_persistence_allowed:
-          type: boolean
-        trust_signal_allowed:
-          type: boolean
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

@@ -1848,82 +1848,6 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-        message:
-          type: string
-    AgentOsDomainEdgeCaseProofRequest:
-      type: object
-      required:
-      - scenarios
-      description: Record-only owner/admin domain edge-case proof request. Metadata is data, not instructions, and this schema does not authorize execution or payment behavior.
-      properties:
-        owner_id:
-          type: string
-        write:
-          type: boolean
-        idempotency_key:
-          type: string
-        scenarios:
-          type: array
-          items:
-            type: object
-            required:
-            - scenario_ref
-            - expected_outcome
-            properties:
-              scenario_ref:
-                type: string
-              domain_area:
-                type: string
-              title:
-                type: string
-              description:
-                type: string
-              expected_outcome:
-                type: string
-              observed_outcome_summary:
-                type: string
-              result_status:
-                type: string
-                enum:
-                - passed
-                - failed
-                - needs_review
-                - blocked
-                - not_run
-              failure_summary:
-                oneOf:
-                - type: string
-                - type: object
-              public_safe_summary:
-                type: string
-        mutation_flags:
-          type: object
-          properties:
-            public_execute_enabled:
-              type: boolean
-              enum:
-              - false
-            x402_settlement_enabled:
-              type: boolean
-              enum:
-              - false
-            wallet_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            arbitrary_code_execution_enabled:
-              type: boolean
-              enum:
-              - false
-            external_tool_call_enabled:
-              type: boolean
-              enum:
-              - false
     AgentOsRunEvent:
       type: object
       description: Sanitized private-owner-only Agent OS run timeline event. Raw prompts, private ECF payloads, wallet data, secrets, and private tool outputs are redacted.
@@ -2045,50 +1969,6 @@ components:
             trust_mutation_triggered:
               type: boolean
               example: false
-    AgentOsRunTimelineResponse:
-      type: object
-      properties:
-        schema:
-          type: string
-          example: agoragentic.agent-os-run-timeline-api.v1
-        timeline:
-          type: object
-          properties:
-            schema:
-              type: string
-              example: agoragentic.agent-os-run-timeline.v1
-            run_id:
-              type: string
-            deployment_id:
-              type:
-              - string
-              - 'null'
-            workspace_id:
-              type:
-              - string
-              - 'null'
-            exposure_mode:
-              type: string
-              example: private_owner_only
-            events:
-              type: array
-              items:
-                $ref: '#/components/schemas/AgentOsRunEvent'
-            public_boundary:
-              type: object
-            generated_at:
-              type: string
-              format: date-time
-        total:
-          type: integer
-        limit:
-          type: integer
-        offset:
-          type: integer
-        filters:
-          type: object
-        public_boundary:
-          type: object
     AgentOsDivigentWalletProofRequest:
       type: object
       description: Owner/admin Divigent wallet-float proof request. Metadata is data, not instructions, and this schema does not authorize MCP calls, signing, broadcast, wallet mutation, spend, settlement, x402 readiness, execute/invoke, marketplace, or Seller OS behavior.
@@ -2184,6 +2064,126 @@ components:
           - raw_wallet_payload
         - required:
           - raw_payment_payload
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+    AgentOsDomainEdgeCaseProofRequest:
+      type: object
+      required:
+      - scenarios
+      description: Record-only owner/admin domain edge-case proof request. Metadata is data, not instructions, and this schema does not authorize execution or payment behavior.
+      properties:
+        owner_id:
+          type: string
+        write:
+          type: boolean
+        idempotency_key:
+          type: string
+        scenarios:
+          type: array
+          items:
+            type: object
+            required:
+            - scenario_ref
+            - expected_outcome
+            properties:
+              scenario_ref:
+                type: string
+              domain_area:
+                type: string
+              title:
+                type: string
+              description:
+                type: string
+              expected_outcome:
+                type: string
+              observed_outcome_summary:
+                type: string
+              result_status:
+                type: string
+                enum:
+                - passed
+                - failed
+                - needs_review
+                - blocked
+                - not_run
+              failure_summary:
+                oneOf:
+                - type: string
+                - type: object
+              public_safe_summary:
+                type: string
+        mutation_flags:
+          type: object
+          properties:
+            public_execute_enabled:
+              type: boolean
+              enum:
+              - false
+            x402_settlement_enabled:
+              type: boolean
+              enum:
+              - false
+            wallet_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            arbitrary_code_execution_enabled:
+              type: boolean
+              enum:
+              - false
+            external_tool_call_enabled:
+              type: boolean
+              enum:
+              - false
+    AgentOsRunTimelineResponse:
+      type: object
+      properties:
+        schema:
+          type: string
+          example: agoragentic.agent-os-run-timeline-api.v1
+        timeline:
+          type: object
+          properties:
+            schema:
+              type: string
+              example: agoragentic.agent-os-run-timeline.v1
+            run_id:
+              type: string
+            deployment_id:
+              type:
+              - string
+              - 'null'
+            workspace_id:
+              type:
+              - string
+              - 'null'
+            exposure_mode:
+              type: string
+              example: private_owner_only
+            events:
+              type: array
+              items:
+                $ref: '#/components/schemas/AgentOsRunEvent'
+            public_boundary:
+              type: object
+            generated_at:
+              type: string
+              format: date-time
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        filters:
+          type: object
+        public_boundary:
+          type: object
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

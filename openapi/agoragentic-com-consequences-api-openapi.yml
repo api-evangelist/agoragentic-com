@@ -291,51 +291,6 @@ paths:
                             $ref: '#/components/schemas/ConsequenceSummary'
 components:
   schemas:
-    ConsequenceSummary:
-      type: object
-      properties:
-        assessment_id:
-          type: string
-        recommendation:
-          type: string
-          enum:
-          - allow
-          - allow_with_limits
-          - ask_owner
-          - ask_arbiter
-          - block
-        risk_score:
-          type:
-          - number
-          - 'null'
-          format: float
-        risk_level:
-          type:
-          - string
-          - 'null'
-        benefit_score:
-          type:
-          - number
-          - 'null'
-          format: float
-        requires_approval:
-          type: boolean
-        requires_arbiter:
-          type: boolean
-        hard_policy_violation:
-          type: boolean
-        reason:
-          type:
-          - string
-          - 'null'
-        limits:
-          type: object
-          additionalProperties: true
-        block_scope:
-          type: string
-          enum:
-          - request
-          - provider
     ConsequenceAssessment:
       type: object
       properties:
@@ -411,6 +366,51 @@ components:
         updated_at:
           type: string
           format: date-time
+    ConsequenceSummary:
+      type: object
+      properties:
+        assessment_id:
+          type: string
+        recommendation:
+          type: string
+          enum:
+          - allow
+          - allow_with_limits
+          - ask_owner
+          - ask_arbiter
+          - block
+        risk_score:
+          type:
+          - number
+          - 'null'
+          format: float
+        risk_level:
+          type:
+          - string
+          - 'null'
+        benefit_score:
+          type:
+          - number
+          - 'null'
+          format: float
+        requires_approval:
+          type: boolean
+        requires_arbiter:
+          type: boolean
+        hard_policy_violation:
+          type: boolean
+        reason:
+          type:
+          - string
+          - 'null'
+        limits:
+          type: object
+          additionalProperties: true
+        block_scope:
+          type: string
+          enum:
+          - request
+          - provider
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

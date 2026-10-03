@@ -385,6 +385,20 @@ paths:
                 $ref: '#/components/schemas/AgentWalletPolicyError'
 components:
   schemas:
+    AgentWalletPolicyError:
+      type: object
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
     WalletBalance:
       type: object
       properties:
@@ -407,21 +421,78 @@ components:
         total_earned:
           type: number
           format: float
-    AgentWalletPolicyUpdated:
+    AgentWalletPolicy:
       type: object
       required:
-      - message
-      - updated_fields
-      - policy
+      - daily_spend_cap
+      - per_call_max_cost
+      - auto_approve_max_usdc
+      - rate_limit_per_minute
+      - max_price_per_call
+      - allowed_categories
+      - allowed_sellers
+      - blocked_sellers
+      - approval
+      - updated_at
       properties:
-        message:
-          type: string
-        updated_fields:
+        daily_spend_cap:
+          type: number
+        per_call_max_cost:
+          type: number
+        auto_approve_max_usdc:
+          type: number
+        rate_limit_per_minute:
+          type: number
+        max_price_per_call:
+          type:
+          - number
+          - 'null'
+        allowed_categories:
           type: array
           items:
             type: string
+        allowed_sellers:
+          type: array
+          items:
+            type: string
+        blocked_sellers:
+          type: array
+          items:
+            type: string
+        approval:
+          type: object
+          required:
+          - require_approval
+          - supervisor_id
+          properties:
+            require_approval:
+              type: boolean
+            supervisor_id:
+              type:
+              - string
+              - 'null'
+        updated_at:
+          type:
+          - string
+          - 'null'
+    AgentWalletPolicyResponse:
+      type: object
+      required:
+      - policy
+      - semantics
+      properties:
         policy:
           $ref: '#/components/schemas/AgentWalletPolicy'
+        semantics:
+          type: object
+          required:
+          - auto_approve_max_usdc
+          - settlement_model
+          properties:
+            auto_approve_max_usdc:
+              type: string
+            settlement_model:
+              type: string
     WalletPricingResponse:
       type: object
       required:
@@ -523,6 +594,21 @@ components:
               type: boolean
               enum:
               - false
+    AgentWalletPolicyUpdated:
+      type: object
+      required:
+      - message
+      - updated_fields
+      - policy
+      properties:
+        message:
+          type: string
+        updated_fields:
+          type: array
+          items:
+            type: string
+        policy:
+          $ref: '#/components/schemas/AgentWalletPolicy'
     CustodyAvailability:
       type: object
       description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
@@ -570,92 +656,6 @@ components:
               type: boolean
             authority_read_ok:
               type: boolean
-    AgentWalletPolicy:
-      type: object
-      required:
-      - daily_spend_cap
-      - per_call_max_cost
-      - auto_approve_max_usdc
-      - rate_limit_per_minute
-      - max_price_per_call
-      - allowed_categories
-      - allowed_sellers
-      - blocked_sellers
-      - approval
-      - updated_at
-      properties:
-        daily_spend_cap:
-          type: number
-        per_call_max_cost:
-          type: number
-        auto_approve_max_usdc:
-          type: number
-        rate_limit_per_minute:
-          type: number
-        max_price_per_call:
-          type:
-          - number
-          - 'null'
-        allowed_categories:
-          type: array
-          items:
-            type: string
-        allowed_sellers:
-          type: array
-          items:
-            type: string
-        blocked_sellers:
-          type: array
-          items:
-            type: string
-        approval:
-          type: object
-          required:
-          - require_approval
-          - supervisor_id
-          properties:
-            require_approval:
-              type: boolean
-            supervisor_id:
-              type:
-              - string
-              - 'null'
-        updated_at:
-          type:
-          - string
-          - 'null'
-    AgentWalletPolicyError:
-      type: object
-      required:
-      - error
-      - message
-      properties:
-        error:
-          type: string
-        message:
-          type: string
-        details:
-          type: array
-          items:
-            type: string
-    AgentWalletPolicyResponse:
-      type: object
-      required:
-      - policy
-      - semantics
-      properties:
-        policy:
-          $ref: '#/components/schemas/AgentWalletPolicy'
-        semantics:
-          type: object
-          required:
-          - auto_approve_max_usdc
-          - settlement_model
-          properties:
-            auto_approve_max_usdc:
-              type: string
-            settlement_model:
-              type: string
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

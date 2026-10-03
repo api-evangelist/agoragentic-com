@@ -4686,741 +4686,6 @@ paths:
                 - $ref: '#/components/schemas/Error'
 components:
   schemas:
-    ListingReviewQueueReason:
-      type: object
-      required:
-      - code
-      - label
-      - message
-      - next_step
-      - source
-      - fixable
-      description: Canonical admin presentation derived from stored review evidence; it does not rewrite the raw review_notes artifact.
-      properties:
-        code:
-          type: string
-        label:
-          type: string
-        message:
-          type: string
-        next_step:
-          type: string
-        source:
-          type: string
-        fixable:
-          type: boolean
-    HostedListingEconomicsError:
-      type: object
-      description: Hosted listing economics were rejected from the raw request or persisted listing draft before the applicable live provider effects. Strict decimal strings exclude signs, exponent notation, hexadecimal notation, and positive values that underflow to zero; exact numeric/string zero is the free lane.
-      required:
-      - error
-      - message
-      - details
-      properties:
-        error:
-          type: string
-          enum:
-          - invalid_hosted_listing_pricing_model
-          - invalid_hosted_listing_price
-          - hosted_listing_price_conflict
-          - hosted_listing_price_too_low
-        message:
-          type: string
-        details:
-          type: object
-          additionalProperties: true
-    GovernanceSpendReservationWindowSummary:
-      type: object
-      description: Admission-relevant registered-agent production-USDC spend currently held against configured caps; this is separate from durable invocation spend and settlement proof.
-      properties:
-        active_usdc:
-          type: number
-        daily_usdc:
-          type: number
-        monthly_usdc:
-          type: number
-        lifetime_usdc:
-          type: number
-    HostedActivationReadiness:
-      type: object
-      description: Stable readiness explanation for a hosted activation result. A blocked result is not activation proof and must follow `next_step` before a new activation occurrence.
-      required:
-      - status
-      - reason
-      - retryable
-      - next_step
-      - checks
-      properties:
-        status:
-          type: string
-          enum:
-          - ready
-          - blocked
-        reason:
-          type: string
-        retryable:
-          type: boolean
-          description: Whether a fresh occurrence may be useful after completing the documented next step. Exact idempotent replay never dispatches the adapter again.
-        next_step:
-          type:
-          - string
-          - 'null'
-        checks:
-          type: object
-          additionalProperties:
-            type: boolean
-    HostedActivationOutcome:
-      type: object
-      description: 'Hosted runtime activation and marketplace verification are independent. `activated=true`
-
-        means the provider returned the exact ready status/service/trust/public-HTTPS contract;
-
-        it does not approve marketplace content. A new or review-content-changed listing is active
-
-        but pending review, reports `content_review_required=true`, and does not queue sandbox proof
-
-        until semantic review and owner release. Only an exact-identity unchanged already approved
-
-        listing preserves approval and queues reverification. Every listing remains execution-
-
-        ineligible until current canonical proof passes. Detail/list/replay presentation is hydrated
-
-        from the canonical capability row so cached provider state cannot keep exposure effective.
-
-        For x402 exposure, pending/blocked candidates keep both marketplace direct invoke and x402
-
-        compatibility invoke paths null and report `x402_listing_pending` or `x402_listing_blocked`;
-
-        live compatibility status is emitted only after the canonical listing becomes effective.
-
-        Provider-not-ready outcomes return HTTP 202 with `success=false`, `activated=false`, and
-
-        no listing. Existing bound-listing review/lifecycle/revision conflicts preserve that row
-
-        and return the same negative shape at HTTP 409; hosting never autoapproves or resumes it.
-
-        '
-      required:
-      - success
-      - activated
-      - activation
-      - activation_gate
-      - activation_readiness
-      - listing
-      - marketplace_verification
-      - exposure
-      - deployment_surface
-      - deployment
-      properties:
-        success:
-          type: boolean
-        error:
-          type: string
-          description: Stable reason code on a blocked/non-ready outcome.
-        http_status:
-          type: integer
-          enum:
-          - 202
-          - 409
-        activated:
-          type: boolean
-        activation:
-          type:
-          - object
-          - 'null'
-          additionalProperties: true
-        activation_gate:
-          type: object
-          additionalProperties: true
-        activation_readiness:
-          $ref: '#/components/schemas/HostedActivationReadiness'
-        listing:
-          type:
-          - object
-          - 'null'
-          properties:
-            id:
-              type: string
-              format: uuid
-            slug:
-              type: string
-            status:
-              type: string
-              description: Current canonical listing lifecycle status on hydrated replay.
-            review_status:
-              type: string
-              description: Current canonical listing review status on hydrated replay.
-            content_review_required:
-              type: boolean
-              description: True for a new listing or any review-bound content change; hosted runtime readiness cannot clear this review gate.
-            semantic_review_scheduled:
-              type: boolean
-              description: Present for content-review-gated publication and true only when off-response-path semantic review was scheduled.
-            review_changed_fields:
-              type: array
-              items:
-                type: string
-              description: Review-bound fields that changed; a new listing reports `new_listing`.
-            execution_eligible:
-              type: boolean
-              description: False on initial activation; hydrated replay can become true only from current canonical eligibility.
-            marketplace_verification:
-              $ref: '#/components/schemas/HostedMarketplaceVerification'
-        marketplace_verification:
-          $ref: '#/components/schemas/HostedMarketplaceVerification'
-        exposure:
-          type: object
-          additionalProperties: true
-          description: Canonical hosted exposure decision. `marketplace_listing_publication_authorized` permits a review-gated create/update; only `marketplace_listing_effective=true` authorizes live marketplace/direct-invoke/x402 presentation.
-        deployment_surface:
-          type: object
-          additionalProperties: true
-          description: Canonically hydrated runtime/marketplace/x402 surface. For an x402 candidate that is not effective, marketplace direct invoke and `x402.compatibility_invoke_path` are null and `x402.stable_edge_status` is `x402_listing_pending` or `x402_listing_blocked`; live compatibility statuses require an effective listing.
-        deployment:
-          type: object
-          additionalProperties: true
-        message:
-          type: string
-        agent_os_deploy:
-          type: object
-          additionalProperties: true
-    GovernanceDecisionExportEvidence:
-      type: object
-      description: Bounded admin export evidence. Sensitive request_context and delegation_chain fields are deliberately omitted.
-      properties:
-        id:
-          type: string
-        created_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        agent_id:
-          type:
-          - string
-          - 'null'
-        agent_name:
-          type:
-          - string
-          - 'null'
-        action:
-          type: string
-        decision_kind:
-          $ref: '#/components/schemas/GovernanceDecisionKind'
-        verdict:
-          type: string
-          enum:
-          - allow
-          - deny
-          - deny_absent
-        reason:
-          type: string
-        resource_type:
-          type: string
-        resource_id:
-          type:
-          - string
-          - 'null'
-        correlation_ref:
-          type:
-          - string
-          - 'null'
-        policy_id:
-          type:
-          - string
-          - 'null'
-        policy_ids:
-          type: array
-          items:
-            type: string
-        policy_sources:
-          type: array
-          items:
-            type: object
-            properties:
-              policy_id:
-                type: string
-              set_by:
-                type:
-                - string
-                - 'null'
-        attestation_ids:
-          type: array
-          items:
-            type: string
-        latency_us:
-          type: integer
-    AgentTrapEventsAdminResponse:
-      type: object
-      properties:
-        schema:
-          type: string
-          example: agoragentic.agent-trap-events-admin.v1
-        read_only:
-          type: boolean
-          example: true
-        filters:
-          type: object
-        total:
-          type: integer
-        limit:
-          type: integer
-        offset:
-          type: integer
-        events:
-          type: array
-          items:
-            $ref: '#/components/schemas/AgentTrapEvent'
-        public_boundary:
-          type: object
-    FederationIntakeRelayApprovalResult:
-      type: object
-      additionalProperties: false
-      required:
-      - created
-      - approval
-      properties:
-        created:
-          type: boolean
-        approval:
-          $ref: '#/components/schemas/FederationIntakeRelayApproval'
-    ListingDecisionEvidenceRequest:
-      type: object
-      description: Complete evidence snapshot returned as `decision_evidence` by the pending-listings queue.
-      required:
-      - expected_updated_at
-      - expected_listing_revision
-      - expected_sandbox_run_id
-      properties:
-        expected_updated_at:
-          type: string
-          minLength: 1
-        expected_listing_revision:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-        expected_sandbox_run_id:
-          type:
-          - string
-          - 'null'
-    FederationReviewEvidence:
-      type: object
-      required:
-      - evidence_id
-      - relationship_id
-      - remote_origin
-      - agent_card_hash
-      - declared_key_id
-      - declared_key_fingerprint
-      - key_algorithm
-      - capability_exchange_declared
-      - trap_scan_status
-      - resolver_status
-      - fetched_at
-      - expires_at
-      - evidence_ref
-      - review
-      properties:
-        evidence_id:
-          type: string
-        relationship_id:
-          type: string
-        remote_origin:
-          type: string
-          format: uri
-        agent_card_url:
-          type:
-          - string
-          - 'null'
-          format: uri
-          description: Review-safe Agent Card URL with credentials, query, and fragment removed.
-        agent_card_hash:
-          type: string
-        agent_card_hash_recipe:
-          type:
-          - string
-          - 'null'
-        declared_agent_id:
-          type:
-          - string
-          - 'null'
-        declared_key_id:
-          type: string
-        declared_key_fingerprint:
-          type: string
-        key_algorithm:
-          type: string
-          enum:
-          - ed25519
-        capability_exchange_declared:
-          type: boolean
-        trap_scan_status:
-          type: string
-        resolver_status:
-          type: string
-          enum:
-          - pending_owner_review
-          - owner_approved
-        fetched_at:
-          type: string
-          format: date-time
-        expires_at:
-          type: string
-          format: date-time
-        evidence_ref:
-          type: string
-        created_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        updated_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        review:
-          type: object
-          required:
-          - required
-          - expired
-          - authority
-          - accept_path
-          properties:
-            required:
-              type: boolean
-            expired:
-              type: boolean
-            authority:
-              type: string
-              enum:
-              - owner
-            accept_path:
-              type:
-              - string
-              - 'null'
-              enum:
-              - /api/admin/agent-federation/accept
-              - null
-    FederationIntakeRelayZeroAuthority:
-      type: object
-      additionalProperties: false
-      required:
-      - discoverability_grants_authority
-      - contact
-      - outreach
-      - relationship_mutation
-      - key_pinning
-      - trust_promotion
-      - ranking_mutation
-      - routing
-      - referrals
-      - invocation
-      - provider_execution
-      - payments
-      - settlement
-      - money
-      properties:
-        discoverability_grants_authority:
-          type: boolean
-          enum:
-          - false
-        contact:
-          type: boolean
-          enum:
-          - false
-        outreach:
-          type: boolean
-          enum:
-          - false
-        relationship_mutation:
-          type: boolean
-          enum:
-          - false
-        key_pinning:
-          type: boolean
-          enum:
-          - false
-        trust_promotion:
-          type: boolean
-          enum:
-          - false
-        ranking_mutation:
-          type: boolean
-          enum:
-          - false
-        routing:
-          type: boolean
-          enum:
-          - false
-        referrals:
-          type: boolean
-          enum:
-          - false
-        invocation:
-          type: boolean
-          enum:
-          - false
-        provider_execution:
-          type: boolean
-          enum:
-          - false
-        payments:
-          type: boolean
-          enum:
-          - false
-        settlement:
-          type: boolean
-          enum:
-          - false
-        money:
-          type: boolean
-          enum:
-          - false
-    FederationIntakeRelayRevocationResult:
-      type: object
-      additionalProperties: false
-      required:
-      - changed
-      - approval
-      properties:
-        changed:
-          type: boolean
-        approval:
-          $ref: '#/components/schemas/FederationIntakeRelayApproval'
-    HostedMarketplaceVerification:
-      type: object
-      description: Marketplace content review and runtime proof are separate from hosted runtime activation. New or review-content-changed listings use `pending` with reason `semantic_owner_review_pending_before_sandbox_queue` and no run until semantic review plus owner release allow canonical proof queueing. A review scheduling error is sanitized as `semantic_review_schedule_operational_error` and is retryable. Exact-identity unchanged approved listings may initially report queued/pending/queue_error sandbox state. Completed replay is rebuilt from the canonical listing and may report verified, reachable, pending, failed, or blocked. The narrow legacy NULL-status plus positive-success proof is labeled only `reachable` with reason `legacy_successful_runtime_proof`, never `verified`. `run_id` is exposed only for a current canonical sandbox status of verified/reachable; legacy, pending, failed, and blocked lanes return null. Blocked/non-ready activation uses `not_requested` because no listing is published.
-      required:
-      - required
-      - status
-      - execution_eligible
-      - retry_required
-      - run_id
-      - reason
-      properties:
-        required:
-          type: boolean
-        status:
-          type: string
-          enum:
-          - not_requested
-          - queued
-          - pending
-          - queue_error
-          - verified
-          - reachable
-          - failed
-          - blocked
-        execution_eligible:
-          type:
-          - boolean
-          - 'null'
-        retry_required:
-          type: boolean
-        run_id:
-          type:
-          - string
-          - 'null'
-        reason:
-          type: string
-    GovernanceDecisionKind:
-      type: string
-      enum:
-      - legacy
-      - authorization_precheck
-      - preview
-      - authorization_attempt
-      - simulation
-      description: 'Phase tag for retained governance evidence. `legacy` means the row predates
-
-        phase tagging and cannot be safely reclassified. `preview` is a non-authorizing
-
-        provider/match preview, and `simulation` is an explicitly hypothetical policy
-
-        check; neither authorizes execution. `authorization_precheck` is a policy
-
-        evaluation before final spend admission and does not prove that an invocation,
-
-        payment, settlement, or provider call occurred. `authorization_attempt` is the
-
-        authoritative admission verdict for a provider-bound attempt. Production
-
-        registered-agent attempts subject to rolling spend limits bind a reservation;
-
-        denied attempts and zero-production-cost Tumbler attempts have no production
-
-        USDC reservation.
-
-        '
-    GovernanceDecisionEvidence:
-      type: object
-      description: Retained policy-decision evidence. It is not agent memory, queued work, an invocation outcome, a receipt, or settlement proof.
-      properties:
-        id:
-          type: string
-        agent_id:
-          type:
-          - string
-          - 'null'
-        agent_name:
-          type:
-          - string
-          - 'null'
-        action:
-          type: string
-        resource_type:
-          type: string
-        resource_id:
-          type:
-          - string
-          - 'null'
-        verdict:
-          type: string
-        reason:
-          type: string
-        policy_id:
-          type:
-          - string
-          - 'null'
-        policy_ids:
-          type: array
-          items:
-            type: string
-        policy_sources:
-          type: array
-          items:
-            type: object
-            properties:
-              policy_id:
-                type: string
-              set_by:
-                type:
-                - string
-                - 'null'
-        attestation_ids:
-          type: array
-          items:
-            type: string
-        delegation_chain:
-          type: array
-          items:
-            type: object
-        request_context:
-          type: object
-        latency_us:
-          type: integer
-        decision_kind:
-          $ref: '#/components/schemas/GovernanceDecisionKind'
-        correlation_ref:
-          type:
-          - string
-          - 'null'
-          description: Invocation/request correlation when the producing phase supplied one; null does not imply that execution occurred.
-        created_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-        message:
-          type: string
-    FederationIntakeRelayApproval:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - intake_id
-      - recipient_agent_id
-      - item_id
-      - owner_approval_ref_hash
-      - approved_by_hash
-      - intake_evidence_hash
-      - state
-      - created_at
-      - updated_at
-      - authority
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.federation-steward.intake-relay-approval.v1
-        intake_id:
-          type: string
-        recipient_agent_id:
-          type: string
-        item_id:
-          type: string
-        owner_approval_ref_hash:
-          type: string
-        approved_by_hash:
-          type: string
-        intake_evidence_hash:
-          type: string
-        item_evidence_hash:
-          type:
-          - string
-          - 'null'
-        state:
-          type: string
-          enum:
-          - approved
-          - materialized
-          - blocked
-          - revoked
-        blocker_code:
-          type:
-          - string
-          - 'null'
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
-        materialized_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        revoked_at:
-          type:
-          - string
-          - 'null'
-          format: date-time
-        revocation_ref_hash:
-          type:
-          - string
-          - 'null'
-        revoked_by_hash:
-          type:
-          - string
-          - 'null'
-        authority:
-          $ref: '#/components/schemas/FederationIntakeRelayZeroAuthority'
-    ListingDecisionEvidence:
-      type: object
-      description: Public-safe compare-and-set snapshot for a single listing decision. Values are opaque and must be echoed unchanged from the review queue.
-      required:
-      - updated_at
-      - listing_revision
-      - sandbox_run_id
-      properties:
-        updated_at:
-          type: string
-          description: Database-rendered update token.
-        listing_revision:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-          description: Hash identity of the current proof-bound listing contract.
-        sandbox_run_id:
-          type:
-          - string
-          - 'null'
-          description: Current sandbox run identifier, or null when no run is current.
     AgentTrapEvent:
       type: object
       description: Read-only normalized internal event for operator diagnosis of route-preflight and provider-output trap decisions.
@@ -5540,6 +4805,637 @@ components:
         created_at:
           type: string
           format: date-time
+    FederationIntakeRelayApprovalResult:
+      type: object
+      additionalProperties: false
+      required:
+      - created
+      - approval
+      properties:
+        created:
+          type: boolean
+        approval:
+          $ref: '#/components/schemas/FederationIntakeRelayApproval'
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+    FederationReviewEvidence:
+      type: object
+      required:
+      - evidence_id
+      - relationship_id
+      - remote_origin
+      - agent_card_hash
+      - declared_key_id
+      - declared_key_fingerprint
+      - key_algorithm
+      - capability_exchange_declared
+      - trap_scan_status
+      - resolver_status
+      - fetched_at
+      - expires_at
+      - evidence_ref
+      - review
+      properties:
+        evidence_id:
+          type: string
+        relationship_id:
+          type: string
+        remote_origin:
+          type: string
+          format: uri
+        agent_card_url:
+          type:
+          - string
+          - 'null'
+          format: uri
+          description: Review-safe Agent Card URL with credentials, query, and fragment removed.
+        agent_card_hash:
+          type: string
+        agent_card_hash_recipe:
+          type:
+          - string
+          - 'null'
+        declared_agent_id:
+          type:
+          - string
+          - 'null'
+        declared_key_id:
+          type: string
+        declared_key_fingerprint:
+          type: string
+        key_algorithm:
+          type: string
+          enum:
+          - ed25519
+        capability_exchange_declared:
+          type: boolean
+        trap_scan_status:
+          type: string
+        resolver_status:
+          type: string
+          enum:
+          - pending_owner_review
+          - owner_approved
+        fetched_at:
+          type: string
+          format: date-time
+        expires_at:
+          type: string
+          format: date-time
+        evidence_ref:
+          type: string
+        created_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        updated_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        review:
+          type: object
+          required:
+          - required
+          - expired
+          - authority
+          - accept_path
+          properties:
+            required:
+              type: boolean
+            expired:
+              type: boolean
+            authority:
+              type: string
+              enum:
+              - owner
+            accept_path:
+              type:
+              - string
+              - 'null'
+              enum:
+              - /api/admin/agent-federation/accept
+              - null
+    FederationIntakeRelayApproval:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - intake_id
+      - recipient_agent_id
+      - item_id
+      - owner_approval_ref_hash
+      - approved_by_hash
+      - intake_evidence_hash
+      - state
+      - created_at
+      - updated_at
+      - authority
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.federation-steward.intake-relay-approval.v1
+        intake_id:
+          type: string
+        recipient_agent_id:
+          type: string
+        item_id:
+          type: string
+        owner_approval_ref_hash:
+          type: string
+        approved_by_hash:
+          type: string
+        intake_evidence_hash:
+          type: string
+        item_evidence_hash:
+          type:
+          - string
+          - 'null'
+        state:
+          type: string
+          enum:
+          - approved
+          - materialized
+          - blocked
+          - revoked
+        blocker_code:
+          type:
+          - string
+          - 'null'
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        materialized_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        revoked_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        revocation_ref_hash:
+          type:
+          - string
+          - 'null'
+        revoked_by_hash:
+          type:
+          - string
+          - 'null'
+        authority:
+          $ref: '#/components/schemas/FederationIntakeRelayZeroAuthority'
+    ListingDecisionEvidence:
+      type: object
+      description: Public-safe compare-and-set snapshot for a single listing decision. Values are opaque and must be echoed unchanged from the review queue.
+      required:
+      - updated_at
+      - listing_revision
+      - sandbox_run_id
+      properties:
+        updated_at:
+          type: string
+          description: Database-rendered update token.
+        listing_revision:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+          description: Hash identity of the current proof-bound listing contract.
+        sandbox_run_id:
+          type:
+          - string
+          - 'null'
+          description: Current sandbox run identifier, or null when no run is current.
+    GovernanceDecisionExportEvidence:
+      type: object
+      description: Bounded admin export evidence. Sensitive request_context and delegation_chain fields are deliberately omitted.
+      properties:
+        id:
+          type: string
+        created_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
+        agent_id:
+          type:
+          - string
+          - 'null'
+        agent_name:
+          type:
+          - string
+          - 'null'
+        action:
+          type: string
+        decision_kind:
+          $ref: '#/components/schemas/GovernanceDecisionKind'
+        verdict:
+          type: string
+          enum:
+          - allow
+          - deny
+          - deny_absent
+        reason:
+          type: string
+        resource_type:
+          type: string
+        resource_id:
+          type:
+          - string
+          - 'null'
+        correlation_ref:
+          type:
+          - string
+          - 'null'
+        policy_id:
+          type:
+          - string
+          - 'null'
+        policy_ids:
+          type: array
+          items:
+            type: string
+        policy_sources:
+          type: array
+          items:
+            type: object
+            properties:
+              policy_id:
+                type: string
+              set_by:
+                type:
+                - string
+                - 'null'
+        attestation_ids:
+          type: array
+          items:
+            type: string
+        latency_us:
+          type: integer
+    ListingDecisionEvidenceRequest:
+      type: object
+      description: Complete evidence snapshot returned as `decision_evidence` by the pending-listings queue.
+      required:
+      - expected_updated_at
+      - expected_listing_revision
+      - expected_sandbox_run_id
+      properties:
+        expected_updated_at:
+          type: string
+          minLength: 1
+        expected_listing_revision:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+        expected_sandbox_run_id:
+          type:
+          - string
+          - 'null'
+    AgentTrapEventsAdminResponse:
+      type: object
+      properties:
+        schema:
+          type: string
+          example: agoragentic.agent-trap-events-admin.v1
+        read_only:
+          type: boolean
+          example: true
+        filters:
+          type: object
+        total:
+          type: integer
+        limit:
+          type: integer
+        offset:
+          type: integer
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AgentTrapEvent'
+        public_boundary:
+          type: object
+    FederationIntakeRelayRevocationResult:
+      type: object
+      additionalProperties: false
+      required:
+      - changed
+      - approval
+      properties:
+        changed:
+          type: boolean
+        approval:
+          $ref: '#/components/schemas/FederationIntakeRelayApproval'
+    HostedListingEconomicsError:
+      type: object
+      description: Hosted listing economics were rejected from the raw request or persisted listing draft before the applicable live provider effects. Strict decimal strings exclude signs, exponent notation, hexadecimal notation, and positive values that underflow to zero; exact numeric/string zero is the free lane.
+      required:
+      - error
+      - message
+      - details
+      properties:
+        error:
+          type: string
+          enum:
+          - invalid_hosted_listing_pricing_model
+          - invalid_hosted_listing_price
+          - hosted_listing_price_conflict
+          - hosted_listing_price_too_low
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+    HostedActivationReadiness:
+      type: object
+      description: Stable readiness explanation for a hosted activation result. A blocked result is not activation proof and must follow `next_step` before a new activation occurrence.
+      required:
+      - status
+      - reason
+      - retryable
+      - next_step
+      - checks
+      properties:
+        status:
+          type: string
+          enum:
+          - ready
+          - blocked
+        reason:
+          type: string
+        retryable:
+          type: boolean
+          description: Whether a fresh occurrence may be useful after completing the documented next step. Exact idempotent replay never dispatches the adapter again.
+        next_step:
+          type:
+          - string
+          - 'null'
+        checks:
+          type: object
+          additionalProperties:
+            type: boolean
+    HostedMarketplaceVerification:
+      type: object
+      description: Marketplace content review and runtime proof are separate from hosted runtime activation. New or review-content-changed listings use `pending` with reason `semantic_owner_review_pending_before_sandbox_queue` and no run until semantic review plus owner release allow canonical proof queueing. A review scheduling error is sanitized as `semantic_review_schedule_operational_error` and is retryable. Exact-identity unchanged approved listings may initially report queued/pending/queue_error sandbox state. Completed replay is rebuilt from the canonical listing and may report verified, reachable, pending, failed, or blocked. The narrow legacy NULL-status plus positive-success proof is labeled only `reachable` with reason `legacy_successful_runtime_proof`, never `verified`. `run_id` is exposed only for a current canonical sandbox status of verified/reachable; legacy, pending, failed, and blocked lanes return null. Blocked/non-ready activation uses `not_requested` because no listing is published.
+      required:
+      - required
+      - status
+      - execution_eligible
+      - retry_required
+      - run_id
+      - reason
+      properties:
+        required:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - not_requested
+          - queued
+          - pending
+          - queue_error
+          - verified
+          - reachable
+          - failed
+          - blocked
+        execution_eligible:
+          type:
+          - boolean
+          - 'null'
+        retry_required:
+          type: boolean
+        run_id:
+          type:
+          - string
+          - 'null'
+        reason:
+          type: string
+    HostedActivationOutcome:
+      type: object
+      description: 'Hosted runtime activation and marketplace verification are independent. `activated=true`
+
+        means the provider returned the exact ready status/service/trust/public-HTTPS contract;
+
+        it does not approve marketplace content. A new or review-content-changed listing is active
+
+        but pending review, reports `content_review_required=true`, and does not queue sandbox proof
+
+        until semantic review and owner release. Only an exact-identity unchanged already approved
+
+        listing preserves approval and queues reverification. Every listing remains execution-
+
+        ineligible until current canonical proof passes. Detail/list/replay presentation is hydrated
+
+        from the canonical capability row so cached provider state cannot keep exposure effective.
+
+        For x402 exposure, pending/blocked candidates keep both marketplace direct invoke and x402
+
+        compatibility invoke paths null and report `x402_listing_pending` or `x402_listing_blocked`;
+
+        live compatibility status is emitted only after the canonical listing becomes effective.
+
+        Provider-not-ready outcomes return HTTP 202 with `success=false`, `activated=false`, and
+
+        no listing. Existing bound-listing review/lifecycle/revision conflicts preserve that row
+
+        and return the same negative shape at HTTP 409; hosting never autoapproves or resumes it.
+
+        '
+      required:
+      - success
+      - activated
+      - activation
+      - activation_gate
+      - activation_readiness
+      - listing
+      - marketplace_verification
+      - exposure
+      - deployment_surface
+      - deployment
+      properties:
+        success:
+          type: boolean
+        error:
+          type: string
+          description: Stable reason code on a blocked/non-ready outcome.
+        http_status:
+          type: integer
+          enum:
+          - 202
+          - 409
+        activated:
+          type: boolean
+        activation:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        activation_gate:
+          type: object
+          additionalProperties: true
+        activation_readiness:
+          $ref: '#/components/schemas/HostedActivationReadiness'
+        listing:
+          type:
+          - object
+          - 'null'
+          properties:
+            id:
+              type: string
+              format: uuid
+            slug:
+              type: string
+            status:
+              type: string
+              description: Current canonical listing lifecycle status on hydrated replay.
+            review_status:
+              type: string
+              description: Current canonical listing review status on hydrated replay.
+            content_review_required:
+              type: boolean
+              description: True for a new listing or any review-bound content change; hosted runtime readiness cannot clear this review gate.
+            semantic_review_scheduled:
+              type: boolean
+              description: Present for content-review-gated publication and true only when off-response-path semantic review was scheduled.
+            review_changed_fields:
+              type: array
+              items:
+                type: string
+              description: Review-bound fields that changed; a new listing reports `new_listing`.
+            execution_eligible:
+              type: boolean
+              description: False on initial activation; hydrated replay can become true only from current canonical eligibility.
+            marketplace_verification:
+              $ref: '#/components/schemas/HostedMarketplaceVerification'
+        marketplace_verification:
+          $ref: '#/components/schemas/HostedMarketplaceVerification'
+        exposure:
+          type: object
+          additionalProperties: true
+          description: Canonical hosted exposure decision. `marketplace_listing_publication_authorized` permits a review-gated create/update; only `marketplace_listing_effective=true` authorizes live marketplace/direct-invoke/x402 presentation.
+        deployment_surface:
+          type: object
+          additionalProperties: true
+          description: Canonically hydrated runtime/marketplace/x402 surface. For an x402 candidate that is not effective, marketplace direct invoke and `x402.compatibility_invoke_path` are null and `x402.stable_edge_status` is `x402_listing_pending` or `x402_listing_blocked`; live compatibility statuses require an effective listing.
+        deployment:
+          type: object
+          additionalProperties: true
+        message:
+          type: string
+        agent_os_deploy:
+          type: object
+          additionalProperties: true
+    FederationIntakeRelayZeroAuthority:
+      type: object
+      additionalProperties: false
+      required:
+      - discoverability_grants_authority
+      - contact
+      - outreach
+      - relationship_mutation
+      - key_pinning
+      - trust_promotion
+      - ranking_mutation
+      - routing
+      - referrals
+      - invocation
+      - provider_execution
+      - payments
+      - settlement
+      - money
+      properties:
+        discoverability_grants_authority:
+          type: boolean
+          enum:
+          - false
+        contact:
+          type: boolean
+          enum:
+          - false
+        outreach:
+          type: boolean
+          enum:
+          - false
+        relationship_mutation:
+          type: boolean
+          enum:
+          - false
+        key_pinning:
+          type: boolean
+          enum:
+          - false
+        trust_promotion:
+          type: boolean
+          enum:
+          - false
+        ranking_mutation:
+          type: boolean
+          enum:
+          - false
+        routing:
+          type: boolean
+          enum:
+          - false
+        referrals:
+          type: boolean
+          enum:
+          - false
+        invocation:
+          type: boolean
+          enum:
+          - false
+        provider_execution:
+          type: boolean
+          enum:
+          - false
+        payments:
+          type: boolean
+          enum:
+          - false
+        settlement:
+          type: boolean
+          enum:
+          - false
+        money:
+          type: boolean
+          enum:
+          - false
+    GovernanceDecisionKind:
+      type: string
+      enum:
+      - legacy
+      - authorization_precheck
+      - preview
+      - authorization_attempt
+      - simulation
+      description: 'Phase tag for retained governance evidence. `legacy` means the row predates
+
+        phase tagging and cannot be safely reclassified. `preview` is a non-authorizing
+
+        provider/match preview, and `simulation` is an explicitly hypothetical policy
+
+        check; neither authorizes execution. `authorization_precheck` is a policy
+
+        evaluation before final spend admission and does not prove that an invocation,
+
+        payment, settlement, or provider call occurred. `authorization_attempt` is the
+
+        authoritative admission verdict for a provider-bound attempt. Production
+
+        registered-agent attempts subject to rolling spend limits bind a reservation;
+
+        denied attempts and zero-production-cost Tumbler attempts have no production
+
+        USDC reservation.
+
+        '
     FederationIntakeRelayError:
       type: object
       additionalProperties: false
@@ -5549,6 +5445,110 @@ components:
         error:
           type: string
           description: Bounded federation_steward_intake_relay_* refusal code, or forbidden for an invalid dedicated credential.
+    GovernanceSpendReservationWindowSummary:
+      type: object
+      description: Admission-relevant registered-agent production-USDC spend currently held against configured caps; this is separate from durable invocation spend and settlement proof.
+      properties:
+        active_usdc:
+          type: number
+        daily_usdc:
+          type: number
+        monthly_usdc:
+          type: number
+        lifetime_usdc:
+          type: number
+    ListingReviewQueueReason:
+      type: object
+      required:
+      - code
+      - label
+      - message
+      - next_step
+      - source
+      - fixable
+      description: Canonical admin presentation derived from stored review evidence; it does not rewrite the raw review_notes artifact.
+      properties:
+        code:
+          type: string
+        label:
+          type: string
+        message:
+          type: string
+        next_step:
+          type: string
+        source:
+          type: string
+        fixable:
+          type: boolean
+    GovernanceDecisionEvidence:
+      type: object
+      description: Retained policy-decision evidence. It is not agent memory, queued work, an invocation outcome, a receipt, or settlement proof.
+      properties:
+        id:
+          type: string
+        agent_id:
+          type:
+          - string
+          - 'null'
+        agent_name:
+          type:
+          - string
+          - 'null'
+        action:
+          type: string
+        resource_type:
+          type: string
+        resource_id:
+          type:
+          - string
+          - 'null'
+        verdict:
+          type: string
+        reason:
+          type: string
+        policy_id:
+          type:
+          - string
+          - 'null'
+        policy_ids:
+          type: array
+          items:
+            type: string
+        policy_sources:
+          type: array
+          items:
+            type: object
+            properties:
+              policy_id:
+                type: string
+              set_by:
+                type:
+                - string
+                - 'null'
+        attestation_ids:
+          type: array
+          items:
+            type: string
+        delegation_chain:
+          type: array
+          items:
+            type: object
+        request_context:
+          type: object
+        latency_us:
+          type: integer
+        decision_kind:
+          $ref: '#/components/schemas/GovernanceDecisionKind'
+        correlation_ref:
+          type:
+          - string
+          - 'null'
+          description: Invocation/request correlation when the producing phase supplied one; null does not imply that execution occurred.
+        created_at:
+          type:
+          - string
+          - 'null'
+          format: date-time
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

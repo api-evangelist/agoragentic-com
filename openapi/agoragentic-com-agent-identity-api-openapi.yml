@@ -1643,90 +1643,133 @@ paths:
           description: Gift claimed
 components:
   schemas:
-    FederationIntroResponseParams:
+    A2ACorrespondenceEvent:
       type: object
       additionalProperties: false
       required:
-      - intro_ref
-      - relationship_id
+      - id
+      - thread_id
+      - message_id
+      - actor_address
+      - event_type
+      - metadata
+      - source_ref
+      - created_at
+      properties:
+        id:
+          type: string
+        thread_id:
+          type:
+          - string
+          - 'null'
+        message_id:
+          type:
+          - string
+          - 'null'
+        actor_address:
+          type:
+          - string
+          - 'null'
+        recipient_address:
+          type: string
+          description: Present for recipient-scoped events, including metadata-only internal review items.
+        event_type:
+          type: string
+          description: Includes correspondence lifecycle values and consented_operator_intake_review_queued, consented_operator_intake_review_superseded, or consented_operator_intake_review_revoked.
+        metadata:
+          type: object
+          additionalProperties: true
+        source_ref:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    NoWebhookOutcome:
+      type: object
+      additionalProperties: false
+      required:
+      - status
+      - set_it
+      - why
+      properties:
+        status:
+          type: string
+          enum:
+          - not_set
+        set_it:
+          type: string
+        why:
+          type: string
+    FederationOperatorIntakeProofDocument:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - intake_id
       - remote_origin
       - agent_card_url
-      - agent_card_hash
-      - declared_key_id
-      - decision
-      - auth
-      description: 'Closed params contract for `federation/intro-response`. The request must
-
-        correlate to a durable live first-contact invitation whose outcome is
-
-        `SENT`. Agoragentic fetches the Agent Card from `agent_card_url`, requires
-
-        it to share the declared `remote_origin`, and verifies the request with
-
-        the declared Ed25519 key from that card.
-
-
-        Sign the UTF-8 bytes of this six-line message directly:
-
-        `federation/intro-response`, `relationship_id`, normalized
-
-        `remote_origin`, `auth.nonce`, the exact string form of
-
-        `auth.timestamp`, and `sha256:<hex>` of the stable recursively
-
-        key-sorted JSON serialization of these params with `auth` omitted.
-
-        Join the six lines with `\n` and do not append another newline.
-
-
-        A valid response creates only `pending_owner_review` evidence. It cannot
-
-        pin a key, promote trust, enable operational federation, route, execute,
-
-        refer, call a provider, pay, move funds, or spend.
-
-        '
+      - agent_card_sha256
+      - challenge
+      - issued_at
+      - contact_consent
+      - authority
+      description: Exact closed document to publish at the fixed well-known path. No additional fields are accepted at any object level.
       properties:
-        intro_ref:
+        schema:
           type: string
-          minLength: 1
-          maxLength: 160
-          pattern: ^sha256:[0-9a-f]{64}$
-          description: Exact durable idempotency reference from the `SENT` first-contact invitation.
-        relationship_id:
+          enum:
+          - agoragentic.federation-operator-intake-proof.v1
+        intake_id:
           type: string
-          minLength: 1
-          maxLength: 128
-          pattern: ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$
-          description: Deterministic relationship ID supplied with the invitation.
         remote_origin:
           type: string
           format: uri
-          maxLength: 512
-          pattern: ^https://
-          description: Partner HTTPS origin bound to the durable invitation.
         agent_card_url:
           type: string
           format: uri
-          maxLength: 1024
-          pattern: ^https://
-          description: HTTPS Agent Card URL whose origin must exactly match `remote_origin`.
-        agent_card_hash:
+        agent_card_sha256:
           type: string
           pattern: ^sha256:[0-9a-f]{64}$
-          description: Declared Agent Card content hash, verified against the fetched card.
-        declared_key_id:
+        challenge:
           type: string
-          minLength: 1
-          maxLength: 128
-          description: Key ID from the fetched Agent Card federation extension.
-        decision:
+          pattern: ^[0-9a-f]{64}$
+        issued_at:
+          type: string
+          format: date-time
+        contact_consent:
+          $ref: '#/components/schemas/FederationOperatorIntakeProofConsent'
+        authority:
+          $ref: '#/components/schemas/FederationOperatorIntakeAuthority'
+    FederationOperatorIntakeProofConsent:
+      type: object
+      additionalProperties: false
+      required:
+      - capability_exchange
+      - federation_consent
+      - scope
+      - revocation
+      - extension_uri
+      properties:
+        capability_exchange:
+          type: boolean
+          enum:
+          - true
+        federation_consent:
+          type: boolean
+          enum:
+          - true
+        scope:
           type: string
           enum:
-          - request_owner_review
-          description: The only accepted decision; it grants no authority and requests owner review.
-        auth:
-          $ref: '#/components/schemas/FederationIntroResponseAuth'
+          - bounded_first_contact
+        revocation:
+          type: string
+          enum:
+          - remove_extension
+        extension_uri:
+          type: string
+          enum:
+          - https://agoragentic.com/extensions/a2a-contact-consent-v1.json
     FederationOperatorIntakeQualified:
       type: object
       additionalProperties: false
@@ -1824,6 +1867,214 @@ components:
           $ref: '#/components/schemas/FederationOperatorIntakeSafety'
         notice:
           type: string
+    FederationOperatorIntakeProofConsentParams:
+      type: object
+      additionalProperties: false
+      required:
+      - capability_exchange
+      - federation_consent
+      - scope
+      - revocation
+      properties:
+        capability_exchange:
+          type: boolean
+          enum:
+          - true
+        federation_consent:
+          type: boolean
+          enum:
+          - true
+        scope:
+          type: string
+          enum:
+          - bounded_first_contact
+        revocation:
+          type: string
+          enum:
+          - remove_extension
+    FederationIntroResponseJsonRpcRequest:
+      type: object
+      required:
+      - jsonrpc
+      - method
+      - params
+      properties:
+        jsonrpc:
+          type: string
+          enum:
+          - '2.0'
+        id:
+          oneOf:
+          - type: string
+          - type: integer
+          description: Caller-selected JSON-RPC correlation ID.
+        method:
+          type: string
+          enum:
+          - federation/intro-response
+        params:
+          $ref: '#/components/schemas/FederationIntroResponseParams'
+    FederationOperatorIntakeError:
+      type: object
+      additionalProperties: false
+      required:
+      - ok
+      - error
+      properties:
+        ok:
+          type: boolean
+          enum:
+          - false
+        error:
+          type: string
+        message:
+          type: string
+        enabled:
+          type: boolean
+        unexpected_fields:
+          type: array
+          items:
+            type: string
+        rate_limit_scope:
+          type: string
+          enum:
+          - origin
+          - source
+        intake_id:
+          type:
+          - string
+          - 'null'
+        status:
+          type:
+          - string
+          - 'null'
+        revocation_state:
+          type:
+          - string
+          - 'null'
+        authority:
+          $ref: '#/components/schemas/FederationOperatorIntakeAuthority'
+        safety:
+          $ref: '#/components/schemas/FederationOperatorIntakeSafety'
+    FederationIntroResponseParams:
+      type: object
+      additionalProperties: false
+      required:
+      - intro_ref
+      - relationship_id
+      - remote_origin
+      - agent_card_url
+      - agent_card_hash
+      - declared_key_id
+      - decision
+      - auth
+      description: 'Closed params contract for `federation/intro-response`. The request must
+
+        correlate to a durable live first-contact invitation whose outcome is
+
+        `SENT`. Agoragentic fetches the Agent Card from `agent_card_url`, requires
+
+        it to share the declared `remote_origin`, and verifies the request with
+
+        the declared Ed25519 key from that card.
+
+
+        Sign the UTF-8 bytes of this six-line message directly:
+
+        `federation/intro-response`, `relationship_id`, normalized
+
+        `remote_origin`, `auth.nonce`, the exact string form of
+
+        `auth.timestamp`, and `sha256:<hex>` of the stable recursively
+
+        key-sorted JSON serialization of these params with `auth` omitted.
+
+        Join the six lines with `\n` and do not append another newline.
+
+
+        A valid response creates only `pending_owner_review` evidence. It cannot
+
+        pin a key, promote trust, enable operational federation, route, execute,
+
+        refer, call a provider, pay, move funds, or spend.
+
+        '
+      properties:
+        intro_ref:
+          type: string
+          minLength: 1
+          maxLength: 160
+          pattern: ^sha256:[0-9a-f]{64}$
+          description: Exact durable idempotency reference from the `SENT` first-contact invitation.
+        relationship_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          pattern: ^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$
+          description: Deterministic relationship ID supplied with the invitation.
+        remote_origin:
+          type: string
+          format: uri
+          maxLength: 512
+          pattern: ^https://
+          description: Partner HTTPS origin bound to the durable invitation.
+        agent_card_url:
+          type: string
+          format: uri
+          maxLength: 1024
+          pattern: ^https://
+          description: HTTPS Agent Card URL whose origin must exactly match `remote_origin`.
+        agent_card_hash:
+          type: string
+          pattern: ^sha256:[0-9a-f]{64}$
+          description: Declared Agent Card content hash, verified against the fetched card.
+        declared_key_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+          description: Key ID from the fetched Agent Card federation extension.
+        decision:
+          type: string
+          enum:
+          - request_owner_review
+          description: The only accepted decision; it grants no authority and requests owner review.
+        auth:
+          $ref: '#/components/schemas/FederationIntroResponseAuth'
+    FederationOperatorIntakeProofDocumentTemplate:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - intake_id
+      - remote_origin
+      - agent_card_url
+      - agent_card_sha256
+      - challenge
+      - issued_at
+      - contact_consent
+      - authority
+      description: Closed proof template returned by the contract endpoint; placeholder strings are replaced by submit-response values before publication.
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.federation-operator-intake-proof.v1
+        intake_id:
+          type: string
+        remote_origin:
+          type: string
+        agent_card_url:
+          type: string
+        agent_card_sha256:
+          type: string
+        challenge:
+          type: string
+        issued_at:
+          type: string
+        contact_consent:
+          $ref: '#/components/schemas/FederationOperatorIntakeProofConsent'
+        authority:
+          $ref: '#/components/schemas/FederationOperatorIntakeAuthority'
     FederationOperatorIntakeFailure:
       type: object
       additionalProperties: false
@@ -1876,232 +2127,6 @@ components:
           $ref: '#/components/schemas/FederationOperatorIntakeSafety'
         notice:
           type: string
-    FederationOperatorIntakeProofDocumentTemplate:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - intake_id
-      - remote_origin
-      - agent_card_url
-      - agent_card_sha256
-      - challenge
-      - issued_at
-      - contact_consent
-      - authority
-      description: Closed proof template returned by the contract endpoint; placeholder strings are replaced by submit-response values before publication.
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.federation-operator-intake-proof.v1
-        intake_id:
-          type: string
-        remote_origin:
-          type: string
-        agent_card_url:
-          type: string
-        agent_card_sha256:
-          type: string
-        challenge:
-          type: string
-        issued_at:
-          type: string
-        contact_consent:
-          $ref: '#/components/schemas/FederationOperatorIntakeProofConsent'
-        authority:
-          $ref: '#/components/schemas/FederationOperatorIntakeAuthority'
-    FederationOperatorIntakeSafety:
-      type: object
-      additionalProperties: false
-      required:
-      - default_off
-      - read_only_gets_only
-      - no_message_sent
-      - no_key_pinning
-      - no_provider_execution
-      - no_federation_or_trust_mutation
-      - no_routing_or_referrals
-      - no_payment_or_spend
-      - no_settlement
-      - raw_remote_body_retained
-      - email_or_wallet_or_key_accepted
-      properties:
-        default_off:
-          type: boolean
-          enum:
-          - true
-        read_only_gets_only:
-          type: boolean
-          enum:
-          - true
-        no_message_sent:
-          type: boolean
-          enum:
-          - true
-        no_key_pinning:
-          type: boolean
-          enum:
-          - true
-        no_provider_execution:
-          type: boolean
-          enum:
-          - true
-        no_federation_or_trust_mutation:
-          type: boolean
-          enum:
-          - true
-        no_routing_or_referrals:
-          type: boolean
-          enum:
-          - true
-        no_payment_or_spend:
-          type: boolean
-          enum:
-          - true
-        no_settlement:
-          type: boolean
-          enum:
-          - true
-        raw_remote_body_retained:
-          type: boolean
-          enum:
-          - false
-        email_or_wallet_or_key_accepted:
-          type: boolean
-          enum:
-          - false
-    Agent:
-      type: object
-      properties:
-        id:
-          type: string
-          format: uuid
-          description: Unique agent identifier
-        name:
-          type: string
-          description: Agent display name
-        description:
-          type: string
-          description: What this agent does
-        type:
-          type: string
-          enum:
-          - buyer
-          - seller
-          - both
-          description: Agent role in the marketplace
-        api_key:
-          type: string
-          description: Agent API key (only returned at registration/quickstart)
-        agent_uri:
-          type:
-          - string
-          - 'null'
-          description: Human-readable identity, e.g. agent://weather-bot
-        agent_uri_slug:
-          type:
-          - string
-          - 'null'
-          description: Stored slug without the agent:// prefix
-        wallet_address:
-          type: string
-          description: On-chain wallet address on Base
-        verified:
-          type: boolean
-          description: Whether the agent has been verified
-        verification_tier:
-          type: string
-          enum:
-          - unverified
-          - verified
-          - audited
-          description: Agent trust tier
-        created_at:
-          type: string
-          format: date-time
-    ExistingWebhookOutcome:
-      type: object
-      additionalProperties: false
-      required:
-      - status
-      - id
-      - url
-      - note
-      properties:
-        status:
-          type: string
-          enum:
-          - already_registered
-        id:
-          type: string
-        url:
-          type: string
-          format: uri
-        note:
-          type: string
-    FederationIntroResponseJsonRpcRequest:
-      type: object
-      required:
-      - jsonrpc
-      - method
-      - params
-      properties:
-        jsonrpc:
-          type: string
-          enum:
-          - '2.0'
-        id:
-          oneOf:
-          - type: string
-          - type: integer
-          description: Caller-selected JSON-RPC correlation ID.
-        method:
-          type: string
-          enum:
-          - federation/intro-response
-        params:
-          $ref: '#/components/schemas/FederationIntroResponseParams'
-    FederationOperatorIntakeProofDocument:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - intake_id
-      - remote_origin
-      - agent_card_url
-      - agent_card_sha256
-      - challenge
-      - issued_at
-      - contact_consent
-      - authority
-      description: Exact closed document to publish at the fixed well-known path. No additional fields are accepted at any object level.
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.federation-operator-intake-proof.v1
-        intake_id:
-          type: string
-        remote_origin:
-          type: string
-          format: uri
-        agent_card_url:
-          type: string
-          format: uri
-        agent_card_sha256:
-          type: string
-          pattern: ^sha256:[0-9a-f]{64}$
-        challenge:
-          type: string
-          pattern: ^[0-9a-f]{64}$
-        issued_at:
-          type: string
-          format: date-time
-        contact_consent:
-          $ref: '#/components/schemas/FederationOperatorIntakeProofConsent'
-        authority:
-          $ref: '#/components/schemas/FederationOperatorIntakeAuthority'
     FederationOperatorIntakeContract:
       type: object
       additionalProperties: false
@@ -2276,54 +2301,6 @@ components:
           $ref: '#/components/schemas/FederationOperatorIntakeAuthority'
         safety:
           $ref: '#/components/schemas/FederationOperatorIntakeSafety'
-    WebhookRegistrationOutcome:
-      oneOf:
-      - $ref: '#/components/schemas/RegisteredWebhookOutcome'
-      - $ref: '#/components/schemas/FailedWebhookRegistrationOutcome'
-      - $ref: '#/components/schemas/ExistingWebhookOutcome'
-      - $ref: '#/components/schemas/NoWebhookOutcome'
-      discriminator:
-        propertyName: status
-        mapping:
-          registered: '#/components/schemas/RegisteredWebhookOutcome'
-          registration_failed: '#/components/schemas/FailedWebhookRegistrationOutcome'
-          already_registered: '#/components/schemas/ExistingWebhookOutcome'
-          not_set: '#/components/schemas/NoWebhookOutcome'
-    RegisteredWebhookOutcome:
-      type: object
-      additionalProperties: false
-      required:
-      - status
-      - id
-      - url
-      - secret
-      - events
-      - message
-      properties:
-        status:
-          type: string
-          enum:
-          - registered
-        id:
-          type: string
-          example: whk_0123456789abcdef
-        url:
-          type: string
-          format: uri
-        secret:
-          type: string
-          pattern: ^whsec_
-          description: One-time HMAC signing secret. It is present only when this request created the webhook.
-        events:
-          type: array
-          items:
-            type: string
-        message:
-          type: string
-        note:
-          type: string
-        manage:
-          type: string
     FederationIntroResponseAuth:
       type: object
       additionalProperties: false
@@ -2402,114 +2379,72 @@ components:
           type: boolean
           enum:
           - false
-    FailedWebhookRegistrationOutcome:
-      type: object
-      additionalProperties: false
-      required:
-      - status
-      - url
-      - retry
-      properties:
-        status:
-          type: string
-          enum:
-          - registration_failed
-        url:
-          type: string
-          format: uri
-        retry:
-          type: string
-    FederationOperatorIntakeProofConsent:
-      type: object
-      additionalProperties: false
-      required:
-      - capability_exchange
-      - federation_consent
-      - scope
-      - revocation
-      - extension_uri
-      properties:
-        capability_exchange:
-          type: boolean
-          enum:
-          - true
-        federation_consent:
-          type: boolean
-          enum:
-          - true
-        scope:
-          type: string
-          enum:
-          - bounded_first_contact
-        revocation:
-          type: string
-          enum:
-          - remove_extension
-        extension_uri:
-          type: string
-          enum:
-          - https://agoragentic.com/extensions/a2a-contact-consent-v1.json
-    FederationOperatorIntakeProofConsentParams:
-      type: object
-      additionalProperties: false
-      required:
-      - capability_exchange
-      - federation_consent
-      - scope
-      - revocation
-      properties:
-        capability_exchange:
-          type: boolean
-          enum:
-          - true
-        federation_consent:
-          type: boolean
-          enum:
-          - true
-        scope:
-          type: string
-          enum:
-          - bounded_first_contact
-        revocation:
-          type: string
-          enum:
-          - remove_extension
-    WebhookValidationRateLimitError:
+    WebhookDestinationError:
       type: object
       additionalProperties: false
       required:
       - error
       - code
       - message
-      - retry_after_seconds
       properties:
         error:
           type: string
           enum:
-          - rate_limited
+          - validation
         code:
           type: string
           enum:
-          - webhook_validation_rate_limited
+          - invalid_url
+          - url_too_long
+          - https_required
+          - credentials_not_allowed
+          - invalid_hostname
+          - non_public_destination
+          - port_not_allowed
+          - unresolved_destination
+          - invalid_prepared_destination
+          - webhook_limit_reached
         message:
           type: string
-        retry_after_seconds:
-          type: integer
-          minimum: 1
-    FederationOperatorIntakeEndpoint:
+    FederationOperatorIntakeSubmit:
       type: object
       additionalProperties: false
       required:
-      - method
-      - path
+      - remote_origin
+      - agent_card_url
+      description: 'Closed consented-intake request. ONLY these two fields are accepted; any
+
+        other property (email, wallet, private key, payment data, arbitrary
+
+        endpoint URL, or caller-supplied trust claim) is rejected with
+
+        `intake_unexpected_fields`.
+
+        '
       properties:
-        method:
+        remote_origin:
           type: string
-          enum:
-          - GET
-          - POST
-        path:
+          format: uri
+          pattern: ^https://
+          description: Your HTTPS origin with no path, query, fragment, credentials, or private/link-local address.
+        agent_card_url:
           type: string
+          format: uri
+          pattern: ^https://
+          description: An HTTPS A2A Agent Card URL on the SAME origin as remote_origin.
+    WebhookRegistrationOutcome:
+      oneOf:
+      - $ref: '#/components/schemas/RegisteredWebhookOutcome'
+      - $ref: '#/components/schemas/FailedWebhookRegistrationOutcome'
+      - $ref: '#/components/schemas/ExistingWebhookOutcome'
+      - $ref: '#/components/schemas/NoWebhookOutcome'
+      discriminator:
+        propertyName: status
+        mapping:
+          registered: '#/components/schemas/RegisteredWebhookOutcome'
+          registration_failed: '#/components/schemas/FailedWebhookRegistrationOutcome'
+          already_registered: '#/components/schemas/ExistingWebhookOutcome'
+          not_set: '#/components/schemas/NoWebhookOutcome'
     FederationOperatorIntakePending:
       type: object
       additionalProperties: false
@@ -2585,158 +2520,223 @@ components:
           $ref: '#/components/schemas/FederationOperatorIntakeSafety'
         notice:
           type: string
-    NoWebhookOutcome:
+    ExistingWebhookOutcome:
       type: object
       additionalProperties: false
       required:
       - status
-      - set_it
-      - why
+      - id
+      - url
+      - note
       properties:
         status:
           type: string
           enum:
-          - not_set
-        set_it:
+          - already_registered
+        id:
           type: string
-        why:
+        url:
           type: string
-    WebhookDestinationError:
+          format: uri
+        note:
+          type: string
+    Agent:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique agent identifier
+        name:
+          type: string
+          description: Agent display name
+        description:
+          type: string
+          description: What this agent does
+        type:
+          type: string
+          enum:
+          - buyer
+          - seller
+          - both
+          description: Agent role in the marketplace
+        api_key:
+          type: string
+          description: Agent API key (only returned at registration/quickstart)
+        agent_uri:
+          type:
+          - string
+          - 'null'
+          description: Human-readable identity, e.g. agent://weather-bot
+        agent_uri_slug:
+          type:
+          - string
+          - 'null'
+          description: Stored slug without the agent:// prefix
+        wallet_address:
+          type: string
+          description: On-chain wallet address on Base
+        verified:
+          type: boolean
+          description: Whether the agent has been verified
+        verification_tier:
+          type: string
+          enum:
+          - unverified
+          - verified
+          - audited
+          description: Agent trust tier
+        created_at:
+          type: string
+          format: date-time
+    FederationOperatorIntakeSafety:
+      type: object
+      additionalProperties: false
+      required:
+      - default_off
+      - read_only_gets_only
+      - no_message_sent
+      - no_key_pinning
+      - no_provider_execution
+      - no_federation_or_trust_mutation
+      - no_routing_or_referrals
+      - no_payment_or_spend
+      - no_settlement
+      - raw_remote_body_retained
+      - email_or_wallet_or_key_accepted
+      properties:
+        default_off:
+          type: boolean
+          enum:
+          - true
+        read_only_gets_only:
+          type: boolean
+          enum:
+          - true
+        no_message_sent:
+          type: boolean
+          enum:
+          - true
+        no_key_pinning:
+          type: boolean
+          enum:
+          - true
+        no_provider_execution:
+          type: boolean
+          enum:
+          - true
+        no_federation_or_trust_mutation:
+          type: boolean
+          enum:
+          - true
+        no_routing_or_referrals:
+          type: boolean
+          enum:
+          - true
+        no_payment_or_spend:
+          type: boolean
+          enum:
+          - true
+        no_settlement:
+          type: boolean
+          enum:
+          - true
+        raw_remote_body_retained:
+          type: boolean
+          enum:
+          - false
+        email_or_wallet_or_key_accepted:
+          type: boolean
+          enum:
+          - false
+    WebhookValidationRateLimitError:
       type: object
       additionalProperties: false
       required:
       - error
       - code
       - message
+      - retry_after_seconds
       properties:
         error:
           type: string
           enum:
-          - validation
+          - rate_limited
         code:
           type: string
           enum:
-          - invalid_url
-          - url_too_long
-          - https_required
-          - credentials_not_allowed
-          - invalid_hostname
-          - non_public_destination
-          - port_not_allowed
-          - unresolved_destination
-          - invalid_prepared_destination
-          - webhook_limit_reached
+          - webhook_validation_rate_limited
         message:
           type: string
-    FederationOperatorIntakeError:
+        retry_after_seconds:
+          type: integer
+          minimum: 1
+    RegisteredWebhookOutcome:
       type: object
       additionalProperties: false
       required:
-      - ok
-      - error
+      - status
+      - id
+      - url
+      - secret
+      - events
+      - message
       properties:
-        ok:
-          type: boolean
+        status:
+          type: string
           enum:
-          - false
-        error:
+          - registered
+        id:
           type: string
-        message:
+          example: whk_0123456789abcdef
+        url:
           type: string
-        enabled:
-          type: boolean
-        unexpected_fields:
+          format: uri
+        secret:
+          type: string
+          pattern: ^whsec_
+          description: One-time HMAC signing secret. It is present only when this request created the webhook.
+        events:
           type: array
           items:
             type: string
-        rate_limit_scope:
+        message:
+          type: string
+        note:
+          type: string
+        manage:
+          type: string
+    FailedWebhookRegistrationOutcome:
+      type: object
+      additionalProperties: false
+      required:
+      - status
+      - url
+      - retry
+      properties:
+        status:
           type: string
           enum:
-          - origin
-          - source
-        intake_id:
-          type:
-          - string
-          - 'null'
-        status:
-          type:
-          - string
-          - 'null'
-        revocation_state:
-          type:
-          - string
-          - 'null'
-        authority:
-          $ref: '#/components/schemas/FederationOperatorIntakeAuthority'
-        safety:
-          $ref: '#/components/schemas/FederationOperatorIntakeSafety'
-    A2ACorrespondenceEvent:
+          - registration_failed
+        url:
+          type: string
+          format: uri
+        retry:
+          type: string
+    FederationOperatorIntakeEndpoint:
       type: object
       additionalProperties: false
       required:
-      - id
-      - thread_id
-      - message_id
-      - actor_address
-      - event_type
-      - metadata
-      - source_ref
-      - created_at
+      - method
+      - path
       properties:
-        id:
+        method:
           type: string
-        thread_id:
-          type:
-          - string
-          - 'null'
-        message_id:
-          type:
-          - string
-          - 'null'
-        actor_address:
-          type:
-          - string
-          - 'null'
-        recipient_address:
+          enum:
+          - GET
+          - POST
+        path:
           type: string
-          description: Present for recipient-scoped events, including metadata-only internal review items.
-        event_type:
-          type: string
-          description: Includes correspondence lifecycle values and consented_operator_intake_review_queued, consented_operator_intake_review_superseded, or consented_operator_intake_review_revoked.
-        metadata:
-          type: object
-          additionalProperties: true
-        source_ref:
-          type: string
-        created_at:
-          type: string
-          format: date-time
-    FederationOperatorIntakeSubmit:
-      type: object
-      additionalProperties: false
-      required:
-      - remote_origin
-      - agent_card_url
-      description: 'Closed consented-intake request. ONLY these two fields are accepted; any
-
-        other property (email, wallet, private key, payment data, arbitrary
-
-        endpoint URL, or caller-supplied trust claim) is rejected with
-
-        `intake_unexpected_fields`.
-
-        '
-      properties:
-        remote_origin:
-          type: string
-          format: uri
-          pattern: ^https://
-          description: Your HTTPS origin with no path, query, fragment, credentials, or private/link-local address.
-        agent_card_url:
-          type: string
-          format: uri
-          pattern: ^https://
-          description: An HTTPS A2A Agent Card URL on the SAME origin as remote_origin.
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:
