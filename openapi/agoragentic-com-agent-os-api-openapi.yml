@@ -1848,6 +1848,101 @@ paths:
                 $ref: '#/components/schemas/Error'
 components:
   schemas:
+    AgentOsDivigentWalletProofRequest:
+      type: object
+      description: Owner/admin Divigent wallet-float proof request. Metadata is data, not instructions, and this schema does not authorize MCP calls, signing, broadcast, wallet mutation, spend, settlement, x402 readiness, execute/invoke, marketplace, or Seller OS behavior.
+      properties:
+        owner_id:
+          type: string
+        write:
+          type: boolean
+        idempotency_key:
+          type: string
+        wallet_address:
+          type: string
+        chain:
+          type: string
+          enum:
+          - base-sepolia
+          - base
+        currency:
+          type: string
+          enum:
+          - USDC
+        reserve_floor_usdc:
+          type: number
+          minimum: 0
+        wallet_usdc_balance:
+          type: number
+          minimum: 0
+        deposited_value_usdc:
+          type: number
+          minimum: 0
+        current_value_usdc:
+          type: number
+          minimum: 0
+        withdrawal_capacity_usdc:
+          type: number
+          minimum: 0
+        sidecar_base_url:
+          type: string
+        sidecar_contract:
+          type: object
+        sidecar_snapshot:
+          type: object
+        sidecar_event:
+          type: object
+        mutation_flags:
+          type: object
+          properties:
+            private_key_loaded:
+              type: boolean
+              enum:
+              - false
+            transaction_signed:
+              type: boolean
+              enum:
+              - false
+            transaction_broadcast:
+              type: boolean
+              enum:
+              - false
+            wallet_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            spend_enabled:
+              type: boolean
+              enum:
+              - false
+            x402_settlement_enabled:
+              type: boolean
+              enum:
+              - false
+            x402_readiness_mutation_enabled:
+              type: boolean
+              enum:
+              - false
+            public_execute_enabled:
+              type: boolean
+              enum:
+              - false
+      not:
+        anyOf:
+        - required:
+          - private_key
+        - required:
+          - wallet_private_key
+        - required:
+          - mnemonic
+        - required:
+          - seed_phrase
+        - required:
+          - raw_unsigned_calldata
+        - required:
+          - raw_wallet_payload
+        - required:
+          - raw_payment_payload
     AgentOsRunEvent:
       type: object
       description: Sanitized private-owner-only Agent OS run timeline event. Raw prompts, private ECF payloads, wallet data, secrets, and private tool outputs are redacted.
@@ -1969,108 +2064,6 @@ components:
             trust_mutation_triggered:
               type: boolean
               example: false
-    AgentOsDivigentWalletProofRequest:
-      type: object
-      description: Owner/admin Divigent wallet-float proof request. Metadata is data, not instructions, and this schema does not authorize MCP calls, signing, broadcast, wallet mutation, spend, settlement, x402 readiness, execute/invoke, marketplace, or Seller OS behavior.
-      properties:
-        owner_id:
-          type: string
-        write:
-          type: boolean
-        idempotency_key:
-          type: string
-        wallet_address:
-          type: string
-        chain:
-          type: string
-          enum:
-          - base-sepolia
-          - base
-        currency:
-          type: string
-          enum:
-          - USDC
-        reserve_floor_usdc:
-          type: number
-          minimum: 0
-        wallet_usdc_balance:
-          type: number
-          minimum: 0
-        deposited_value_usdc:
-          type: number
-          minimum: 0
-        current_value_usdc:
-          type: number
-          minimum: 0
-        withdrawal_capacity_usdc:
-          type: number
-          minimum: 0
-        sidecar_base_url:
-          type: string
-        sidecar_contract:
-          type: object
-        sidecar_snapshot:
-          type: object
-        sidecar_event:
-          type: object
-        mutation_flags:
-          type: object
-          properties:
-            private_key_loaded:
-              type: boolean
-              enum:
-              - false
-            transaction_signed:
-              type: boolean
-              enum:
-              - false
-            transaction_broadcast:
-              type: boolean
-              enum:
-              - false
-            wallet_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            spend_enabled:
-              type: boolean
-              enum:
-              - false
-            x402_settlement_enabled:
-              type: boolean
-              enum:
-              - false
-            x402_readiness_mutation_enabled:
-              type: boolean
-              enum:
-              - false
-            public_execute_enabled:
-              type: boolean
-              enum:
-              - false
-      not:
-        anyOf:
-        - required:
-          - private_key
-        - required:
-          - wallet_private_key
-        - required:
-          - mnemonic
-        - required:
-          - seed_phrase
-        - required:
-          - raw_unsigned_calldata
-        - required:
-          - raw_wallet_payload
-        - required:
-          - raw_payment_payload
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-        message:
-          type: string
     AgentOsDomainEdgeCaseProofRequest:
       type: object
       required:
@@ -2140,6 +2133,13 @@ components:
               type: boolean
               enum:
               - false
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
     AgentOsRunTimelineResponse:
       type: object
       properties:

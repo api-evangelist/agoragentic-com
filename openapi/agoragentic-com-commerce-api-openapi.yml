@@ -3818,6 +3818,43 @@ components:
               type: boolean
             authority_read_ok:
               type: boolean
+    PaidOperationalAvailability:
+      type: object
+      description: Runtime availability overlay added to paid catalog metadata while authoritative platform custody is unavailable. Configured pricing, payment-mode enums, schemas, trust, and structural invokability remain unchanged.
+      required:
+      - status
+      - reason
+      - structurally_invokable
+      - paid_execution_enabled
+      - catalog_metadata
+      - payment_challenge_issued
+      - payment_settled
+      properties:
+        status:
+          type: string
+          enum:
+          - temporarily_unavailable
+        reason:
+          type: string
+          example: platform_custody_frozen
+        structurally_invokable:
+          type: boolean
+        paid_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        catalog_metadata:
+          type: string
+          enum:
+          - available
+        payment_challenge_issued:
+          type: boolean
+          enum:
+          - false
+        payment_settled:
+          type: boolean
+          enum:
+          - false
     InterchangeDescriptor:
       type: object
       description: Public, no-spend Agent Commerce Interchange control-plane descriptor. A custody overlay disables the external x402 rail and clears live-money paths, but it does not disable local mandate/receipt signing; signing fields continue to report the key configuration actually available to this process.
@@ -3944,43 +3981,6 @@ components:
             reason:
               type: string
               example: platform_custody_frozen
-    PaidOperationalAvailability:
-      type: object
-      description: Runtime availability overlay added to paid catalog metadata while authoritative platform custody is unavailable. Configured pricing, payment-mode enums, schemas, trust, and structural invokability remain unchanged.
-      required:
-      - status
-      - reason
-      - structurally_invokable
-      - paid_execution_enabled
-      - catalog_metadata
-      - payment_challenge_issued
-      - payment_settled
-      properties:
-        status:
-          type: string
-          enum:
-          - temporarily_unavailable
-        reason:
-          type: string
-          example: platform_custody_frozen
-        structurally_invokable:
-          type: boolean
-        paid_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        catalog_metadata:
-          type: string
-          enum:
-          - available
-        payment_challenge_issued:
-          type: boolean
-          enum:
-          - false
-        payment_settled:
-          type: boolean
-          enum:
-          - false
     Error:
       type: object
       properties:

@@ -1713,46 +1713,6 @@ paths:
           description: Invocation not found
 components:
   schemas:
-    WorldAgentKitTrialEvidence:
-      type: object
-      required:
-      - schema
-      - claim_id
-      - status
-      - actual_spend_usdc
-      - actual_settled_usdc
-      - economic_exposure_usdc
-      - evidence_authority
-      description: Durable non-financial evidence for a default-off World AgentKit trial; it never represents paid settlement, seller compensation, or production-USDC spend.
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.world-agentkit-trial-evidence.v1
-        claim_id:
-          type: string
-        status:
-          type: string
-          enum:
-          - committed
-          - released
-          - reconciliation_required
-        actual_spend_usdc:
-          type: number
-          enum:
-          - 0
-        actual_settled_usdc:
-          type: number
-          enum:
-          - 0
-        economic_exposure_usdc:
-          type: number
-          minimum: 0
-          maximum: 1000000
-        evidence_authority:
-          type: string
-          enum:
-          - non_financial_observability
     PaymentReconciliationRequiredError:
       type: object
       required:
@@ -1802,13 +1762,6 @@ components:
           - false
         free_trial_evidence:
           $ref: '#/components/schemas/WorldAgentKitTrialEvidence'
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-        message:
-          type: string
     ProviderOutputTrapBlockedError:
       type: object
       required:
@@ -1824,6 +1777,46 @@ components:
           type: string
         agent_trap_review:
           $ref: '#/components/schemas/AgentTrapReview'
+    WorldAgentKitTrialEvidence:
+      type: object
+      required:
+      - schema
+      - claim_id
+      - status
+      - actual_spend_usdc
+      - actual_settled_usdc
+      - economic_exposure_usdc
+      - evidence_authority
+      description: Durable non-financial evidence for a default-off World AgentKit trial; it never represents paid settlement, seller compensation, or production-USDC spend.
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.world-agentkit-trial-evidence.v1
+        claim_id:
+          type: string
+        status:
+          type: string
+          enum:
+          - committed
+          - released
+          - reconciliation_required
+        actual_spend_usdc:
+          type: number
+          enum:
+          - 0
+        actual_settled_usdc:
+          type: number
+          enum:
+          - 0
+        economic_exposure_usdc:
+          type: number
+          minimum: 0
+          maximum: 1000000
+        evidence_authority:
+          type: string
+          enum:
+          - non_financial_observability
     AgentTrapReview:
       type: object
       description: Public-safe Agent Trap Shield review summary. Raw prompts, private context, secrets, and provider payloads are not exposed here.
@@ -1863,29 +1856,6 @@ components:
           type: boolean
         trust_signal_allowed:
           type: boolean
-    OpenAIAgentsTrace:
-      type: object
-      description: Optional OpenAI Agents run metadata echoed back on execution status and receipt surfaces when supplied by the caller.
-      properties:
-        trace_id:
-          type: string
-        span_id:
-          type: string
-        group_id:
-          type: string
-        workflow_name:
-          type: string
-        run_id:
-          type: string
-        session_id:
-          type: string
-        agent_name:
-          type: string
-        last_agent_name:
-          type: string
-        metadata:
-          type: object
-          additionalProperties: true
     X402PaidExecutionFrozenError:
       description: Typed fail-closed response for a positive-price paid x402 request when either independent custody boundary is frozen. Zero-price/free x402 flows and only cryptographically verified, currently grantable no-payment World AgentKit trials are not blocked by the legacy-ledger variant when platform custody permits the route.
       oneOf:
@@ -1937,6 +1907,36 @@ components:
             type: string
           custody:
             type: object
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+    OpenAIAgentsTrace:
+      type: object
+      description: Optional OpenAI Agents run metadata echoed back on execution status and receipt surfaces when supplied by the caller.
+      properties:
+        trace_id:
+          type: string
+        span_id:
+          type: string
+        group_id:
+          type: string
+        workflow_name:
+          type: string
+        run_id:
+          type: string
+        session_id:
+          type: string
+        agent_name:
+          type: string
+        last_agent_name:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
     AgentTrapBlockedError:
       type: object
       required:

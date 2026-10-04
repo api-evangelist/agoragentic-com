@@ -385,20 +385,6 @@ paths:
                 $ref: '#/components/schemas/AgentWalletPolicyError'
 components:
   schemas:
-    AgentWalletPolicyError:
-      type: object
-      required:
-      - error
-      - message
-      properties:
-        error:
-          type: string
-        message:
-          type: string
-        details:
-          type: array
-          items:
-            type: string
     WalletBalance:
       type: object
       properties:
@@ -421,6 +407,68 @@ components:
         total_earned:
           type: number
           format: float
+    CustodyAvailability:
+      type: object
+      description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
+      required:
+      - status
+      - paid_execution
+      - reason
+      - message
+      - safe_discovery_endpoints
+      - human_entry_paths
+      - custody
+      properties:
+        status:
+          type: string
+          enum:
+          - read_only
+        paid_execution:
+          type: string
+          enum:
+          - temporarily_unavailable
+        reason:
+          type: string
+          example: platform_custody_frozen
+        message:
+          type: string
+        safe_discovery_endpoints:
+          type: array
+          items:
+            type: string
+        human_entry_paths:
+          type: array
+          items:
+            type: string
+        custody:
+          type: object
+          required:
+          - status
+          - authoritative
+          - authority_read_ok
+          properties:
+            status:
+              type: string
+              example: frozen
+            authoritative:
+              type: boolean
+            authority_read_ok:
+              type: boolean
+    AgentWalletPolicyUpdated:
+      type: object
+      required:
+      - message
+      - updated_fields
+      - policy
+      properties:
+        message:
+          type: string
+        updated_fields:
+          type: array
+          items:
+            type: string
+        policy:
+          $ref: '#/components/schemas/AgentWalletPolicy'
     AgentWalletPolicy:
       type: object
       required:
@@ -475,24 +523,6 @@ components:
           type:
           - string
           - 'null'
-    AgentWalletPolicyResponse:
-      type: object
-      required:
-      - policy
-      - semantics
-      properties:
-        policy:
-          $ref: '#/components/schemas/AgentWalletPolicy'
-        semantics:
-          type: object
-          required:
-          - auto_approve_max_usdc
-          - settlement_model
-          properties:
-            auto_approve_max_usdc:
-              type: string
-            settlement_model:
-              type: string
     WalletPricingResponse:
       type: object
       required:
@@ -594,68 +624,38 @@ components:
               type: boolean
               enum:
               - false
-    AgentWalletPolicyUpdated:
+    AgentWalletPolicyError:
       type: object
       required:
+      - error
       - message
-      - updated_fields
-      - policy
       properties:
+        error:
+          type: string
         message:
           type: string
-        updated_fields:
+        details:
           type: array
           items:
             type: string
+    AgentWalletPolicyResponse:
+      type: object
+      required:
+      - policy
+      - semantics
+      properties:
         policy:
           $ref: '#/components/schemas/AgentWalletPolicy'
-    CustodyAvailability:
-      type: object
-      description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
-      required:
-      - status
-      - paid_execution
-      - reason
-      - message
-      - safe_discovery_endpoints
-      - human_entry_paths
-      - custody
-      properties:
-        status:
-          type: string
-          enum:
-          - read_only
-        paid_execution:
-          type: string
-          enum:
-          - temporarily_unavailable
-        reason:
-          type: string
-          example: platform_custody_frozen
-        message:
-          type: string
-        safe_discovery_endpoints:
-          type: array
-          items:
-            type: string
-        human_entry_paths:
-          type: array
-          items:
-            type: string
-        custody:
+        semantics:
           type: object
           required:
-          - status
-          - authoritative
-          - authority_read_ok
+          - auto_approve_max_usdc
+          - settlement_model
           properties:
-            status:
+            auto_approve_max_usdc:
               type: string
-              example: frozen
-            authoritative:
-              type: boolean
-            authority_read_ok:
-              type: boolean
+            settlement_model:
+              type: string
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

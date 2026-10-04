@@ -717,74 +717,6 @@ paths:
           description: request_not_withdrawable
 components:
   schemas:
-    PlatformHealth:
-      type: object
-      required:
-      - status
-      - scope
-      - timestamp
-      - uptime_seconds
-      - version
-      - commit
-      - commit_source
-      - source_fingerprint
-      - source_fingerprint_source
-      - checks
-      properties:
-        status:
-          type: string
-          enum:
-          - starting
-          - healthy
-          - degraded
-          - unhealthy
-        scope:
-          type: string
-          enum:
-          - liveness
-          - diagnostic
-        timestamp:
-          type: string
-          format: date-time
-        uptime_seconds:
-          type: integer
-        version:
-          type: string
-        commit:
-          type: string
-          description: Deployed git SHA reported by the runtime, or unknown when the build cannot prove it.
-        commit_source:
-          type: string
-          enum:
-          - git
-          - file
-          - env
-          - unknown
-          description: Diagnostic source used for commit. Source bundles without Git metadata or a legacy baked marker may honestly report unknown; env is an explicit debug escape hatch and not deployment proof.
-        source_fingerprint:
-          type: string
-          description: SHA-256 tree fingerprint baked from the source App Runner actually fetched, or unknown when no valid build artifact exists.
-        source_fingerprint_source:
-          type: string
-          enum:
-          - file
-          - unknown
-          description: Source used for source_fingerprint. Exact deployment proof requires file.
-        checks:
-          type: object
-          additionalProperties: true
-        tripwires:
-          type:
-          - array
-          - 'null'
-          description: Freshness alarms exposed by JSON GET health as readiness and release evidence. On `/health`, an alarm alone does not change otherwise healthy startup/process liveness or its HTTP 200 response; Deploy Verify parses the live-armed Interchange alarm separately and may reject the release. The process-only HEAD probe omits database-backed freshness checks and tripwires. Diagnostic `/health/details` may still report degraded health and HTTP 503.
-          items:
-            type: object
-            additionalProperties: true
-        response_ms:
-          type:
-          - integer
-          - 'null'
     Capability:
       type: object
       properties:
@@ -1443,6 +1375,135 @@ components:
         created_at:
           type: string
           format: date-time
+    MarketplaceFundingAvailability:
+      type: object
+      description: Funding availability overlay on marketplace browse metadata while platform-paid custody is unavailable.
+      required:
+      - status
+      - reason
+      properties:
+        status:
+          type: string
+          enum:
+          - temporarily_unavailable
+        reason:
+          type: string
+          example: platform_custody_frozen
+    PlatformHealth:
+      type: object
+      required:
+      - status
+      - scope
+      - timestamp
+      - uptime_seconds
+      - version
+      - commit
+      - commit_source
+      - source_fingerprint
+      - source_fingerprint_source
+      - checks
+      properties:
+        status:
+          type: string
+          enum:
+          - starting
+          - healthy
+          - degraded
+          - unhealthy
+        scope:
+          type: string
+          enum:
+          - liveness
+          - diagnostic
+        timestamp:
+          type: string
+          format: date-time
+        uptime_seconds:
+          type: integer
+        version:
+          type: string
+        commit:
+          type: string
+          description: Deployed git SHA reported by the runtime, or unknown when the build cannot prove it.
+        commit_source:
+          type: string
+          enum:
+          - git
+          - file
+          - env
+          - unknown
+          description: Diagnostic source used for commit. Source bundles without Git metadata or a legacy baked marker may honestly report unknown; env is an explicit debug escape hatch and not deployment proof.
+        source_fingerprint:
+          type: string
+          description: SHA-256 tree fingerprint baked from the source App Runner actually fetched, or unknown when no valid build artifact exists.
+        source_fingerprint_source:
+          type: string
+          enum:
+          - file
+          - unknown
+          description: Source used for source_fingerprint. Exact deployment proof requires file.
+        checks:
+          type: object
+          additionalProperties: true
+        tripwires:
+          type:
+          - array
+          - 'null'
+          description: Freshness alarms exposed by JSON GET health as readiness and release evidence. On `/health`, an alarm alone does not change otherwise healthy startup/process liveness or its HTTP 200 response; Deploy Verify parses the live-armed Interchange alarm separately and may reject the release. The process-only HEAD probe omits database-backed freshness checks and tripwires. Diagnostic `/health/details` may still report degraded health and HTTP 503.
+          items:
+            type: object
+            additionalProperties: true
+        response_ms:
+          type:
+          - integer
+          - 'null'
+    CustodyAvailability:
+      type: object
+      description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
+      required:
+      - status
+      - paid_execution
+      - reason
+      - message
+      - safe_discovery_endpoints
+      - human_entry_paths
+      - custody
+      properties:
+        status:
+          type: string
+          enum:
+          - read_only
+        paid_execution:
+          type: string
+          enum:
+          - temporarily_unavailable
+        reason:
+          type: string
+          example: platform_custody_frozen
+        message:
+          type: string
+        safe_discovery_endpoints:
+          type: array
+          items:
+            type: string
+        human_entry_paths:
+          type: array
+          items:
+            type: string
+        custody:
+          type: object
+          required:
+          - status
+          - authoritative
+          - authority_read_ok
+          properties:
+            status:
+              type: string
+              example: frozen
+            authoritative:
+              type: boolean
+            authority_read_ok:
+              type: boolean
     AgentCategoriesResponse:
       type: object
       description: Public category taxonomy and listing guidance. This metadata grants no listing or execution authority.
@@ -1499,12 +1560,17 @@ components:
               type: string
             auto_review:
               type: string
-    MarketplaceFundingAvailability:
+    PaidOperationalAvailability:
       type: object
-      description: Funding availability overlay on marketplace browse metadata while platform-paid custody is unavailable.
+      description: Runtime availability overlay added to paid catalog metadata while authoritative platform custody is unavailable. Configured pricing, payment-mode enums, schemas, trust, and structural invokability remain unchanged.
       required:
       - status
       - reason
+      - structurally_invokable
+      - paid_execution_enabled
+      - catalog_metadata
+      - payment_challenge_issued
+      - payment_settled
       properties:
         status:
           type: string
@@ -1513,6 +1579,24 @@ components:
         reason:
           type: string
           example: platform_custody_frozen
+        structurally_invokable:
+          type: boolean
+        paid_execution_enabled:
+          type: boolean
+          enum:
+          - false
+        catalog_metadata:
+          type: string
+          enum:
+          - available
+        payment_challenge_issued:
+          type: boolean
+          enum:
+          - false
+        payment_settled:
+          type: boolean
+          enum:
+          - false
     MarketplaceBrowseResponse:
       type: object
       required:
@@ -1565,90 +1649,6 @@ components:
             discovery_visibility:
               type: object
               additionalProperties: true
-    CustodyAvailability:
-      type: object
-      description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
-      required:
-      - status
-      - paid_execution
-      - reason
-      - message
-      - safe_discovery_endpoints
-      - human_entry_paths
-      - custody
-      properties:
-        status:
-          type: string
-          enum:
-          - read_only
-        paid_execution:
-          type: string
-          enum:
-          - temporarily_unavailable
-        reason:
-          type: string
-          example: platform_custody_frozen
-        message:
-          type: string
-        safe_discovery_endpoints:
-          type: array
-          items:
-            type: string
-        human_entry_paths:
-          type: array
-          items:
-            type: string
-        custody:
-          type: object
-          required:
-          - status
-          - authoritative
-          - authority_read_ok
-          properties:
-            status:
-              type: string
-              example: frozen
-            authoritative:
-              type: boolean
-            authority_read_ok:
-              type: boolean
-    PaidOperationalAvailability:
-      type: object
-      description: Runtime availability overlay added to paid catalog metadata while authoritative platform custody is unavailable. Configured pricing, payment-mode enums, schemas, trust, and structural invokability remain unchanged.
-      required:
-      - status
-      - reason
-      - structurally_invokable
-      - paid_execution_enabled
-      - catalog_metadata
-      - payment_challenge_issued
-      - payment_settled
-      properties:
-        status:
-          type: string
-          enum:
-          - temporarily_unavailable
-        reason:
-          type: string
-          example: platform_custody_frozen
-        structurally_invokable:
-          type: boolean
-        paid_execution_enabled:
-          type: boolean
-          enum:
-          - false
-        catalog_metadata:
-          type: string
-          enum:
-          - available
-        payment_challenge_issued:
-          type: boolean
-          enum:
-          - false
-        payment_settled:
-          type: boolean
-          enum:
-          - false
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

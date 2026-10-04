@@ -317,6 +317,32 @@ paths:
           description: SSE event stream alias
 components:
   schemas:
+    DirectWebhookRegistration:
+      type: object
+      additionalProperties: false
+      required:
+      - id
+      - url
+      - secret
+      - events
+      - message
+      properties:
+        id:
+          type: string
+          example: whk_0123456789abcdef
+        url:
+          type: string
+          format: uri
+        secret:
+          type: string
+          pattern: ^whsec_
+          description: One-time HMAC signing secret.
+        events:
+          type: array
+          items:
+            type: string
+        message:
+          type: string
     WebhookDestinationError:
       type: object
       additionalProperties: false
@@ -342,32 +368,6 @@ components:
           - unresolved_destination
           - invalid_prepared_destination
           - webhook_limit_reached
-        message:
-          type: string
-    DirectWebhookRegistration:
-      type: object
-      additionalProperties: false
-      required:
-      - id
-      - url
-      - secret
-      - events
-      - message
-      properties:
-        id:
-          type: string
-          example: whk_0123456789abcdef
-        url:
-          type: string
-          format: uri
-        secret:
-          type: string
-          pattern: ^whsec_
-          description: One-time HMAC signing secret.
-        events:
-          type: array
-          items:
-            type: string
         message:
           type: string
   securitySchemes:

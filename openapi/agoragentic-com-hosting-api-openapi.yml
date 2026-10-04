@@ -1997,12 +1997,93 @@ components:
         agent_os_deploy:
           type: object
           additionalProperties: true
+    ReviewedHostedPendingOutcome:
+      type: object
+      description: Reviewed hosted work exceeded the synchronous response window; this is not an activation or marketplace-verification result.
+      required:
+      - success
+      - pending
+      - deployment_id
+      - action
+      - message
+      - poll
+      - arbiter
+      - hosted_worker_contract
+      properties:
+        success:
+          type: boolean
+          enum:
+          - true
+        pending:
+          type: boolean
+          enum:
+          - true
+        deployment_id:
+          type: string
+        action:
+          type: string
+        message:
+          type: string
+        poll:
+          type: object
+          required:
+          - deployment
+          - activation_gate
+          properties:
+            deployment:
+              type: string
+            activation_gate:
+              type: string
+        arbiter:
+          type: object
+          additionalProperties: true
+        hosted_worker_contract:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
     Error:
       type: object
       properties:
         error:
           type: string
         message:
+          type: string
+    HostedMarketplaceVerification:
+      type: object
+      description: Marketplace content review and runtime proof are separate from hosted runtime activation. New or review-content-changed listings use `pending` with reason `semantic_owner_review_pending_before_sandbox_queue` and no run until semantic review plus owner release allow canonical proof queueing. A review scheduling error is sanitized as `semantic_review_schedule_operational_error` and is retryable. Exact-identity unchanged approved listings may initially report queued/pending/queue_error sandbox state. Completed replay is rebuilt from the canonical listing and may report verified, reachable, pending, failed, or blocked. The narrow legacy NULL-status plus positive-success proof is labeled only `reachable` with reason `legacy_successful_runtime_proof`, never `verified`. `run_id` is exposed only for a current canonical sandbox status of verified/reachable; legacy, pending, failed, and blocked lanes return null. Blocked/non-ready activation uses `not_requested` because no listing is published.
+      required:
+      - required
+      - status
+      - execution_eligible
+      - retry_required
+      - run_id
+      - reason
+      properties:
+        required:
+          type: boolean
+        status:
+          type: string
+          enum:
+          - not_requested
+          - queued
+          - pending
+          - queue_error
+          - verified
+          - reachable
+          - failed
+          - blocked
+        execution_eligible:
+          type:
+          - boolean
+          - 'null'
+        retry_required:
+          type: boolean
+        run_id:
+          type:
+          - string
+          - 'null'
+        reason:
           type: string
     HostedListingEconomicsError:
       type: object
@@ -2052,87 +2133,6 @@ components:
           type: object
           additionalProperties:
             type: boolean
-    ReviewedHostedPendingOutcome:
-      type: object
-      description: Reviewed hosted work exceeded the synchronous response window; this is not an activation or marketplace-verification result.
-      required:
-      - success
-      - pending
-      - deployment_id
-      - action
-      - message
-      - poll
-      - arbiter
-      - hosted_worker_contract
-      properties:
-        success:
-          type: boolean
-          enum:
-          - true
-        pending:
-          type: boolean
-          enum:
-          - true
-        deployment_id:
-          type: string
-        action:
-          type: string
-        message:
-          type: string
-        poll:
-          type: object
-          required:
-          - deployment
-          - activation_gate
-          properties:
-            deployment:
-              type: string
-            activation_gate:
-              type: string
-        arbiter:
-          type: object
-          additionalProperties: true
-        hosted_worker_contract:
-          type:
-          - object
-          - 'null'
-          additionalProperties: true
-    HostedMarketplaceVerification:
-      type: object
-      description: Marketplace content review and runtime proof are separate from hosted runtime activation. New or review-content-changed listings use `pending` with reason `semantic_owner_review_pending_before_sandbox_queue` and no run until semantic review plus owner release allow canonical proof queueing. A review scheduling error is sanitized as `semantic_review_schedule_operational_error` and is retryable. Exact-identity unchanged approved listings may initially report queued/pending/queue_error sandbox state. Completed replay is rebuilt from the canonical listing and may report verified, reachable, pending, failed, or blocked. The narrow legacy NULL-status plus positive-success proof is labeled only `reachable` with reason `legacy_successful_runtime_proof`, never `verified`. `run_id` is exposed only for a current canonical sandbox status of verified/reachable; legacy, pending, failed, and blocked lanes return null. Blocked/non-ready activation uses `not_requested` because no listing is published.
-      required:
-      - required
-      - status
-      - execution_eligible
-      - retry_required
-      - run_id
-      - reason
-      properties:
-        required:
-          type: boolean
-        status:
-          type: string
-          enum:
-          - not_requested
-          - queued
-          - pending
-          - queue_error
-          - verified
-          - reachable
-          - failed
-          - blocked
-        execution_eligible:
-          type:
-          - boolean
-          - 'null'
-        retry_required:
-          type: boolean
-        run_id:
-          type:
-          - string
-          - 'null'
-        reason:
-          type: string
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

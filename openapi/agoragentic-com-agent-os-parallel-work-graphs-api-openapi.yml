@@ -640,34 +640,11 @@ paths:
           description: Internal server error
 components:
   schemas:
-    ParallelGraphReadResponse:
+    ParallelMergeResult:
       type: object
       additionalProperties: true
-      required:
-      - id
-      - status
-      - branches
-      - cost_summary
-      - budget_attempts
-      - legacy_untracked_attempts
       properties:
-        id:
-          type: string
-        deployment_id:
-          type: string
-        agent_id:
-          type:
-          - string
-          - 'null'
-        owner_id:
-          type:
-          - string
-          - 'null'
-        execution_principal_id:
-          type:
-          - string
-          - 'null'
-        status:
+        verdict:
           type: string
         total_cost_usdc:
           type:
@@ -675,24 +652,73 @@ components:
           - 'null'
           format: double
           minimum: 0
-          description: Nullable compatibility field. Use cost_summary completeness and explicit cost fields.
-        branches:
-          type: array
-          items:
-            $ref: '#/components/schemas/ParallelBranch'
+          description: Compatibility total populated only for a complete canonical known-cost audit; not settlement truth.
+        total_cost_basis:
+          type: string
+          enum:
+          - canonical_known_cost_not_settlement
+          - incomplete_use_known_and_policy_accounted_fields
+        known_cost_usdc:
+          type:
+          - number
+          - 'null'
+          format: double
+          minimum: 0
+        reported_cost_usdc:
+          type:
+          - number
+          - 'null'
+          format: double
+          minimum: 0
+        policy_accounted_cost_usdc:
+          type: number
+          format: double
+          minimum: 0
+        cost_complete:
+          type: boolean
+        unknown_cost_attempt_count:
+          type: integer
+          minimum: 0
+        legacy_untracked_attempt_count:
+          type: integer
+          minimum: 0
+        receipt_reconciliation_complete:
+          type: boolean
+        settlement_truth:
+          type: boolean
+          enum:
+          - false
+        cost_truth:
+          type: string
+          enum:
+          - incomplete_legacy_and_server_invocation_audit
+          - policy_and_internal_no_effect_receipt_audit_only
+          - policy_and_mixed_server_binding_audit_only
+          - policy_and_server_invocation_audit_only
         cost_summary:
           $ref: '#/components/schemas/ParallelCostAuditSummary'
-        budget_attempts:
+        receipts:
           type: array
-          description: Immutable reservation/attempt rows created by the atomic dispatch transition.
           items:
             $ref: '#/components/schemas/ParallelBudgetAttempt'
-        legacy_untracked_attempts:
-          type: array
-          description: Conservative reconstructed evidence for execution predating immutable attempt audit.
-          items:
-            $ref: '#/components/schemas/ParallelBudgetAttempt'
-    ParallelFleetNoEffectCanaryForbiddenError:
+    ParallelGraphCancelResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - graph_id
+      - status
+      - branches_cancelled
+      properties:
+        graph_id:
+          type: string
+        status:
+          type: string
+          enum:
+          - cancelled
+        branches_cancelled:
+          type: integer
+          minimum: 0
+    ParallelFleetNoEffectCanaryUnavailableError:
       allOf:
       - $ref: '#/components/schemas/ParallelFleetNoEffectCanaryFailure'
       - type: object
@@ -701,12 +727,40 @@ components:
         properties:
           error:
             type: string
-            enum:
-            - fleet_no_effect_canary_not_enabled
-            - fleet_no_effect_canary_authority_revoked
-            - fleet_no_effect_canary_binding_scope_mismatch
-            - fleet_no_effect_canary_guard_scope_mismatch
-            - fleet_no_effect_canary_principal_mismatch
+            minLength: 1
+            description: Known canary availability codes are enumerated first. An unexpected exception with a non-empty code preserves that code at 503; an uncoded exception becomes fleet_no_effect_canary_unavailable. Shared runtime/lifecycle 503 codes also remain possible.
+            anyOf:
+            - enum:
+              - fleet_no_effect_canary_database_required
+              - fleet_no_effect_canary_authority_check_required
+              - fleet_no_effect_canary_guard_operation_required
+              - fleet_no_effect_canary_admission_not_proven
+              - fleet_no_effect_canary_orchestrator_required
+              - fleet_no_effect_canary_persisted_proof_invalid
+              - fleet_no_effect_canary_unavailable
+              - graph_execution_lifecycle_exists
+              - graph_execution_session_stale
+              - parallel_durable_cancel_watcher_unavailable
+              - parallel_deployment_authority_unavailable
+              - parallel_graph_execution_lease_heartbeat_unavailable
+              - parallel_runtime_stopping
+            - type: string
+              minLength: 1
+    ParallelDeploymentNotFoundError:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          enum:
+          - deployment_not_found
+        message:
+          type: string
+          enum:
+          - Agent OS deployment request not found.
     ParallelGraphRetryResponse:
       type: object
       additionalProperties: true
@@ -737,393 +791,103 @@ components:
           items:
             type: object
             additionalProperties: true
-    ParallelGraphExecuteResponse:
+    ParallelFleetNoEffectCanaryConflictError:
+      allOf:
+      - $ref: '#/components/schemas/ParallelFleetNoEffectCanaryFailure'
+      - type: object
+        required:
+        - error
+        properties:
+          error:
+            type: string
+            description: Selected canary failures include fixed false assertions even when the same coordination code is also used by ordinary execute.
+            enum:
+            - fleet_no_effect_canary_shadow_graph_required
+            - fleet_no_effect_canary_graph_already_terminal
+            - fleet_no_effect_canary_ineligible
+            - fleet_no_effect_canary_run_binding_conflict
+            - fleet_no_effect_canary_aborted
+            - fleet_no_effect_canary_prepared_branch_mismatch
+            - fleet_no_effect_canary_durable_precondition_failed
+            - fleet_no_effect_canary_receipt_conflict
+            - fleet_no_effect_canary_receipt_missing
+            - fleet_no_effect_canary_attempt_replay_conflict
+            - fleet_no_effect_canary_run_state_conflict
+            - fleet_no_effect_canary_attempt_set_conflict
+            - fleet_no_effect_canary_graph_state_conflict
+            - fleet_no_effect_canary_terminal_binding_mismatch
+            - fleet_no_effect_canary_admission_intent_mismatch
+            - fleet_no_effect_canary_replay_not_succeeded
+            - fleet_no_effect_canary_replay_shape_mismatch
+            - fleet_no_effect_canary_replay_identity_invalid
+            - graph_execution_lease_required
+            - branch_state_conflict
+            - branches_still_running
+            - graph_execution_in_flight
+            - graph_execution_lease_lost
+            - graph_state_conflict
+            - legacy_attempt_audit_incomplete
+            - required_branch_receipts_missing
+    ParallelExecuteUnavailableError:
       type: object
       additionalProperties: true
-      required:
-      - graph_id
-      - status
-      - merge_ready
-      properties:
-        graph_id:
-          type: string
-        status:
-          type: string
-          enum:
-          - running
-          - succeeded
-          - failed
-          - cancelled
-          - partially_succeeded
-        execution:
-          type:
-          - object
-          - 'null'
-          additionalProperties: true
-          properties:
-            branches_run:
-              type: integer
-              minimum: 0
-            dependencies_released:
-              type: integer
-              minimum: 0
-            dependencies_blocked:
-              type: integer
-              minimum: 0
-            results:
-              type: array
-              items:
-                type: object
-                additionalProperties: true
-        merge_ready:
-          type: boolean
-        merge_result:
-          allOf:
-          - $ref: '#/components/schemas/ParallelMergeResult'
-        no_effect_canary:
-          oneOf:
-          - $ref: '#/components/schemas/ParallelFleetNoEffectCanaryProof'
-          - $ref: '#/components/schemas/ParallelFleetNoEffectRetentionCanaryProof'
-    ParallelGraphReceiptAuditResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - graph_id
-      - receipts
-      - attempts
-      - cost_summary
-      properties:
-        graph_id:
-          type: string
-        receipts:
-          type: array
-          description: Receipt-bearing subset of attempts; not a payment-settlement ledger.
-          items:
-            $ref: '#/components/schemas/ParallelBudgetAttempt'
-        attempts:
-          type: array
-          items:
-            $ref: '#/components/schemas/ParallelBudgetAttempt'
-        cost_summary:
-          $ref: '#/components/schemas/ParallelCostAuditSummary'
-    ParallelGraphNotFoundError:
-      type: object
-      additionalProperties: false
       required:
       - error
       properties:
         error:
           type: string
           enum:
-          - Graph not found.
-    ParallelFleetNoEffectRetentionCanaryProof:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - mode
-      - verified
-      - receipt_ref
-      - result_hash
-      - fleet_source_succeeded
-      - fleet_attempt_count
-      - accepted_admission_count
-      - cost_basis
-      - cost_usdc
-      - cost_complete
-      - receipt_reconciliation_complete
-      - settlement_truth
-      - no_effect
-      - provider_called
-      - model_called
-      - remote_worker_called
-      - network_called
-      - outbound_dispatch_attempted
-      - tool_called
-      - wallet_accessed
-      - payment_attempted
-      - settlement_attempted
-      - publication_attempted
-      - trust_mutation_attempted
-      - deployment_attempted
-      - external_write_attempted
-      - authority_granted
-      - execution_input_eligible
-      - base_canary_mode
-      - base_canary_proof_hash
-      - stage_c_retention
-      - proof_binding_hash
-      - replayed
-      description: Durable Stage C proof that binds the exact Stage B no-effect proof to one immutable retention-readiness and caller selection. It remains zero-effect and grants no authority.
-      properties:
-        schema:
+          - graph_execution_lifecycle_exists
+          - graph_execution_session_stale
+          - parallel_durable_cancel_watcher_unavailable
+          - parallel_deployment_authority_unavailable
+          - parallel_context_authority_unavailable
+          - parallel_marketplace_effect_class_unbound
+          - parallel_graph_execution_lease_heartbeat_unavailable
+          - parallel_runtime_stopping
+        graph_id:
           type: string
-          enum:
-          - agoragentic.parallel-fleet-no-effect-retention-canary-proof.v1
-        mode:
+        status:
           type: string
-          enum:
-          - no_effect_retention_v1
-        verified:
+        merge_ready:
           type: boolean
-          enum:
-          - true
-        receipt_ref:
+        message:
           type: string
-          minLength: 1
-        result_hash:
-          type: string
-          minLength: 1
-        fleet_source_succeeded:
-          type: boolean
-          enum:
-          - true
-        fleet_attempt_count:
-          type: integer
-          enum:
-          - 1
-        accepted_admission_count:
-          type: integer
-          enum:
-          - 1
-        cost_basis:
-          type: string
-          enum:
-          - internal_no_effect_receipt_bound
-        cost_usdc:
-          type: number
-          enum:
-          - 0
-        cost_complete:
-          type: boolean
-          enum:
-          - true
-        receipt_reconciliation_complete:
-          type: boolean
-          enum:
-          - true
-        settlement_truth:
-          type: boolean
-          enum:
-          - false
-        no_effect:
-          type: boolean
-          enum:
-          - true
         provider_called:
           type: boolean
           enum:
           - false
-        model_called:
+          description: Present on the ordinary context/effect-class availability stops; no provider was called.
+        charge_attempted:
           type: boolean
           enum:
           - false
-        remote_worker_called:
-          type: boolean
-          enum:
-          - false
-        network_called:
-          type: boolean
-          enum:
-          - false
-        outbound_dispatch_attempted:
-          type: boolean
-          enum:
-          - false
-        tool_called:
-          type: boolean
-          enum:
-          - false
-        wallet_accessed:
-          type: boolean
-          enum:
-          - false
-        payment_attempted:
-          type: boolean
-          enum:
-          - false
-        settlement_attempted:
-          type: boolean
-          enum:
-          - false
-        publication_attempted:
-          type: boolean
-          enum:
-          - false
-        trust_mutation_attempted:
-          type: boolean
-          enum:
-          - false
-        deployment_attempted:
-          type: boolean
-          enum:
-          - false
-        external_write_attempted:
-          type: boolean
-          enum:
-          - false
-        authority_granted:
-          type: boolean
-          enum:
-          - false
-        execution_input_eligible:
-          type: boolean
-          enum:
-          - false
-        base_canary_mode:
-          type: string
-          enum:
-          - no_effect_v1
-        base_canary_proof_hash:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        stage_c_retention:
-          $ref: '#/components/schemas/ParallelFleetNoEffectRetentionCanaryBinding'
-        proof_binding_hash:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        replayed:
-          type: boolean
-          description: False for the first Stage C execution response; true only after the persisted base proof, readiness receipt, and immutable Stage C selection are revalidated.
-    ParallelGraphExecuteOrdinaryRequest:
-      type: object
-      additionalProperties: false
-      maxProperties: 0
-      description: Empty ordinary execute request. The server reloads graph-owner deployment authority, while the authenticated execution principal supplies authorization only. Non-none context returns parallel_context_authority_unavailable; none context returns parallel_marketplace_effect_class_unbound. Both are 503 before runtime lifecycle, charge, or provider dispatch.
-    ParallelDeploymentNotFoundError:
+          description: Present on the ordinary context/effect-class availability stops; no charge was attempted.
+    ParallelBranchNotFoundError:
       type: object
       additionalProperties: false
       required:
       - error
-      - message
       properties:
         error:
           type: string
           enum:
-          - deployment_not_found
-        message:
-          type: string
-          enum:
-          - Agent OS deployment request not found.
-    ParallelBudgetAttempt:
-      type: object
-      additionalProperties: true
-      properties:
-        id:
-          type:
-          - string
-          - 'null'
-          description: Immutable reservation ID on graph-detail output; null for reconstructed legacy evidence.
-        reservation_id:
-          type:
-          - string
-          - 'null'
-          description: Reservation ID on receipt-audit projections; null for reconstructed legacy evidence.
-        graph_id:
-          type: string
-        branch_id:
-          type: string
-        branch_name:
-          type:
-          - string
-          - 'null'
-        attempt_number:
-          type:
-          - integer
-          - 'null'
-          minimum: 1
-        legacy_untracked:
-          type: boolean
-        immutable_attempt_record:
-          type: boolean
-        reservation_status:
-          type: string
-        status:
-          type: string
-        terminal_status:
-          type:
-          - string
-          - 'null'
-        reserved_microusd:
-          type: integer
-          minimum: 0
-        reserved_usdc:
-          type: number
-          format: double
-          minimum: 0
-        claimed_cost_microusd:
-          type:
-          - integer
-          - 'null'
-          minimum: 0
-        claimed_cost_usdc:
-          type:
-          - number
-          - 'null'
-          format: double
-          minimum: 0
-        reported_cost_usdc:
-          type:
-          - number
-          - 'null'
-          format: double
-          minimum: 0
-        known_cost_microusd:
-          type:
-          - integer
-          - 'null'
-          minimum: 0
-        known_cost_usdc:
-          type:
-          - number
-          - 'null'
-          format: double
-          minimum: 0
-        accounted_cost_microusd:
-          type: integer
-          minimum: 0
-        accounted_cost_usdc:
-          type: number
-          format: double
-          minimum: 0
-        policy_accounted_cost_usdc:
-          type: number
-          format: double
-          minimum: 0
-        cost_known:
-          type: boolean
-        cost_binding_status:
-          type: string
-        invocation_id:
-          type:
-          - string
-          - 'null'
-        receipt_id:
-          type:
-          - string
-          - 'null'
-        invocation_status:
-          type:
-          - string
-          - 'null'
-        invocation_settlement_status_observed:
-          type:
-          - string
-          - 'null'
-          description: Observed invocation metadata only; not wallet, chain-finality, or payout truth.
-        invocation_settlement_status:
-          type:
-          - string
-          - 'null'
-          description: Raw attempt-audit observation only; not wallet, chain-finality, or payout truth.
-        disposition_reason:
-          type:
-          - string
-          - 'null'
-        settlement_truth:
-          type: boolean
-          enum:
-          - false
+          - Branch not found.
+    ParallelFleetNoEffectCanaryForbiddenError:
+      allOf:
+      - $ref: '#/components/schemas/ParallelFleetNoEffectCanaryFailure'
+      - type: object
+        required:
+        - error
+        properties:
+          error:
+            type: string
+            enum:
+            - fleet_no_effect_canary_not_enabled
+            - fleet_no_effect_canary_authority_revoked
+            - fleet_no_effect_canary_binding_scope_mismatch
+            - fleet_no_effect_canary_guard_scope_mismatch
+            - fleet_no_effect_canary_principal_mismatch
     ParallelExecuteConflictError:
       type: object
       additionalProperties: true
@@ -1147,6 +911,173 @@ components:
           type: string
         merge_ready:
           type: boolean
+    ParallelCostAuditSummary:
+      type: object
+      additionalProperties: true
+      required:
+      - attempt_count
+      - immutable_attempt_count
+      - legacy_untracked_attempt_count
+      - legacy_untracked_branch_count
+      - policy_capacity_attempt_count
+      - known_cost_attempt_count
+      - unknown_cost_attempt_count
+      - reported_cost_usdc
+      - known_cost_usdc
+      - policy_accounted_cost_usdc
+      - cost_complete
+      - receipt_reconciliation_complete
+      - settlement_truth
+      - cost_truth
+      properties:
+        total_cost_usdc:
+          type:
+          - number
+          - 'null'
+          format: double
+          minimum: 0
+          description: Compatibility total. Null unless the known-cost audit is complete; never settlement truth.
+        total_cost_basis:
+          type: string
+          enum:
+          - canonical_known_cost_not_settlement
+          - incomplete_use_known_and_policy_accounted_fields
+        attempt_count:
+          type: integer
+          minimum: 0
+        immutable_attempt_count:
+          type: integer
+          minimum: 0
+        legacy_untracked_attempt_count:
+          type: integer
+          minimum: 0
+        legacy_untracked_branch_count:
+          type: integer
+          minimum: 0
+        policy_capacity_attempt_count:
+          type: integer
+          minimum: 0
+        released_attempt_count:
+          type: integer
+          minimum: 0
+        known_cost_attempt_count:
+          type: integer
+          minimum: 0
+        unknown_cost_attempt_count:
+          type: integer
+          minimum: 0
+        reported_cost_usdc:
+          type: number
+          format: double
+          minimum: 0
+          description: Bounded executor claims, not canonical or settled cost.
+        known_cost_usdc:
+          type: number
+          format: double
+          minimum: 0
+          description: Cost bound to canonical server invocation and receipt evidence; not settlement truth.
+        policy_accounted_cost_usdc:
+          type: number
+          format: double
+          minimum: 0
+          description: Conservative capacity charged to graph policy; unknown outcomes retain their full reservation.
+        cost_complete:
+          type: boolean
+        receipt_reconciliation_complete:
+          type: boolean
+          description: Server invocation/receipt audit completeness only; does not establish payment settlement.
+        settlement_truth:
+          type: boolean
+          enum:
+          - false
+        cost_truth:
+          type: string
+          description: Explicit provenance/completeness label for the server-side attempt audit.
+          enum:
+          - incomplete_legacy_and_server_invocation_audit
+          - policy_and_internal_no_effect_receipt_audit_only
+          - policy_and_mixed_server_binding_audit_only
+          - policy_and_server_invocation_audit_only
+    ParallelFleetNoEffectRetentionCanaryBinding:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - canary_mode
+      - selection_hash
+      - base_canary_identity_hash
+      - base_canary_receipt_hash
+      - readiness_receipt_hash
+      - readiness_digest
+      - stage_c_authorization_intent_hash
+      - stage_c_caller_ref_hash
+      - source_sha
+      - deployment_fingerprint
+      - environment
+      - authority_granted
+      - execution_input_eligible
+      description: Immutable Stage C selection and retention-readiness binding. It records bounded hashes and fixed false authority assertions; it does not grant execution authority or make retained context eligible as execution input.
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.fleet-shared-context-canary-selection.v1
+        canary_mode:
+          type: string
+          enum:
+          - no_effect_retention_v1
+        selection_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        base_canary_identity_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        base_canary_receipt_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        readiness_receipt_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        readiness_digest:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        stage_c_authorization_intent_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        stage_c_caller_ref_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        source_sha:
+          type: string
+          pattern: ^[a-f0-9]{40}(?:[a-f0-9]{24})?$
+        deployment_fingerprint:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        environment:
+          type: string
+          minLength: 2
+          maxLength: 100
+          pattern: ^[a-z0-9][a-z0-9_-]{1,99}$
+        authority_granted:
+          type: boolean
+          enum:
+          - false
+        execution_input_eligible:
+          type: boolean
+          enum:
+          - false
+    ParallelFleetNoEffectCanaryRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - fleet_shared_context_canary
+      description: Exact selector for either the default-off Stage B zero-effect Fleet shadow canary or the separately authorized, default-off Stage C retention-bound canary. No other property is accepted.
+      properties:
+        fleet_shared_context_canary:
+          type: string
+          enum:
+          - no_effect_v1
+          - no_effect_retention_v1
     ParallelGraphCreateRequest:
       type: object
       additionalProperties: false
@@ -1368,11 +1299,203 @@ components:
                     items:
                       type: string
                       minLength: 1
-    ParallelMergeResult:
+    ParallelFleetNoEffectRetentionCanaryProof:
+      type: object
+      additionalProperties: false
+      required:
+      - schema
+      - mode
+      - verified
+      - receipt_ref
+      - result_hash
+      - fleet_source_succeeded
+      - fleet_attempt_count
+      - accepted_admission_count
+      - cost_basis
+      - cost_usdc
+      - cost_complete
+      - receipt_reconciliation_complete
+      - settlement_truth
+      - no_effect
+      - provider_called
+      - model_called
+      - remote_worker_called
+      - network_called
+      - outbound_dispatch_attempted
+      - tool_called
+      - wallet_accessed
+      - payment_attempted
+      - settlement_attempted
+      - publication_attempted
+      - trust_mutation_attempted
+      - deployment_attempted
+      - external_write_attempted
+      - authority_granted
+      - execution_input_eligible
+      - base_canary_mode
+      - base_canary_proof_hash
+      - stage_c_retention
+      - proof_binding_hash
+      - replayed
+      description: Durable Stage C proof that binds the exact Stage B no-effect proof to one immutable retention-readiness and caller selection. It remains zero-effect and grants no authority.
+      properties:
+        schema:
+          type: string
+          enum:
+          - agoragentic.parallel-fleet-no-effect-retention-canary-proof.v1
+        mode:
+          type: string
+          enum:
+          - no_effect_retention_v1
+        verified:
+          type: boolean
+          enum:
+          - true
+        receipt_ref:
+          type: string
+          minLength: 1
+        result_hash:
+          type: string
+          minLength: 1
+        fleet_source_succeeded:
+          type: boolean
+          enum:
+          - true
+        fleet_attempt_count:
+          type: integer
+          enum:
+          - 1
+        accepted_admission_count:
+          type: integer
+          enum:
+          - 1
+        cost_basis:
+          type: string
+          enum:
+          - internal_no_effect_receipt_bound
+        cost_usdc:
+          type: number
+          enum:
+          - 0
+        cost_complete:
+          type: boolean
+          enum:
+          - true
+        receipt_reconciliation_complete:
+          type: boolean
+          enum:
+          - true
+        settlement_truth:
+          type: boolean
+          enum:
+          - false
+        no_effect:
+          type: boolean
+          enum:
+          - true
+        provider_called:
+          type: boolean
+          enum:
+          - false
+        model_called:
+          type: boolean
+          enum:
+          - false
+        remote_worker_called:
+          type: boolean
+          enum:
+          - false
+        network_called:
+          type: boolean
+          enum:
+          - false
+        outbound_dispatch_attempted:
+          type: boolean
+          enum:
+          - false
+        tool_called:
+          type: boolean
+          enum:
+          - false
+        wallet_accessed:
+          type: boolean
+          enum:
+          - false
+        payment_attempted:
+          type: boolean
+          enum:
+          - false
+        settlement_attempted:
+          type: boolean
+          enum:
+          - false
+        publication_attempted:
+          type: boolean
+          enum:
+          - false
+        trust_mutation_attempted:
+          type: boolean
+          enum:
+          - false
+        deployment_attempted:
+          type: boolean
+          enum:
+          - false
+        external_write_attempted:
+          type: boolean
+          enum:
+          - false
+        authority_granted:
+          type: boolean
+          enum:
+          - false
+        execution_input_eligible:
+          type: boolean
+          enum:
+          - false
+        base_canary_mode:
+          type: string
+          enum:
+          - no_effect_v1
+        base_canary_proof_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        stage_c_retention:
+          $ref: '#/components/schemas/ParallelFleetNoEffectRetentionCanaryBinding'
+        proof_binding_hash:
+          type: string
+          pattern: ^sha256:[a-f0-9]{64}$
+        replayed:
+          type: boolean
+          description: False for the first Stage C execution response; true only after the persisted base proof, readiness receipt, and immutable Stage C selection are revalidated.
+    ParallelGraphReadResponse:
       type: object
       additionalProperties: true
+      required:
+      - id
+      - status
+      - branches
+      - cost_summary
+      - budget_attempts
+      - legacy_untracked_attempts
       properties:
-        verdict:
+        id:
+          type: string
+        deployment_id:
+          type: string
+        agent_id:
+          type:
+          - string
+          - 'null'
+        owner_id:
+          type:
+          - string
+          - 'null'
+        execution_principal_id:
+          type:
+          - string
+          - 'null'
+        status:
           type: string
         total_cost_usdc:
           type:
@@ -1380,13 +1503,75 @@ components:
           - 'null'
           format: double
           minimum: 0
-          description: Compatibility total populated only for a complete canonical known-cost audit; not settlement truth.
-        total_cost_basis:
+          description: Nullable compatibility field. Use cost_summary completeness and explicit cost fields.
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParallelBranch'
+        cost_summary:
+          $ref: '#/components/schemas/ParallelCostAuditSummary'
+        budget_attempts:
+          type: array
+          description: Immutable reservation/attempt rows created by the atomic dispatch transition.
+          items:
+            $ref: '#/components/schemas/ParallelBudgetAttempt'
+        legacy_untracked_attempts:
+          type: array
+          description: Conservative reconstructed evidence for execution predating immutable attempt audit.
+          items:
+            $ref: '#/components/schemas/ParallelBudgetAttempt'
+    ParallelBudgetAttempt:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type:
+          - string
+          - 'null'
+          description: Immutable reservation ID on graph-detail output; null for reconstructed legacy evidence.
+        reservation_id:
+          type:
+          - string
+          - 'null'
+          description: Reservation ID on receipt-audit projections; null for reconstructed legacy evidence.
+        graph_id:
           type: string
-          enum:
-          - canonical_known_cost_not_settlement
-          - incomplete_use_known_and_policy_accounted_fields
-        known_cost_usdc:
+        branch_id:
+          type: string
+        branch_name:
+          type:
+          - string
+          - 'null'
+        attempt_number:
+          type:
+          - integer
+          - 'null'
+          minimum: 1
+        legacy_untracked:
+          type: boolean
+        immutable_attempt_record:
+          type: boolean
+        reservation_status:
+          type: string
+        status:
+          type: string
+        terminal_status:
+          type:
+          - string
+          - 'null'
+        reserved_microusd:
+          type: integer
+          minimum: 0
+        reserved_usdc:
+          type: number
+          format: double
+          minimum: 0
+        claimed_cost_microusd:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+        claimed_cost_usdc:
           type:
           - number
           - 'null'
@@ -1398,37 +1583,161 @@ components:
           - 'null'
           format: double
           minimum: 0
+        known_cost_microusd:
+          type:
+          - integer
+          - 'null'
+          minimum: 0
+        known_cost_usdc:
+          type:
+          - number
+          - 'null'
+          format: double
+          minimum: 0
+        accounted_cost_microusd:
+          type: integer
+          minimum: 0
+        accounted_cost_usdc:
+          type: number
+          format: double
+          minimum: 0
         policy_accounted_cost_usdc:
           type: number
           format: double
           minimum: 0
-        cost_complete:
+        cost_known:
           type: boolean
-        unknown_cost_attempt_count:
-          type: integer
-          minimum: 0
-        legacy_untracked_attempt_count:
-          type: integer
-          minimum: 0
-        receipt_reconciliation_complete:
-          type: boolean
+        cost_binding_status:
+          type: string
+        invocation_id:
+          type:
+          - string
+          - 'null'
+        receipt_id:
+          type:
+          - string
+          - 'null'
+        invocation_status:
+          type:
+          - string
+          - 'null'
+        invocation_settlement_status_observed:
+          type:
+          - string
+          - 'null'
+          description: Observed invocation metadata only; not wallet, chain-finality, or payout truth.
+        invocation_settlement_status:
+          type:
+          - string
+          - 'null'
+          description: Raw attempt-audit observation only; not wallet, chain-finality, or payout truth.
+        disposition_reason:
+          type:
+          - string
+          - 'null'
         settlement_truth:
           type: boolean
           enum:
           - false
-        cost_truth:
+    ParallelGraphReceiptAuditResponse:
+      type: object
+      additionalProperties: false
+      required:
+      - graph_id
+      - receipts
+      - attempts
+      - cost_summary
+      properties:
+        graph_id:
           type: string
-          enum:
-          - incomplete_legacy_and_server_invocation_audit
-          - policy_and_internal_no_effect_receipt_audit_only
-          - policy_and_mixed_server_binding_audit_only
-          - policy_and_server_invocation_audit_only
-        cost_summary:
-          $ref: '#/components/schemas/ParallelCostAuditSummary'
         receipts:
+          type: array
+          description: Receipt-bearing subset of attempts; not a payment-settlement ledger.
+          items:
+            $ref: '#/components/schemas/ParallelBudgetAttempt'
+        attempts:
           type: array
           items:
             $ref: '#/components/schemas/ParallelBudgetAttempt'
+        cost_summary:
+          $ref: '#/components/schemas/ParallelCostAuditSummary'
+    ParallelGraphExecuteResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - graph_id
+      - status
+      - merge_ready
+      properties:
+        graph_id:
+          type: string
+        status:
+          type: string
+          enum:
+          - running
+          - succeeded
+          - failed
+          - cancelled
+          - partially_succeeded
+        execution:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+          properties:
+            branches_run:
+              type: integer
+              minimum: 0
+            dependencies_released:
+              type: integer
+              minimum: 0
+            dependencies_blocked:
+              type: integer
+              minimum: 0
+            results:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+        merge_ready:
+          type: boolean
+        merge_result:
+          allOf:
+          - $ref: '#/components/schemas/ParallelMergeResult'
+        no_effect_canary:
+          oneOf:
+          - $ref: '#/components/schemas/ParallelFleetNoEffectCanaryProof'
+          - $ref: '#/components/schemas/ParallelFleetNoEffectRetentionCanaryProof'
+    ParallelSharedContextShadowDenied:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      - shared_context_mode
+      - authority_granted
+      - execution_input_eligible
+      properties:
+        error:
+          type: string
+          enum:
+          - shared_context_shadow_not_enabled
+        message:
+          type: string
+          enum:
+          - Shared context shadow mode is not enabled for this caller.
+        shared_context_mode:
+          type: string
+          enum:
+          - disabled
+        authority_granted:
+          type: boolean
+          enum:
+          - false
+        execution_input_eligible:
+          type: boolean
+          enum:
+          - false
     ParallelFleetNoEffectCanaryFailure:
       type: object
       additionalProperties: true
@@ -1528,451 +1837,6 @@ components:
           type: boolean
           enum:
           - false
-    ParallelSharedContextShadowDenied:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      - shared_context_mode
-      - authority_granted
-      - execution_input_eligible
-      properties:
-        error:
-          type: string
-          enum:
-          - shared_context_shadow_not_enabled
-        message:
-          type: string
-          enum:
-          - Shared context shadow mode is not enabled for this caller.
-        shared_context_mode:
-          type: string
-          enum:
-          - disabled
-        authority_granted:
-          type: boolean
-          enum:
-          - false
-        execution_input_eligible:
-          type: boolean
-          enum:
-          - false
-    ParallelBranch:
-      type: object
-      additionalProperties: true
-      properties:
-        id:
-          type: string
-        graph_id:
-          type: string
-        deployment_id:
-          type: string
-        agent_id:
-          type:
-          - string
-          - 'null'
-        name:
-          type: string
-        task:
-          type: string
-        status:
-          type: string
-        receipt_id:
-          type:
-          - string
-          - 'null'
-        invocation_id:
-          type:
-          - string
-          - 'null'
-        cost_usdc:
-          type:
-          - number
-          - 'null'
-          format: double
-          minimum: 0
-          description: Compatibility branch cost; use explicit audit fields for completeness and provenance.
-    ParallelGraphPlanResponse:
-      type: object
-      additionalProperties: true
-      required:
-      - graph_id
-      - status
-      - simulation_mode
-      - branch_count
-      - branches
-      - merge_strategy
-      - shared_context_mode
-      properties:
-        graph_id:
-          type: string
-        status:
-          type: string
-          enum:
-          - planned
-        world_model_level:
-          type: string
-          enum:
-          - L2_simulator
-        simulation_mode:
-          type: string
-          enum:
-          - dry_run
-          - execute
-        collaboration_style:
-          type: string
-        max_rounds:
-          type: integer
-          minimum: 1
-          maximum: 5
-        collaboration_plan:
-          type: object
-          additionalProperties: true
-        predicted_branch_rollouts:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
-        expected_receipts:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
-        merge_prediction:
-          type:
-          - object
-          - 'null'
-          additionalProperties: true
-        branch_count:
-          type: integer
-          minimum: 1
-          maximum: 20
-        branches:
-          type: array
-          items:
-            $ref: '#/components/schemas/ParallelBranch'
-        merge_strategy:
-          type: string
-        context_mode:
-          type: string
-        shared_context_mode:
-          type: string
-          enum:
-          - disabled
-          - shadow
-        model_policy:
-          type: object
-          additionalProperties: true
-    ParallelFleetNoEffectCanaryUnavailableError:
-      allOf:
-      - $ref: '#/components/schemas/ParallelFleetNoEffectCanaryFailure'
-      - type: object
-        required:
-        - error
-        properties:
-          error:
-            type: string
-            minLength: 1
-            description: Known canary availability codes are enumerated first. An unexpected exception with a non-empty code preserves that code at 503; an uncoded exception becomes fleet_no_effect_canary_unavailable. Shared runtime/lifecycle 503 codes also remain possible.
-            anyOf:
-            - enum:
-              - fleet_no_effect_canary_database_required
-              - fleet_no_effect_canary_authority_check_required
-              - fleet_no_effect_canary_guard_operation_required
-              - fleet_no_effect_canary_admission_not_proven
-              - fleet_no_effect_canary_orchestrator_required
-              - fleet_no_effect_canary_persisted_proof_invalid
-              - fleet_no_effect_canary_unavailable
-              - graph_execution_lifecycle_exists
-              - graph_execution_session_stale
-              - parallel_durable_cancel_watcher_unavailable
-              - parallel_deployment_authority_unavailable
-              - parallel_graph_execution_lease_heartbeat_unavailable
-              - parallel_runtime_stopping
-            - type: string
-              minLength: 1
-    ParallelBranchNotFoundError:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      properties:
-        error:
-          type: string
-          enum:
-          - Branch not found.
-    ParallelFleetNoEffectRetentionCanaryBinding:
-      type: object
-      additionalProperties: false
-      required:
-      - schema
-      - canary_mode
-      - selection_hash
-      - base_canary_identity_hash
-      - base_canary_receipt_hash
-      - readiness_receipt_hash
-      - readiness_digest
-      - stage_c_authorization_intent_hash
-      - stage_c_caller_ref_hash
-      - source_sha
-      - deployment_fingerprint
-      - environment
-      - authority_granted
-      - execution_input_eligible
-      description: Immutable Stage C selection and retention-readiness binding. It records bounded hashes and fixed false authority assertions; it does not grant execution authority or make retained context eligible as execution input.
-      properties:
-        schema:
-          type: string
-          enum:
-          - agoragentic.fleet-shared-context-canary-selection.v1
-        canary_mode:
-          type: string
-          enum:
-          - no_effect_retention_v1
-        selection_hash:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        base_canary_identity_hash:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        base_canary_receipt_hash:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        readiness_receipt_hash:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        readiness_digest:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        stage_c_authorization_intent_hash:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        stage_c_caller_ref_hash:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        source_sha:
-          type: string
-          pattern: ^[a-f0-9]{40}(?:[a-f0-9]{24})?$
-        deployment_fingerprint:
-          type: string
-          pattern: ^sha256:[a-f0-9]{64}$
-        environment:
-          type: string
-          minLength: 2
-          maxLength: 100
-          pattern: ^[a-z0-9][a-z0-9_-]{1,99}$
-        authority_granted:
-          type: boolean
-          enum:
-          - false
-        execution_input_eligible:
-          type: boolean
-          enum:
-          - false
-    ParallelFleetNoEffectCanaryConflictError:
-      allOf:
-      - $ref: '#/components/schemas/ParallelFleetNoEffectCanaryFailure'
-      - type: object
-        required:
-        - error
-        properties:
-          error:
-            type: string
-            description: Selected canary failures include fixed false assertions even when the same coordination code is also used by ordinary execute.
-            enum:
-            - fleet_no_effect_canary_shadow_graph_required
-            - fleet_no_effect_canary_graph_already_terminal
-            - fleet_no_effect_canary_ineligible
-            - fleet_no_effect_canary_run_binding_conflict
-            - fleet_no_effect_canary_aborted
-            - fleet_no_effect_canary_prepared_branch_mismatch
-            - fleet_no_effect_canary_durable_precondition_failed
-            - fleet_no_effect_canary_receipt_conflict
-            - fleet_no_effect_canary_receipt_missing
-            - fleet_no_effect_canary_attempt_replay_conflict
-            - fleet_no_effect_canary_run_state_conflict
-            - fleet_no_effect_canary_attempt_set_conflict
-            - fleet_no_effect_canary_graph_state_conflict
-            - fleet_no_effect_canary_terminal_binding_mismatch
-            - fleet_no_effect_canary_admission_intent_mismatch
-            - fleet_no_effect_canary_replay_not_succeeded
-            - fleet_no_effect_canary_replay_shape_mismatch
-            - fleet_no_effect_canary_replay_identity_invalid
-            - graph_execution_lease_required
-            - branch_state_conflict
-            - branches_still_running
-            - graph_execution_in_flight
-            - graph_execution_lease_lost
-            - graph_state_conflict
-            - legacy_attempt_audit_incomplete
-            - required_branch_receipts_missing
-    ParallelGraphCancelResponse:
-      type: object
-      additionalProperties: false
-      required:
-      - graph_id
-      - status
-      - branches_cancelled
-      properties:
-        graph_id:
-          type: string
-        status:
-          type: string
-          enum:
-          - cancelled
-        branches_cancelled:
-          type: integer
-          minimum: 0
-    ParallelExecuteUnavailableError:
-      type: object
-      additionalProperties: true
-      required:
-      - error
-      properties:
-        error:
-          type: string
-          enum:
-          - graph_execution_lifecycle_exists
-          - graph_execution_session_stale
-          - parallel_durable_cancel_watcher_unavailable
-          - parallel_deployment_authority_unavailable
-          - parallel_context_authority_unavailable
-          - parallel_marketplace_effect_class_unbound
-          - parallel_graph_execution_lease_heartbeat_unavailable
-          - parallel_runtime_stopping
-        graph_id:
-          type: string
-        status:
-          type: string
-        merge_ready:
-          type: boolean
-        message:
-          type: string
-        provider_called:
-          type: boolean
-          enum:
-          - false
-          description: Present on the ordinary context/effect-class availability stops; no provider was called.
-        charge_attempted:
-          type: boolean
-          enum:
-          - false
-          description: Present on the ordinary context/effect-class availability stops; no charge was attempted.
-    ParallelCostAuditSummary:
-      type: object
-      additionalProperties: true
-      required:
-      - attempt_count
-      - immutable_attempt_count
-      - legacy_untracked_attempt_count
-      - legacy_untracked_branch_count
-      - policy_capacity_attempt_count
-      - known_cost_attempt_count
-      - unknown_cost_attempt_count
-      - reported_cost_usdc
-      - known_cost_usdc
-      - policy_accounted_cost_usdc
-      - cost_complete
-      - receipt_reconciliation_complete
-      - settlement_truth
-      - cost_truth
-      properties:
-        total_cost_usdc:
-          type:
-          - number
-          - 'null'
-          format: double
-          minimum: 0
-          description: Compatibility total. Null unless the known-cost audit is complete; never settlement truth.
-        total_cost_basis:
-          type: string
-          enum:
-          - canonical_known_cost_not_settlement
-          - incomplete_use_known_and_policy_accounted_fields
-        attempt_count:
-          type: integer
-          minimum: 0
-        immutable_attempt_count:
-          type: integer
-          minimum: 0
-        legacy_untracked_attempt_count:
-          type: integer
-          minimum: 0
-        legacy_untracked_branch_count:
-          type: integer
-          minimum: 0
-        policy_capacity_attempt_count:
-          type: integer
-          minimum: 0
-        released_attempt_count:
-          type: integer
-          minimum: 0
-        known_cost_attempt_count:
-          type: integer
-          minimum: 0
-        unknown_cost_attempt_count:
-          type: integer
-          minimum: 0
-        reported_cost_usdc:
-          type: number
-          format: double
-          minimum: 0
-          description: Bounded executor claims, not canonical or settled cost.
-        known_cost_usdc:
-          type: number
-          format: double
-          minimum: 0
-          description: Cost bound to canonical server invocation and receipt evidence; not settlement truth.
-        policy_accounted_cost_usdc:
-          type: number
-          format: double
-          minimum: 0
-          description: Conservative capacity charged to graph policy; unknown outcomes retain their full reservation.
-        cost_complete:
-          type: boolean
-        receipt_reconciliation_complete:
-          type: boolean
-          description: Server invocation/receipt audit completeness only; does not establish payment settlement.
-        settlement_truth:
-          type: boolean
-          enum:
-          - false
-        cost_truth:
-          type: string
-          description: Explicit provenance/completeness label for the server-side attempt audit.
-          enum:
-          - incomplete_legacy_and_server_invocation_audit
-          - policy_and_internal_no_effect_receipt_audit_only
-          - policy_and_mixed_server_binding_audit_only
-          - policy_and_server_invocation_audit_only
-    ParallelFleetNoEffectCanaryRequestError:
-      type: object
-      additionalProperties: false
-      required:
-      - error
-      - message
-      properties:
-        error:
-          type: string
-          enum:
-          - fleet_no_effect_canary_request_invalid
-        message:
-          type: string
-          enum:
-          - 'The request body must be empty or exactly { "fleet_shared_context_canary": "no_effect_v1" } or the separately authorized Stage C mode.'
-    ParallelFleetNoEffectCanaryRequest:
-      type: object
-      additionalProperties: false
-      required:
-      - fleet_shared_context_canary
-      description: Exact selector for either the default-off Stage B zero-effect Fleet shadow canary or the separately authorized, default-off Stage C retention-bound canary. No other property is accepted.
-      properties:
-        fleet_shared_context_canary:
-          type: string
-          enum:
-          - no_effect_v1
-          - no_effect_retention_v1
     ParallelFleetNoEffectCanaryProof:
       type: object
       additionalProperties: false
@@ -2126,6 +1990,142 @@ components:
         replayed:
           type: boolean
           description: False for the first execution response; true only after persisted proof is revalidated on a succeeded-graph replay.
+    ParallelBranch:
+      type: object
+      additionalProperties: true
+      properties:
+        id:
+          type: string
+        graph_id:
+          type: string
+        deployment_id:
+          type: string
+        agent_id:
+          type:
+          - string
+          - 'null'
+        name:
+          type: string
+        task:
+          type: string
+        status:
+          type: string
+        receipt_id:
+          type:
+          - string
+          - 'null'
+        invocation_id:
+          type:
+          - string
+          - 'null'
+        cost_usdc:
+          type:
+          - number
+          - 'null'
+          format: double
+          minimum: 0
+          description: Compatibility branch cost; use explicit audit fields for completeness and provenance.
+    ParallelFleetNoEffectCanaryRequestError:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+          enum:
+          - fleet_no_effect_canary_request_invalid
+        message:
+          type: string
+          enum:
+          - 'The request body must be empty or exactly { "fleet_shared_context_canary": "no_effect_v1" } or the separately authorized Stage C mode.'
+    ParallelGraphNotFoundError:
+      type: object
+      additionalProperties: false
+      required:
+      - error
+      properties:
+        error:
+          type: string
+          enum:
+          - Graph not found.
+    ParallelGraphExecuteOrdinaryRequest:
+      type: object
+      additionalProperties: false
+      maxProperties: 0
+      description: Empty ordinary execute request. The server reloads graph-owner deployment authority, while the authenticated execution principal supplies authorization only. Non-none context returns parallel_context_authority_unavailable; none context returns parallel_marketplace_effect_class_unbound. Both are 503 before runtime lifecycle, charge, or provider dispatch.
+    ParallelGraphPlanResponse:
+      type: object
+      additionalProperties: true
+      required:
+      - graph_id
+      - status
+      - simulation_mode
+      - branch_count
+      - branches
+      - merge_strategy
+      - shared_context_mode
+      properties:
+        graph_id:
+          type: string
+        status:
+          type: string
+          enum:
+          - planned
+        world_model_level:
+          type: string
+          enum:
+          - L2_simulator
+        simulation_mode:
+          type: string
+          enum:
+          - dry_run
+          - execute
+        collaboration_style:
+          type: string
+        max_rounds:
+          type: integer
+          minimum: 1
+          maximum: 5
+        collaboration_plan:
+          type: object
+          additionalProperties: true
+        predicted_branch_rollouts:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        expected_receipts:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+        merge_prediction:
+          type:
+          - object
+          - 'null'
+          additionalProperties: true
+        branch_count:
+          type: integer
+          minimum: 1
+          maximum: 20
+        branches:
+          type: array
+          items:
+            $ref: '#/components/schemas/ParallelBranch'
+        merge_strategy:
+          type: string
+        context_mode:
+          type: string
+        shared_context_mode:
+          type: string
+          enum:
+          - disabled
+          - shadow
+        model_policy:
+          type: object
+          additionalProperties: true
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

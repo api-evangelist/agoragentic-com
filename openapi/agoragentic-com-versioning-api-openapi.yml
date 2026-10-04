@@ -543,9 +543,9 @@ components:
               type: string
             existing_run_id:
               type: string
-    CapabilityVersionHistoryInvalidError:
+    VersionNumberExhaustedError:
       type: object
-      description: A stored capability-version history row is outside the supported version-number contract. The route fails closed rather than skipping or renumbering the row.
+      description: The current capability-version head is already the maximum supported integer, so no next contiguous version can be published.
       required:
       - error
       - reason
@@ -556,12 +556,11 @@ components:
         error:
           type: string
           enum:
-          - capability_version_history_invalid
+          - version_number_exhausted
         reason:
           type: string
           enum:
-          - version_number_format_invalid
-          - version_number_out_of_range
+          - version_number_limit_reached
         message:
           type: string
         retryable:
@@ -591,34 +590,6 @@ components:
           enum:
           - version_number_format_invalid
           - version_number_out_of_range
-        message:
-          type: string
-        retryable:
-          type: boolean
-          enum:
-          - false
-        max_version_number:
-          type: integer
-          enum:
-          - 2147483647
-    VersionNumberExhaustedError:
-      type: object
-      description: The current capability-version head is already the maximum supported integer, so no next contiguous version can be published.
-      required:
-      - error
-      - reason
-      - message
-      - retryable
-      - max_version_number
-      properties:
-        error:
-          type: string
-          enum:
-          - version_number_exhausted
-        reason:
-          type: string
-          enum:
-          - version_number_limit_reached
         message:
           type: string
         retryable:
@@ -659,6 +630,35 @@ components:
           type: integer
           enum:
           - 1
+        max_version_number:
+          type: integer
+          enum:
+          - 2147483647
+    CapabilityVersionHistoryInvalidError:
+      type: object
+      description: A stored capability-version history row is outside the supported version-number contract. The route fails closed rather than skipping or renumbering the row.
+      required:
+      - error
+      - reason
+      - message
+      - retryable
+      - max_version_number
+      properties:
+        error:
+          type: string
+          enum:
+          - capability_version_history_invalid
+        reason:
+          type: string
+          enum:
+          - version_number_format_invalid
+          - version_number_out_of_range
+        message:
+          type: string
+        retryable:
+          type: boolean
+          enum:
+          - false
         max_version_number:
           type: integer
           enum:

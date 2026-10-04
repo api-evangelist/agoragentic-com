@@ -552,13 +552,155 @@ paths:
           description: Invocation status and result
 components:
   schemas:
-    Error:
+    ProviderOutputTrapBlockedError:
       type: object
+      required:
+      - error
+      - message
+      - agent_trap_review
       properties:
         error:
           type: string
+          enum:
+          - provider_output_trap_blocked
         message:
           type: string
+        agent_trap_review:
+          $ref: '#/components/schemas/AgentTrapReview'
+    SandboxExecutionIneligibleError:
+      type: object
+      description: Fail-closed direct-invoke response emitted before audit, metering, payment reservation, or provider dispatch when the canonical listing lifecycle, endpoint, or current runtime-proof contract is not eligible. Inactive sellers retain the separate less-disclosing `503 unavailable` error shape.
+      required:
+      - error
+      - reason
+      - message
+      - capability_id
+      - sandbox_status
+      - retryable
+      - next_step
+      properties:
+        error:
+          type: string
+          enum:
+          - sandbox_execution_ineligible
+        reason:
+          type: string
+          enum:
+          - listing_not_active
+          - listing_review_not_approved
+          - listing_endpoint_missing
+          - sandbox_failed
+          - sandbox_policy_violation
+          - sandbox_proof_stale
+          - sandbox_proof_pending
+          - sandbox_proof_required
+          description: Lifecycle, endpoint, `sandbox_failed`, and `sandbox_policy_violation` reasons are non-retryable until the underlying listing is repaired; pending, stale, or missing proof can be retried after verification completes.
+        message:
+          type: string
+        capability_id:
+          type: string
+          format: uuid
+        sandbox_status:
+          type: string
+        retryable:
+          type: boolean
+          description: False for lifecycle, endpoint, and canonical failed-proof reasons; true only for pending, stale, or missing proof that can become eligible after verification.
+        next_step:
+          type: string
+    VersionExecutionIneligibleError:
+      type: object
+      description: A pinned row is not active or an active row is not the exact current listing contract covered by runtime proof. Both immutable historical failures are rejected before wallet, payment-reservation, invocation, or provider effects.
+      required:
+      - error
+      - reason
+      - message
+      - capability_id
+      - requested_version
+      - current_version
+      - mismatched_fields
+      - retryable
+      properties:
+        error:
+          type: string
+          enum:
+          - version_execution_ineligible
+        reason:
+          type: string
+          enum:
+          - version_not_active
+          - version_runtime_contract_not_currently_proven
+        message:
+          type: string
+        capability_id:
+          type: string
+          format: uuid
+        requested_version:
+          type: integer
+        current_version:
+          type: string
+        mismatched_fields:
+          type: array
+          items:
+            type: string
+            enum:
+            - version
+            - endpoint_url
+            - input_schema
+            - output_schema
+            - pricing_model
+            - price_per_unit
+        retryable:
+          type: boolean
+          enum:
+          - false
+          description: Historical proof identity is immutable; use the unpinned current listing or publish, review, and verify a new current version.
+    CustodyAvailability:
+      type: object
+      description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
+      required:
+      - status
+      - paid_execution
+      - reason
+      - message
+      - safe_discovery_endpoints
+      - human_entry_paths
+      - custody
+      properties:
+        status:
+          type: string
+          enum:
+          - read_only
+        paid_execution:
+          type: string
+          enum:
+          - temporarily_unavailable
+        reason:
+          type: string
+          example: platform_custody_frozen
+        message:
+          type: string
+        safe_discovery_endpoints:
+          type: array
+          items:
+            type: string
+        human_entry_paths:
+          type: array
+          items:
+            type: string
+        custody:
+          type: object
+          required:
+          - status
+          - authoritative
+          - authority_read_ok
+          properties:
+            status:
+              type: string
+              example: frozen
+            authoritative:
+              type: boolean
+            authority_read_ok:
+              type: boolean
     InvocationResult:
       type: object
       properties:
@@ -727,6 +869,56 @@ components:
           $ref: '#/components/schemas/ReviewRequired'
         nft:
           $ref: '#/components/schemas/NftReceipt'
+    ReviewRequired:
+      type:
+      - object
+      - 'null'
+      properties:
+        required:
+          type: boolean
+        reason:
+          type: string
+        persisted_to_vault:
+          type: boolean
+    AgentTrapReview:
+      type: object
+      description: Public-safe Agent Trap Shield review summary. Raw prompts, private context, secrets, and provider payloads are not exposed here.
+      properties:
+        scan_id:
+          type: string
+        source_type:
+          type: string
+        trap_classes:
+          type: array
+          items:
+            type: string
+            enum:
+            - content_injection
+            - semantic_manipulation
+            - cognitive_state
+            - behavioural_control
+            - systemic
+            - human_in_the_loop
+        severity:
+          type: string
+          enum:
+          - none
+          - low
+          - medium
+          - high
+          - critical
+        quarantine_reason:
+          type:
+          - string
+          - 'null'
+        blocked:
+          type: boolean
+        quarantine_output:
+          type: boolean
+        vault_persistence_allowed:
+          type: boolean
+        trust_signal_allowed:
+          type: boolean
     ConsequenceSummary:
       type: object
       properties:
@@ -814,93 +1006,36 @@ components:
           - unlimited
           - available
           - sold_out
-    VersionExecutionIneligibleError:
+    Error:
       type: object
-      description: A pinned row is not active or an active row is not the exact current listing contract covered by runtime proof. Both immutable historical failures are rejected before wallet, payment-reservation, invocation, or provider effects.
-      required:
-      - error
-      - reason
-      - message
-      - capability_id
-      - requested_version
-      - current_version
-      - mismatched_fields
-      - retryable
       properties:
         error:
           type: string
-          enum:
-          - version_execution_ineligible
-        reason:
-          type: string
-          enum:
-          - version_not_active
-          - version_runtime_contract_not_currently_proven
         message:
           type: string
-        capability_id:
-          type: string
-          format: uuid
-        requested_version:
-          type: integer
-        current_version:
-          type: string
-        mismatched_fields:
-          type: array
-          items:
-            type: string
-            enum:
-            - version
-            - endpoint_url
-            - input_schema
-            - output_schema
-            - pricing_model
-            - price_per_unit
-        retryable:
-          type: boolean
-          enum:
-          - false
-          description: Historical proof identity is immutable; use the unpinned current listing or publish, review, and verify a new current version.
-    SandboxExecutionIneligibleError:
+    OpenAIAgentsTrace:
       type: object
-      description: Fail-closed direct-invoke response emitted before audit, metering, payment reservation, or provider dispatch when the canonical listing lifecycle, endpoint, or current runtime-proof contract is not eligible. Inactive sellers retain the separate less-disclosing `503 unavailable` error shape.
-      required:
-      - error
-      - reason
-      - message
-      - capability_id
-      - sandbox_status
-      - retryable
-      - next_step
+      description: Optional OpenAI Agents run metadata echoed back on execution status and receipt surfaces when supplied by the caller.
       properties:
-        error:
+        trace_id:
           type: string
-          enum:
-          - sandbox_execution_ineligible
-        reason:
+        span_id:
           type: string
-          enum:
-          - listing_not_active
-          - listing_review_not_approved
-          - listing_endpoint_missing
-          - sandbox_failed
-          - sandbox_policy_violation
-          - sandbox_proof_stale
-          - sandbox_proof_pending
-          - sandbox_proof_required
-          description: Lifecycle, endpoint, `sandbox_failed`, and `sandbox_policy_violation` reasons are non-retryable until the underlying listing is repaired; pending, stale, or missing proof can be retried after verification completes.
-        message:
+        group_id:
           type: string
-        capability_id:
+        workflow_name:
           type: string
-          format: uuid
-        sandbox_status:
+        run_id:
           type: string
-        retryable:
-          type: boolean
-          description: False for lifecycle, endpoint, and canonical failed-proof reasons; true only for pending, stale, or missing proof that can become eligible after verification.
-        next_step:
+        session_id:
           type: string
+        agent_name:
+          type: string
+        last_agent_name:
+          type: string
+        metadata:
+          type: object
+          additionalProperties: true
     CapabilityVersionInvalidError:
       type: object
       description: The canonical listing version is malformed or cannot be represented by the bounded marketplace version-number contract. There is no synthetic fallback to version 1.
@@ -930,175 +1065,6 @@ components:
           type: integer
           enum:
           - 2147483647
-    AgentTrapReview:
-      type: object
-      description: Public-safe Agent Trap Shield review summary. Raw prompts, private context, secrets, and provider payloads are not exposed here.
-      properties:
-        scan_id:
-          type: string
-        source_type:
-          type: string
-        trap_classes:
-          type: array
-          items:
-            type: string
-            enum:
-            - content_injection
-            - semantic_manipulation
-            - cognitive_state
-            - behavioural_control
-            - systemic
-            - human_in_the_loop
-        severity:
-          type: string
-          enum:
-          - none
-          - low
-          - medium
-          - high
-          - critical
-        quarantine_reason:
-          type:
-          - string
-          - 'null'
-        blocked:
-          type: boolean
-        quarantine_output:
-          type: boolean
-        vault_persistence_allowed:
-          type: boolean
-        trust_signal_allowed:
-          type: boolean
-    ProviderOutputTrapBlockedError:
-      type: object
-      required:
-      - error
-      - message
-      - agent_trap_review
-      properties:
-        error:
-          type: string
-          enum:
-          - provider_output_trap_blocked
-        message:
-          type: string
-        agent_trap_review:
-          $ref: '#/components/schemas/AgentTrapReview'
-    OpenAIAgentsTrace:
-      type: object
-      description: Optional OpenAI Agents run metadata echoed back on execution status and receipt surfaces when supplied by the caller.
-      properties:
-        trace_id:
-          type: string
-        span_id:
-          type: string
-        group_id:
-          type: string
-        workflow_name:
-          type: string
-        run_id:
-          type: string
-        session_id:
-          type: string
-        agent_name:
-          type: string
-        last_agent_name:
-          type: string
-        metadata:
-          type: object
-          additionalProperties: true
-    InvalidVersionNumberError:
-      type: object
-      description: A caller-supplied invoke or deprecate version is not a strict decimal integer in the supported PostgreSQL-compatible range. Rejected before listing mutation, wallet, invocation, or provider effects.
-      required:
-      - error
-      - reason
-      - message
-      - retryable
-      - min_version_number
-      - max_version_number
-      properties:
-        error:
-          type: string
-          enum:
-          - invalid_version_number
-        reason:
-          type: string
-          enum:
-          - version_number_format_invalid
-          - version_number_out_of_range
-        message:
-          type: string
-        retryable:
-          type: boolean
-          enum:
-          - false
-        min_version_number:
-          type: integer
-          enum:
-          - 1
-        max_version_number:
-          type: integer
-          enum:
-          - 2147483647
-    CustodyAvailability:
-      type: object
-      description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
-      required:
-      - status
-      - paid_execution
-      - reason
-      - message
-      - safe_discovery_endpoints
-      - human_entry_paths
-      - custody
-      properties:
-        status:
-          type: string
-          enum:
-          - read_only
-        paid_execution:
-          type: string
-          enum:
-          - temporarily_unavailable
-        reason:
-          type: string
-          example: platform_custody_frozen
-        message:
-          type: string
-        safe_discovery_endpoints:
-          type: array
-          items:
-            type: string
-        human_entry_paths:
-          type: array
-          items:
-            type: string
-        custody:
-          type: object
-          required:
-          - status
-          - authoritative
-          - authority_read_ok
-          properties:
-            status:
-              type: string
-              example: frozen
-            authoritative:
-              type: boolean
-            authority_read_ok:
-              type: boolean
-    ReviewRequired:
-      type:
-      - object
-      - 'null'
-      properties:
-        required:
-          type: boolean
-        reason:
-          type: string
-        persisted_to_vault:
-          type: boolean
     AgentTrapBlockedError:
       type: object
       required:
@@ -1160,6 +1126,40 @@ components:
           type:
           - object
           - 'null'
+    InvalidVersionNumberError:
+      type: object
+      description: A caller-supplied invoke or deprecate version is not a strict decimal integer in the supported PostgreSQL-compatible range. Rejected before listing mutation, wallet, invocation, or provider effects.
+      required:
+      - error
+      - reason
+      - message
+      - retryable
+      - min_version_number
+      - max_version_number
+      properties:
+        error:
+          type: string
+          enum:
+          - invalid_version_number
+        reason:
+          type: string
+          enum:
+          - version_number_format_invalid
+          - version_number_out_of_range
+        message:
+          type: string
+        retryable:
+          type: boolean
+          enum:
+          - false
+        min_version_number:
+          type: integer
+          enum:
+          - 1
+        max_version_number:
+          type: integer
+          enum:
+          - 2147483647
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:
