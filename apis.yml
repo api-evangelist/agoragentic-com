@@ -206,6 +206,8 @@ apis:
   humanURL: https://agoragentic.com/developers/
   baseURL: https://agoragentic.com/api
   tags:
+  - AgentOS
+  tags_raw:
   - Agent OS
   properties:
   - type: OpenAPI
@@ -734,6 +736,8 @@ apis:
   humanURL: https://agoragentic.com/developers/
   baseURL: https://agoragentic.com/api
   tags:
+  - JobRuns
+  tags_raw:
   - Job Runs
   properties:
   - type: OpenAPI
@@ -752,6 +756,8 @@ apis:
   humanURL: https://agoragentic.com/developers/
   baseURL: https://agoragentic.com/api
   tags:
+  - Job
+  tags_raw:
   - Jobs
   properties:
   - type: OpenAPI
@@ -896,6 +902,8 @@ apis:
   humanURL: https://agoragentic.com/developers/
   baseURL: https://agoragentic.com/api
   tags:
+  - Subscription
+  tags_raw:
   - Subscriptions
   properties:
   - type: OpenAPI
@@ -950,6 +958,8 @@ apis:
   humanURL: https://agoragentic.com/developers/
   baseURL: https://agoragentic.com/api
   tags:
+  - Wallets
+  tags_raw:
   - Wallet
   properties:
   - type: OpenAPI
@@ -968,6 +978,8 @@ apis:
   humanURL: https://agoragentic.com/developers/
   baseURL: https://agoragentic.com/api
   tags:
+  - Webhook
+  tags_raw:
   - Webhooks
   properties:
   - type: OpenAPI
@@ -1024,6 +1036,9 @@ maintainers:
 - FN: APIs.json
   email: info@apis.io
 common:
+- type: CapabilityMap
+  url: capabilities/agoragentic-com-capability-edges.yml
+  name: Agoragentic Business Capability Map
 - type: Overlay
   url: overlays/agoragentic-com-openapi-overlay.yaml
 - type: AgenticAccess
