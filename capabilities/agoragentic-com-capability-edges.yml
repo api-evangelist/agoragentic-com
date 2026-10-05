@@ -1,0 +1,57 @@
+slug: agoragentic-com
+provider: Agoragentic
+generated_by: planning/capability-mapping/scripts/classify_capabilities.py
+model: claude-opus-5
+frame:
+- Software & Technology
+min_confidence: 0.7
+capability_model:
+  source: https://github.com/vincentmakes/turbo-ea-capabilities
+  license: CC-BY-4.0
+  attribution: Turbo EA Capabilities by Vincent Verdet — Turbo EA, https://github.com/vincentmakes/turbo-ea-capabilities,
+    CC BY 4.0
+  notice: NOTICE
+edge_count: 4
+edges:
+- tag: Webhooks
+  spec_file: agoragentic-com-webhooks-api-openapi.yml
+  capability_id: BC-4270.80
+  capability_id_l1: BC-4270
+  capability_name: Webhook & Event Subscription Management
+  confidence: 0.92
+  evidence: '"Register a webhook"; "List webhook deliveries"; "SSE notification stream"; schema "DirectWebhookRegistration"'
+  reason: Plainly the lifecycle of outbound webhook subscriptions and delivery tracking plus an event
+    stream, matching Webhook & Event Subscription Management directly.
+- tag: Agent OS Codebase Workspaces
+  spec_file: agoragentic-com-agent-os-codebase-workspaces-api-openapi.yml
+  capability_id: BC-4200.40
+  capability_id_l1: BC-4200
+  capability_name: Software Construction Management
+  confidence: 0.75
+  evidence: '"Create a code task"; "Read latest task diff metadata"; "Record owner PR approval"'
+  reason: Operations create codebase workspaces, run code tasks, expose diffs and session logs, and capture
+    pull-request approval — i.e. implementation work with source-control and code-review discipline, which
+    is Software Construction Management. Some ambiguity remains as the surface is agent-driven rather
+    than human IDE tooling.
+- tag: Analytics
+  spec_file: agoragentic-com-analytics-api-openapi.yml
+  capability_id: BC-4280.10
+  capability_id_l1: BC-4280
+  capability_name: Product Telemetry Instrumentation
+  confidence: 0.75
+  evidence: POST /v1/analytics/pageview "Track pageview"; POST /v1/analytics/event "Track custom event";
+    POST /v1/analytics/funnel "Track funnel step"
+  reason: Write-side capture of product usage events (pageviews, custom events, funnel steps) is product
+    telemetry instrumentation. The trailing audit-log read endpoint is unrelated plumbing, which slightly
+    dilutes the tag.
+- tag: Agent OS Market Intelligence
+  spec_file: agoragentic-com-agent-os-market-intelligence-api-openapi.yml
+  capability_id: BC-400.30
+  capability_id_l1: BC-400
+  capability_name: Market Intelligence Management
+  confidence: 0.7
+  evidence: '"Start a Market Intelligence and Value Engine run"; "List demand clusters for a deployment
+    or run"; "List value opportunities matched from demand, capabilities, and pricing"'
+  reason: The operations research market demand, cluster it, and derive value opportunities — market research
+    and customer/demand insight. Confidence moderated because part of the surface (listing drafts, approve/publish)
+    spills into offer creation rather than pure intelligence.
