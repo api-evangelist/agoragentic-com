@@ -58,3 +58,32 @@ refunds_and_finality:
   - 'x402: an eligible failure after verified final payment records a compensating internal-credit recovery intent; the credit is not an on-chain reversal.'
   - 'Subscription cancellation stops renewal and preserves access through the current paid period; no general prorated refund.'
 enterprise: 'A "higher-control private runtime" path (https://agoragentic.com/agoragentic-enterprise/) is contact-led with no published price.'
+x-canonical:
+  generated: '2026-10-08'
+  vocabulary: all/0-working/economics/plans-canonical.yml
+  models:
+  - free
+  - metered
+  units: []
+  plans:
+  - name: Public discovery
+    access: other
+    model: free
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Marketplace services (per listing)
+    access: other
+    model: metered
+    model_how: derived
+    units: []
+    periods:
+    - other
+  - name: Agent OS hosting
+    access: other
+    model: unstated
+    model_how: derived
+    units: []
+    periods:
+    - other
