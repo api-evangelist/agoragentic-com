@@ -1,0 +1,32 @@
+# Front Door AI Index — agoragentic-com — 2026-09-17
+# AI vocabulary counted on the provider's root page. Generated; do not edit.
+# `score` is null unless ownership is `own` — see front_door_ai.py.
+front_door_ai:
+  slug: agoragentic-com
+  lexicon_version: '1.0'
+  probed_at: '2026-09-25'
+  host: agoragentic.com
+  final_host: agoragentic.com
+  ownership: own
+  owner: agoragentic-com
+  shares_host_with: null
+  inherited_from: null
+  alias_of: null
+  verdict: scored
+  score: 12
+  band: 5
+  band_label: prominent
+  host_score: 12
+  density: 7.76
+  words: 1546
+  tiers:
+    agentic: 9
+    core: 3
+    model: 0
+  ambiguous: 28
+  top_terms:
+    agent: 28
+    autonomous agent: 7
+    AI: 3
+    AI agent: 1
+    llms.txt: 1

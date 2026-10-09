@@ -1,4 +1,4 @@
-generated: '2026-09-19'
+generated: '2026-09-23'
 method: generated
 source: openapi/agoragentic-com-openapi.json
 description: Recommended x-agentic-access execution contracts, classified heuristically from
@@ -7,13 +7,13 @@ description: Recommended x-agentic-access execution contracts, classified heuris
 summary:
   operations: 772
   by_action_class:
-    connected: 404
-    acting: 368
+    connected: 409
+    acting: 363
   by_consequence:
-    read: 404
-    write: 207
+    read: 409
+    write: 204
     safety-critical: 60
-    physical: 101
+    physical: 99
   human_in_the_loop_required: 60
 operations:
 - path: /federation/intake
@@ -270,18 +270,12 @@ operations:
   method: post
   operationId: post-ard-search
   x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
+    action-class: connected
+    consequence: read
+    subject: optional
     token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
+      max-ttl: 3600
+    audit: none
 - path: /catalog
   method: get
   operationId: get-api-catalog
@@ -678,18 +672,12 @@ operations:
   method: post
   operationId: post_api_capabilities
   x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
+    action-class: connected
+    consequence: read
+    subject: optional
     token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
+      max-ttl: 3600
+    audit: none
 - path: /capabilities/{id}
   method: get
   operationId: get_api_capabilities_by_id
@@ -1062,18 +1050,12 @@ operations:
   method: post
   operationId: post_api_router_external_marketplace_search
   x-agentic-access:
-    action-class: acting
-    consequence: write
-    subject: required
-    audience: null
+    action-class: connected
+    consequence: read
+    subject: optional
     token:
-      max-ttl: 900
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
+      max-ttl: 3600
+    audit: none
 - path: /router/external-marketplace-search/sources
   method: get
   operationId: get_api_router_external_marketplace_search_sources
@@ -5074,20 +5056,12 @@ operations:
   method: post
   operationId: post_api_agent_os_deployments_by_deployment_id_memory_search
   x-agentic-access:
-    action-class: acting
-    consequence: physical
-    subject: required
-    audience: null
+    action-class: connected
+    consequence: read
+    subject: optional
     token:
-      max-ttl: 300
-      exchange: true
-      purpose-required: true
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
+      max-ttl: 3600
+    audit: none
 - path: /agent-os/deployments/{deployment_id}/memory/reconcile
   method: post
   operationId: post_api_agent_os_deployments_by_deployment_id_memory_reconcile
@@ -5794,20 +5768,12 @@ operations:
   method: post
   operationId: post-api-wallet-purchase
   x-agentic-access:
-    action-class: acting
-    consequence: physical
-    subject: required
-    audience: null
+    action-class: connected
+    consequence: read
+    subject: optional
     token:
-      max-ttl: 300
-      exchange: true
-      purpose-required: true
-    escalation:
-      human-in-the-loop: conditional
-      triggers:
-      - abnormal
-      - high-value
-    audit: required
+      max-ttl: 3600
+    audit: none
 - path: /wallet/purchase/verify
   method: post
   operationId: post_api_wallet_purchase_verify
