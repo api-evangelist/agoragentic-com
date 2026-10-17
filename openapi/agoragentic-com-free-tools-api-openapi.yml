@@ -285,25 +285,7 @@ paths:
                 $ref: '#/components/schemas/AgentMarkdownGetResponse'
 components:
   schemas:
-    AgentMarkdownError:
-      type: object
-      required:
-      - success
-      - error
-      - message
-      properties:
-        success:
-          type: boolean
-          enum:
-          - false
-        error:
-          type: string
-          enum:
-          - missing_input
-          - too_large
-        message:
-          type: string
-    AgentFortuneGetResponse:
+    AgentEchoGetResponse:
       type: object
       required:
       - success
@@ -316,10 +298,47 @@ components:
         output:
           type: object
           required:
-          - fortune
+          - echo
+          - server
           - tip
           properties:
-            fortune:
+            echo:
+              type: object
+              required: []
+              properties: {}
+            server:
+              type: object
+              required:
+              - timestamp
+              - platform
+              properties:
+                timestamp:
+                  type: string
+                  format: date-time
+                platform:
+                  type: string
+            tip:
+              type: string
+    AgentUuidGetResponse:
+      type: object
+      required:
+      - success
+      - output
+      properties:
+        success:
+          type: boolean
+          enum:
+          - true
+        output:
+          type: object
+          required:
+          - id
+          - format
+          - tip
+          properties:
+            id:
+              type: string
+            format:
               type: string
             tip:
               type: string
@@ -395,73 +414,6 @@ components:
                   type: boolean
             tip:
               type: string
-    AgentEchoGetResponse:
-      type: object
-      required:
-      - success
-      - output
-      properties:
-        success:
-          type: boolean
-          enum:
-          - true
-        output:
-          type: object
-          required:
-          - echo
-          - server
-          - tip
-          properties:
-            echo:
-              type: object
-              required: []
-              properties: {}
-            server:
-              type: object
-              required:
-              - timestamp
-              - platform
-              properties:
-                timestamp:
-                  type: string
-                  format: date-time
-                platform:
-                  type: string
-            tip:
-              type: string
-    AgentUuidPostResponse:
-      type: object
-      required:
-      - success
-      - output
-      properties:
-        success:
-          type: boolean
-          enum:
-          - true
-        output:
-          type: object
-          required:
-          - ids
-          - count
-          - format
-          - available_formats
-          - tip
-          properties:
-            ids:
-              type: array
-              items:
-                type: string
-            count:
-              type: integer
-            format:
-              type: string
-            available_formats:
-              type: array
-              items:
-                type: string
-            tip:
-              type: string
     AgentPaletteGetResponse:
       type: object
       required:
@@ -500,7 +452,7 @@ components:
                 type: string
             tip:
               type: string
-    AgentUuidGetResponse:
+    AgentFortuneGetResponse:
       type: object
       required:
       - success
@@ -513,89 +465,11 @@ components:
         output:
           type: object
           required:
-          - id
-          - format
+          - fortune
           - tip
           properties:
-            id:
+            fortune:
               type: string
-            format:
-              type: string
-            tip:
-              type: string
-    AgentPalettePostResponse:
-      type: object
-      required:
-      - success
-      - output
-      properties:
-        success:
-          type: boolean
-          enum:
-          - true
-        output:
-          type: object
-          required:
-          - mood
-          - colors
-          - css
-          - available_moods
-          - tip
-          properties:
-            mood:
-              type: string
-            colors:
-              type: array
-              items:
-                type: object
-                required:
-                - index
-                - name
-                - hex
-                - rgb
-                - hsl
-                - css_var
-                properties:
-                  index:
-                    type: integer
-                  name:
-                    type: string
-                  hex:
-                    type: string
-                  rgb:
-                    type: object
-                    required:
-                    - r
-                    - g
-                    - b
-                    properties:
-                      r:
-                        type: integer
-                      g:
-                        type: integer
-                      b:
-                        type: integer
-                  hsl:
-                    type: object
-                    required:
-                    - h
-                    - s
-                    - l
-                    properties:
-                      h:
-                        type: integer
-                      s:
-                        type: integer
-                      l:
-                        type: integer
-                  css_var:
-                    type: string
-            css:
-              type: string
-            available_moods:
-              type: array
-              items:
-                type: string
             tip:
               type: string
     AgentFortunePostResponse:
@@ -833,6 +707,132 @@ components:
                 type: string
             max_input_length:
               type: integer
+    AgentUuidPostResponse:
+      type: object
+      required:
+      - success
+      - output
+      properties:
+        success:
+          type: boolean
+          enum:
+          - true
+        output:
+          type: object
+          required:
+          - ids
+          - count
+          - format
+          - available_formats
+          - tip
+          properties:
+            ids:
+              type: array
+              items:
+                type: string
+            count:
+              type: integer
+            format:
+              type: string
+            available_formats:
+              type: array
+              items:
+                type: string
+            tip:
+              type: string
+    AgentPalettePostResponse:
+      type: object
+      required:
+      - success
+      - output
+      properties:
+        success:
+          type: boolean
+          enum:
+          - true
+        output:
+          type: object
+          required:
+          - mood
+          - colors
+          - css
+          - available_moods
+          - tip
+          properties:
+            mood:
+              type: string
+            colors:
+              type: array
+              items:
+                type: object
+                required:
+                - index
+                - name
+                - hex
+                - rgb
+                - hsl
+                - css_var
+                properties:
+                  index:
+                    type: integer
+                  name:
+                    type: string
+                  hex:
+                    type: string
+                  rgb:
+                    type: object
+                    required:
+                    - r
+                    - g
+                    - b
+                    properties:
+                      r:
+                        type: integer
+                      g:
+                        type: integer
+                      b:
+                        type: integer
+                  hsl:
+                    type: object
+                    required:
+                    - h
+                    - s
+                    - l
+                    properties:
+                      h:
+                        type: integer
+                      s:
+                        type: integer
+                      l:
+                        type: integer
+                  css_var:
+                    type: string
+            css:
+              type: string
+            available_moods:
+              type: array
+              items:
+                type: string
+            tip:
+              type: string
+    AgentMarkdownError:
+      type: object
+      required:
+      - success
+      - error
+      - message
+      properties:
+        success:
+          type: boolean
+          enum:
+          - false
+        error:
+          type: string
+          enum:
+          - missing_input
+          - too_large
+        message:
+          type: string
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

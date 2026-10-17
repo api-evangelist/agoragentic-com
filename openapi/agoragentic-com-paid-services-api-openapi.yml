@@ -855,7 +855,7 @@ paths:
           description: Dry-run execution result
 components:
   schemas:
-    PublicToolFirecrawlScrapeResult:
+    PublicToolWebSearchResult:
       type: object
       required:
       - success
@@ -867,70 +867,47 @@ components:
         output:
           type: object
           required:
-          - url
-          - formats
-          - metadata
+          - query
+          - results
+          - result_count
+          - provider
           properties:
-            url:
+            query:
               type: string
-              format: uri
-              default: https://example.com
-            formats:
+              default: agent marketplace x402 payments
+            results:
               type: array
               items:
-                type: string
-                enum:
-                - markdown
-                - html
-                - links
-              default:
-              - markdown
-            only_main_content:
-              type: boolean
-              default: true
-            markdown:
+                type: object
+                required:
+                - title
+                - url
+                - snippet
+                properties:
+                  title:
+                    type: string
+                  url:
+                    type: string
+                    format: uri
+                  snippet:
+                    type: string
+                    description: Bounded text excerpt (<= 1000 chars).
+                  score:
+                    type:
+                    - number
+                    - 'null'
+                    description: Provider relevance score when available.
+            result_count:
+              type: integer
+              default: 3
+            max_results:
+              type: integer
+              default: 5
+            provider:
               type: string
-              description: LLM-ready markdown (present when requested).
-            markdown_length:
-              type: integer
-            html:
-              type: string
-              description: Raw HTML (present when requested).
-            html_length:
-              type: integer
-            links:
-              type: array
-              items:
-                type: string
-              description: Page links (present when requested, <= 100).
-            link_count:
-              type: integer
-            metadata:
-              type: object
-              properties:
-                title:
-                  type:
-                  - string
-                  - 'null'
-                description:
-                  type:
-                  - string
-                  - 'null'
-                language:
-                  type:
-                  - string
-                  - 'null'
-                source_url:
-                  type:
-                  - string
-                  - 'null'
-                status_code:
-                  type:
-                  - integer
-                  - 'null'
-            truncated:
-              type: boolean
-              default: false
+              enum:
+              - tavily
+              default: tavily
             fetched_at:
               type: string
               format: date-time
@@ -939,6 +916,164 @@ components:
             tip:
               type: string
       description: Successful POST result projected from the existing invocation contract. Existing dispatch, provider and custody gates still apply; this schema does not enable execution.
+    PublicToolDocParseResult:
+      type: object
+      required:
+      - success
+      - output
+      properties:
+        success:
+          type: boolean
+          default: true
+        output:
+          type: object
+          required:
+          - format
+          - truncated
+          properties:
+            format:
+              type: string
+              enum:
+              - csv
+              - json
+              - markdown
+              - html
+              default: csv
+            input_byte_length:
+              type: integer
+            headers:
+              type:
+              - array
+              - 'null'
+              items:
+                type: string
+            rows:
+              type: array
+              items:
+                type: array
+                items:
+                  type: string
+              description: CSV rows (<= 2000).
+            row_count:
+              type: integer
+            total_row_count:
+              type: integer
+            column_count:
+              type: integer
+            valid:
+              type: boolean
+              description: 'JSON only: whether the document parsed.'
+            parse_error:
+              type:
+              - string
+              - 'null'
+            root_type:
+              type:
+              - string
+              - 'null'
+            data:
+              description: 'JSON only: the parsed document (echoed when <= 256 KB).'
+            blocks:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            table_of_contents:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+            stats:
+              type: object
+              additionalProperties: true
+            title:
+              type:
+              - string
+              - 'null'
+            text:
+              type: string
+              description: 'HTML only: extracted plain text (<= 200000 chars).'
+            links:
+              type: array
+              items:
+                type: string
+            word_count:
+              type: integer
+            truncated:
+              type: boolean
+              default: false
+            processing_time_ms:
+              type: integer
+            tip:
+              type: string
+      description: Successful POST result projected from the existing invocation contract. Existing dispatch, provider and custody gates still apply; this schema does not enable execution.
+    PublicToolWebSearchDescription:
+      type: object
+      required:
+      - success
+      - output
+      properties:
+        success:
+          type: boolean
+        output:
+          type: object
+          required:
+          - service
+          - description
+          - pricing
+          - usage
+          - parameters
+          - provider
+          - configured
+          - tip
+          properties:
+            service:
+              type: string
+            description:
+              type: string
+            pricing:
+              type: string
+            usage:
+              type: string
+            parameters:
+              type: object
+              required:
+              - query
+              - max_results
+              properties:
+                query:
+                  type: object
+                  required:
+                  - type
+                  - required
+                  - description
+                  properties:
+                    type:
+                      type: string
+                    required:
+                      type: boolean
+                    description:
+                      type: string
+                max_results:
+                  type: object
+                  required:
+                  - type
+                  - default
+                  - description
+                  properties:
+                    type:
+                      type: string
+                    default:
+                      type: integer
+                    description:
+                      type: string
+            provider:
+              type: string
+            configured:
+              type: boolean
+            tip:
+              type: string
+      description: The free GET self-description, not a tool execution result. Configuration is not evidence of availability or permission.
     PublicToolDeepResearchDescription:
       type: object
       required:
@@ -1014,294 +1149,6 @@ components:
             tip:
               type: string
       description: The free GET self-description, not a tool execution result. Configuration is not evidence of availability or permission.
-    PublicToolDeepResearchResult:
-      type: object
-      required:
-      - success
-      - output
-      properties:
-        success:
-          type: boolean
-          default: true
-        output:
-          type: object
-          required:
-          - query
-          - report
-          - knowledge_source
-          - live_web_browsing
-          - disclaimer
-          properties:
-            query:
-              type: string
-            report:
-              type: string
-              description: 'Markdown research brief (<= 60000 chars): Executive Summary, Key Findings, Analysis, Caveats & Unknowns, Suggested Next Steps.'
-            report_length:
-              type: integer
-            focus_areas:
-              type: array
-              items:
-                type: string
-              default: []
-            model:
-              type: string
-            knowledge_source:
-              type: string
-              enum:
-              - model_training_knowledge
-              default: model_training_knowledge
-            live_web_browsing:
-              type: boolean
-              default: false
-              description: Always false — this SKU does not browse the live web.
-            disclaimer:
-              type: string
-            generated_at:
-              type: string
-              format: date-time
-            processing_time_ms:
-              type: integer
-            tip:
-              type: string
-      description: Successful POST result projected from the existing invocation contract. Existing dispatch, provider and custody gates still apply; this schema does not enable execution.
-    PublicToolWebSearchDescription:
-      type: object
-      required:
-      - success
-      - output
-      properties:
-        success:
-          type: boolean
-        output:
-          type: object
-          required:
-          - service
-          - description
-          - pricing
-          - usage
-          - parameters
-          - provider
-          - configured
-          - tip
-          properties:
-            service:
-              type: string
-            description:
-              type: string
-            pricing:
-              type: string
-            usage:
-              type: string
-            parameters:
-              type: object
-              required:
-              - query
-              - max_results
-              properties:
-                query:
-                  type: object
-                  required:
-                  - type
-                  - required
-                  - description
-                  properties:
-                    type:
-                      type: string
-                    required:
-                      type: boolean
-                    description:
-                      type: string
-                max_results:
-                  type: object
-                  required:
-                  - type
-                  - default
-                  - description
-                  properties:
-                    type:
-                      type: string
-                    default:
-                      type: integer
-                    description:
-                      type: string
-            provider:
-              type: string
-            configured:
-              type: boolean
-            tip:
-              type: string
-      description: The free GET self-description, not a tool execution result. Configuration is not evidence of availability or permission.
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-        message:
-          type: string
-    PublicToolFirecrawlScrapeDescription:
-      type: object
-      required:
-      - success
-      - output
-      properties:
-        success:
-          type: boolean
-        output:
-          type: object
-          required:
-          - service
-          - description
-          - pricing
-          - usage
-          - parameters
-          - provider
-          - configured
-          - tip
-          properties:
-            service:
-              type: string
-            description:
-              type: string
-            pricing:
-              type: string
-            usage:
-              type: string
-            parameters:
-              type: object
-              required:
-              - url
-              - formats
-              - only_main_content
-              - max_length
-              properties:
-                url:
-                  type: object
-                  required:
-                  - type
-                  - required
-                  - description
-                  properties:
-                    type:
-                      type: string
-                    required:
-                      type: boolean
-                    description:
-                      type: string
-                formats:
-                  type: object
-                  required:
-                  - type
-                  - default
-                  - options
-                  - description
-                  properties:
-                    type:
-                      type: string
-                    default:
-                      type: array
-                      items:
-                        type: string
-                    options:
-                      type: array
-                      items:
-                        type: string
-                    description:
-                      type: string
-                only_main_content:
-                  type: object
-                  required:
-                  - type
-                  - default
-                  - description
-                  properties:
-                    type:
-                      type: string
-                    default:
-                      type: boolean
-                    description:
-                      type: string
-                max_length:
-                  type: object
-                  required:
-                  - type
-                  - default
-                  - description
-                  properties:
-                    type:
-                      type: string
-                    default:
-                      type: integer
-                    description:
-                      type: string
-            provider:
-              type: string
-            configured:
-              type: boolean
-            tip:
-              type: string
-      description: The free GET self-description, not a tool execution result. Configuration is not evidence of availability or permission.
-    PublicToolWebSearchResult:
-      type: object
-      required:
-      - success
-      - output
-      properties:
-        success:
-          type: boolean
-          default: true
-        output:
-          type: object
-          required:
-          - query
-          - results
-          - result_count
-          - provider
-          properties:
-            query:
-              type: string
-              default: agent marketplace x402 payments
-            results:
-              type: array
-              items:
-                type: object
-                required:
-                - title
-                - url
-                - snippet
-                properties:
-                  title:
-                    type: string
-                  url:
-                    type: string
-                    format: uri
-                  snippet:
-                    type: string
-                    description: Bounded text excerpt (<= 1000 chars).
-                  score:
-                    type:
-                    - number
-                    - 'null'
-                    description: Provider relevance score when available.
-            result_count:
-              type: integer
-              default: 3
-            max_results:
-              type: integer
-              default: 5
-            provider:
-              type: string
-              enum:
-              - tavily
-              default: tavily
-            fetched_at:
-              type: string
-              format: date-time
-            processing_time_ms:
-              type: integer
-            tip:
-              type: string
-      description: Successful POST result projected from the existing invocation contract. Existing dispatch, provider and custody gates still apply; this schema does not enable execution.
     PublicToolDocParseDescription:
       type: object
       required:
@@ -1409,7 +1256,7 @@ components:
             tip:
               type: string
       description: The free GET self-description, not a tool execution result. Configuration is not evidence of availability or permission.
-    PublicToolDocParseResult:
+    PublicToolFirecrawlScrapeResult:
       type: object
       required:
       - success
@@ -1421,85 +1268,238 @@ components:
         output:
           type: object
           required:
-          - format
-          - truncated
+          - url
+          - formats
+          - metadata
           properties:
-            format:
+            url:
               type: string
-              enum:
-              - csv
-              - json
-              - markdown
-              - html
-              default: csv
-            input_byte_length:
-              type: integer
-            headers:
-              type:
-              - array
-              - 'null'
+              format: uri
+              default: https://example.com
+            formats:
+              type: array
               items:
                 type: string
-            rows:
-              type: array
-              items:
-                type: array
-                items:
-                  type: string
-              description: CSV rows (<= 2000).
-            row_count:
-              type: integer
-            total_row_count:
-              type: integer
-            column_count:
-              type: integer
-            valid:
+                enum:
+                - markdown
+                - html
+                - links
+              default:
+              - markdown
+            only_main_content:
               type: boolean
-              description: 'JSON only: whether the document parsed.'
-            parse_error:
-              type:
-              - string
-              - 'null'
-            root_type:
-              type:
-              - string
-              - 'null'
-            data:
-              description: 'JSON only: the parsed document (echoed when <= 256 KB).'
-            blocks:
-              type: array
-              items:
-                type: object
-                additionalProperties: true
-            table_of_contents:
-              type: array
-              items:
-                type: object
-                additionalProperties: true
-            stats:
-              type: object
-              additionalProperties: true
-            title:
-              type:
-              - string
-              - 'null'
-            text:
+              default: true
+            markdown:
               type: string
-              description: 'HTML only: extracted plain text (<= 200000 chars).'
+              description: LLM-ready markdown (present when requested).
+            markdown_length:
+              type: integer
+            html:
+              type: string
+              description: Raw HTML (present when requested).
+            html_length:
+              type: integer
             links:
               type: array
               items:
                 type: string
-            word_count:
+              description: Page links (present when requested, <= 100).
+            link_count:
               type: integer
+            metadata:
+              type: object
+              properties:
+                title:
+                  type:
+                  - string
+                  - 'null'
+                description:
+                  type:
+                  - string
+                  - 'null'
+                language:
+                  type:
+                  - string
+                  - 'null'
+                source_url:
+                  type:
+                  - string
+                  - 'null'
+                status_code:
+                  type:
+                  - integer
+                  - 'null'
             truncated:
               type: boolean
               default: false
+            fetched_at:
+              type: string
+              format: date-time
             processing_time_ms:
               type: integer
             tip:
               type: string
       description: Successful POST result projected from the existing invocation contract. Existing dispatch, provider and custody gates still apply; this schema does not enable execution.
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+    PublicToolDeepResearchResult:
+      type: object
+      required:
+      - success
+      - output
+      properties:
+        success:
+          type: boolean
+          default: true
+        output:
+          type: object
+          required:
+          - query
+          - report
+          - knowledge_source
+          - live_web_browsing
+          - disclaimer
+          properties:
+            query:
+              type: string
+            report:
+              type: string
+              description: 'Markdown research brief (<= 60000 chars): Executive Summary, Key Findings, Analysis, Caveats & Unknowns, Suggested Next Steps.'
+            report_length:
+              type: integer
+            focus_areas:
+              type: array
+              items:
+                type: string
+              default: []
+            model:
+              type: string
+            knowledge_source:
+              type: string
+              enum:
+              - model_training_knowledge
+              default: model_training_knowledge
+            live_web_browsing:
+              type: boolean
+              default: false
+              description: Always false — this SKU does not browse the live web.
+            disclaimer:
+              type: string
+            generated_at:
+              type: string
+              format: date-time
+            processing_time_ms:
+              type: integer
+            tip:
+              type: string
+      description: Successful POST result projected from the existing invocation contract. Existing dispatch, provider and custody gates still apply; this schema does not enable execution.
+    PublicToolFirecrawlScrapeDescription:
+      type: object
+      required:
+      - success
+      - output
+      properties:
+        success:
+          type: boolean
+        output:
+          type: object
+          required:
+          - service
+          - description
+          - pricing
+          - usage
+          - parameters
+          - provider
+          - configured
+          - tip
+          properties:
+            service:
+              type: string
+            description:
+              type: string
+            pricing:
+              type: string
+            usage:
+              type: string
+            parameters:
+              type: object
+              required:
+              - url
+              - formats
+              - only_main_content
+              - max_length
+              properties:
+                url:
+                  type: object
+                  required:
+                  - type
+                  - required
+                  - description
+                  properties:
+                    type:
+                      type: string
+                    required:
+                      type: boolean
+                    description:
+                      type: string
+                formats:
+                  type: object
+                  required:
+                  - type
+                  - default
+                  - options
+                  - description
+                  properties:
+                    type:
+                      type: string
+                    default:
+                      type: array
+                      items:
+                        type: string
+                    options:
+                      type: array
+                      items:
+                        type: string
+                    description:
+                      type: string
+                only_main_content:
+                  type: object
+                  required:
+                  - type
+                  - default
+                  - description
+                  properties:
+                    type:
+                      type: string
+                    default:
+                      type: boolean
+                    description:
+                      type: string
+                max_length:
+                  type: object
+                  required:
+                  - type
+                  - default
+                  - description
+                  properties:
+                    type:
+                      type: string
+                    default:
+                      type: integer
+                    description:
+                      type: string
+            provider:
+              type: string
+            configured:
+              type: boolean
+            tip:
+              type: string
+      description: The free GET self-description, not a tool execution result. Configuration is not evidence of availability or permission.
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

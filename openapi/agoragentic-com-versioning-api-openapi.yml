@@ -488,6 +488,35 @@ paths:
                 $ref: '#/components/schemas/InvalidVersionNumberError'
 components:
   schemas:
+    CapabilityVersionHistoryInvalidError:
+      type: object
+      description: A stored capability-version history row is outside the supported version-number contract. The route fails closed rather than skipping or renumbering the row.
+      required:
+      - error
+      - reason
+      - message
+      - retryable
+      - max_version_number
+      properties:
+        error:
+          type: string
+          enum:
+          - capability_version_history_invalid
+        reason:
+          type: string
+          enum:
+          - version_number_format_invalid
+          - version_number_out_of_range
+        message:
+          type: string
+        retryable:
+          type: boolean
+          enum:
+          - false
+        max_version_number:
+          type: integer
+          enum:
+          - 2147483647
     VersionMarketplaceVerification:
       type: object
       required:
@@ -630,35 +659,6 @@ components:
           type: integer
           enum:
           - 1
-        max_version_number:
-          type: integer
-          enum:
-          - 2147483647
-    CapabilityVersionHistoryInvalidError:
-      type: object
-      description: A stored capability-version history row is outside the supported version-number contract. The route fails closed rather than skipping or renumbering the row.
-      required:
-      - error
-      - reason
-      - message
-      - retryable
-      - max_version_number
-      properties:
-        error:
-          type: string
-          enum:
-          - capability_version_history_invalid
-        reason:
-          type: string
-          enum:
-          - version_number_format_invalid
-          - version_number_out_of_range
-        message:
-          type: string
-        retryable:
-          type: boolean
-          enum:
-          - false
         max_version_number:
           type: integer
           enum:

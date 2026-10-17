@@ -385,28 +385,6 @@ paths:
                 $ref: '#/components/schemas/AgentWalletPolicyError'
 components:
   schemas:
-    WalletBalance:
-      type: object
-      properties:
-        balance:
-          type: number
-          format: float
-          description: Total available balance in USDC
-        currency:
-          type: string
-          example: USDC
-        withdrawable_balance:
-          type: number
-          format: float
-        total_deposited:
-          type: number
-          format: float
-        total_spent:
-          type: number
-          format: float
-        total_earned:
-          type: number
-          format: float
     CustodyAvailability:
       type: object
       description: Additive read-only availability contract returned when authoritative platform custody is unavailable. It preserves discovery and proof metadata while suppressing every paid execution, payment-challenge, settlement, and managed-wallet path.
@@ -454,21 +432,28 @@ components:
               type: boolean
             authority_read_ok:
               type: boolean
-    AgentWalletPolicyUpdated:
+    WalletBalance:
       type: object
-      required:
-      - message
-      - updated_fields
-      - policy
       properties:
-        message:
+        balance:
+          type: number
+          format: float
+          description: Total available balance in USDC
+        currency:
           type: string
-        updated_fields:
-          type: array
-          items:
-            type: string
-        policy:
-          $ref: '#/components/schemas/AgentWalletPolicy'
+          example: USDC
+        withdrawable_balance:
+          type: number
+          format: float
+        total_deposited:
+          type: number
+          format: float
+        total_spent:
+          type: number
+          format: float
+        total_earned:
+          type: number
+          format: float
     AgentWalletPolicy:
       type: object
       required:
@@ -523,6 +508,21 @@ components:
           type:
           - string
           - 'null'
+    AgentWalletPolicyUpdated:
+      type: object
+      required:
+      - message
+      - updated_fields
+      - policy
+      properties:
+        message:
+          type: string
+        updated_fields:
+          type: array
+          items:
+            type: string
+        policy:
+          $ref: '#/components/schemas/AgentWalletPolicy'
     WalletPricingResponse:
       type: object
       required:
@@ -624,20 +624,6 @@ components:
               type: boolean
               enum:
               - false
-    AgentWalletPolicyError:
-      type: object
-      required:
-      - error
-      - message
-      properties:
-        error:
-          type: string
-        message:
-          type: string
-        details:
-          type: array
-          items:
-            type: string
     AgentWalletPolicyResponse:
       type: object
       required:
@@ -656,6 +642,20 @@ components:
               type: string
             settlement_model:
               type: string
+    AgentWalletPolicyError:
+      type: object
+      required:
+      - error
+      - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: array
+          items:
+            type: string
   securitySchemes:
     ApiKeyAuth:
       x-agoragentic-permissions:

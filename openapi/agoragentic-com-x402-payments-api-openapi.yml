@@ -1713,70 +1713,45 @@ paths:
           description: Invocation not found
 components:
   schemas:
-    PaymentReconciliationRequiredError:
+    AgentTrapReview:
       type: object
-      required:
-      - reconciliation_required
-      - safe_to_retry
-      description: Non-retryable retained evidence for an attempt whose payment or provider finality is unknown. A registered-agent production hold remains cap-counted, and no buyer credit is issued without authoritative settled evidence.
+      description: Public-safe Agent Trap Shield review summary. Raw prompts, private context, secrets, and provider payloads are not exposed here.
       properties:
-        error:
+        scan_id:
           type: string
-        message:
+        source_type:
           type: string
-        invocation_id:
+        trap_classes:
+          type: array
+          items:
+            type: string
+            enum:
+            - content_injection
+            - semantic_manipulation
+            - cognitive_state
+            - behavioural_control
+            - systemic
+            - human_in_the_loop
+        severity:
           type: string
-        payment_settled:
+          enum:
+          - none
+          - low
+          - medium
+          - high
+          - critical
+        quarantine_reason:
           type:
-          - boolean
+          - string
           - 'null'
-        payment_settlement_unknown:
+        blocked:
           type: boolean
-        settlement_status:
-          type: string
-          enum:
-          - pending
-        reconciliation_required:
+        quarantine_output:
           type: boolean
-          enum:
-          - true
-        retryable:
+        vault_persistence_allowed:
           type: boolean
-          enum:
-          - false
-        safe_to_retry:
+        trust_signal_allowed:
           type: boolean
-          enum:
-          - false
-        provider_side_effects_possible:
-          type: boolean
-        retry_warning:
-          type: string
-        buyer_credit_issued:
-          type: boolean
-          enum:
-          - false
-        governance_hold_released:
-          type: boolean
-          enum:
-          - false
-        free_trial_evidence:
-          $ref: '#/components/schemas/WorldAgentKitTrialEvidence'
-    ProviderOutputTrapBlockedError:
-      type: object
-      required:
-      - error
-      - message
-      - agent_trap_review
-      properties:
-        error:
-          type: string
-          enum:
-          - provider_output_trap_blocked
-        message:
-          type: string
-        agent_trap_review:
-          $ref: '#/components/schemas/AgentTrapReview'
     WorldAgentKitTrialEvidence:
       type: object
       required:
@@ -1817,45 +1792,6 @@ components:
           type: string
           enum:
           - non_financial_observability
-    AgentTrapReview:
-      type: object
-      description: Public-safe Agent Trap Shield review summary. Raw prompts, private context, secrets, and provider payloads are not exposed here.
-      properties:
-        scan_id:
-          type: string
-        source_type:
-          type: string
-        trap_classes:
-          type: array
-          items:
-            type: string
-            enum:
-            - content_injection
-            - semantic_manipulation
-            - cognitive_state
-            - behavioural_control
-            - systemic
-            - human_in_the_loop
-        severity:
-          type: string
-          enum:
-          - none
-          - low
-          - medium
-          - high
-          - critical
-        quarantine_reason:
-          type:
-          - string
-          - 'null'
-        blocked:
-          type: boolean
-        quarantine_output:
-          type: boolean
-        vault_persistence_allowed:
-          type: boolean
-        trust_signal_allowed:
-          type: boolean
     X402PaidExecutionFrozenError:
       description: Typed fail-closed response for a positive-price paid x402 request when either independent custody boundary is frozen. Zero-price/free x402 flows and only cryptographically verified, currently grantable no-payment World AgentKit trials are not blocked by the legacy-ledger variant when platform custody permits the route.
       oneOf:
@@ -1907,6 +1843,55 @@ components:
             type: string
           custody:
             type: object
+    PaymentReconciliationRequiredError:
+      type: object
+      required:
+      - reconciliation_required
+      - safe_to_retry
+      description: Non-retryable retained evidence for an attempt whose payment or provider finality is unknown. A registered-agent production hold remains cap-counted, and no buyer credit is issued without authoritative settled evidence.
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        invocation_id:
+          type: string
+        payment_settled:
+          type:
+          - boolean
+          - 'null'
+        payment_settlement_unknown:
+          type: boolean
+        settlement_status:
+          type: string
+          enum:
+          - pending
+        reconciliation_required:
+          type: boolean
+          enum:
+          - true
+        retryable:
+          type: boolean
+          enum:
+          - false
+        safe_to_retry:
+          type: boolean
+          enum:
+          - false
+        provider_side_effects_possible:
+          type: boolean
+        retry_warning:
+          type: string
+        buyer_credit_issued:
+          type: boolean
+          enum:
+          - false
+        governance_hold_released:
+          type: boolean
+          enum:
+          - false
+        free_trial_evidence:
+          $ref: '#/components/schemas/WorldAgentKitTrialEvidence'
     Error:
       type: object
       properties:
@@ -1914,6 +1899,21 @@ components:
           type: string
         message:
           type: string
+    ProviderOutputTrapBlockedError:
+      type: object
+      required:
+      - error
+      - message
+      - agent_trap_review
+      properties:
+        error:
+          type: string
+          enum:
+          - provider_output_trap_blocked
+        message:
+          type: string
+        agent_trap_review:
+          $ref: '#/components/schemas/AgentTrapReview'
     OpenAIAgentsTrace:
       type: object
       description: Optional OpenAI Agents run metadata echoed back on execution status and receipt surfaces when supplied by the caller.
