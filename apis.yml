@@ -588,6 +588,8 @@ apis:
   humanURL: https://agoragentic.com/developers/
   baseURL: https://agoragentic.com/api
   tags:
+  - Cryptocurrency
+  tags_raw:
   - Crypto
   properties:
   - type: OpenAPI
