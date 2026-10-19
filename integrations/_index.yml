@@ -22,3 +22,121 @@
     detected: '2026-10-15'
   status: not-a-workflow
   arazzo: null
+- slug: agoragentic-com-a2a-protocol-own-agent-card
+  label: A2A protocol (own Agent Card)
+  partner_name: A2A protocol (own Agent Card)
+  category: A2A agent
+  type: register
+  channel: provider-built
+  evidence: https://agoragentic.com/.well-known/agent-card.json
+  source: edge
+  relationship: compatible
+  contract_reference:
+    register: provider's own /.well-known/agent-card.json
+    spec_file: null
+    standard: A2A
+    role: a2a-agent-card
+    registered_name: Agoragentic
+    organization: Agoragentic
+    matched_domain: agoragentic.com
+    matched_by: own-domain
+    detected_by: sweep-ai-agents.py
+    detected: '2026-10-15'
+  status: not-a-workflow
+  arazzo: null
+- slug: agoragentic-com-a2aregistry-org
+  label: a2aregistry.org
+  partner_name: a2aregistry.org
+  category: A2A agent registry
+  type: register
+  channel: standard-directory
+  evidence: https://a2aregistry.org/api/agents/f8f46437-77d7-48e0-9914-977e84190bcc
+  source: edge
+  relationship: compatible
+  contract_reference:
+    register: a2aregistry.org /api/agents
+    spec_file: null
+    standard: A2A
+    role: a2a-registry-listing
+    registered_name: Agoragentic
+    matched_domain: agoragentic.com
+    matched_by: domain
+    matched_via: card-host
+    listings_context: 1
+    sample_agents:
+    - Agoragentic
+    detected_by: sweep-ai-agents.py
+    detected: '2026-10-15'
+  status: not-a-workflow
+  arazzo: null
+- slug: agoragentic-com-npm-registry
+  label: npm registry
+  partner: npm
+  partner_name: npm registry
+  category: official SDK (JavaScript/TypeScript)
+  type: register
+  channel: package-registry
+  evidence: https://www.npmjs.com/package/agoragentic
+  source: edge
+  relationship: distribution-channel
+  contract_reference:
+    register: npm registry (public registry JSON)
+    spec_file: null
+    language: JavaScript/TypeScript
+    packages:
+    - name: agoragentic
+      version: 1.7.1
+      released: '2026-07-23'
+      released_field: modified
+      lapsed: false
+      page: https://www.npmjs.com/package/agoragentic
+      repo_leg: domain:agoragentic.com
+      publisher_leg: email:agoragentic.com
+      matched_by: domain
+    - name: agoragentic-os
+      version: 1.7.1
+      released: '2026-07-23'
+      released_field: modified
+      lapsed: false
+      page: https://www.npmjs.com/package/agoragentic-os
+      repo_leg: domain:agoragentic.com
+      publisher_leg: email:agoragentic.com
+      matched_by: domain
+    current: true
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  status: not-a-workflow
+  arazzo: null
+- slug: agoragentic-com-pypi
+  label: PyPI
+  partner: pypi
+  partner_name: PyPI
+  category: official SDK (Python)
+  type: register
+  channel: package-registry
+  evidence: https://pypi.org/project/agoragentic/
+  source: edge
+  relationship: distribution-channel
+  contract_reference:
+    register: PyPI (public registry JSON)
+    spec_file: null
+    language: Python
+    packages:
+    - name: agoragentic
+      version: 1.7.1
+      released: '2026-07-23'
+      released_field: upload_time
+      lapsed: false
+      page: https://pypi.org/project/agoragentic/
+      repo_leg: domain:agoragentic.com
+      publisher_leg: email:agoragentic.com
+      matched_by: domain
+    current: true
+    signal_note: 'an official package on the registry: distribution, not an integration; lapsed = no release in
+      24 months'
+    detected_by: sweep-official-sdks.py
+    detected: '2026-10-18'
+  status: not-a-workflow
+  arazzo: null
