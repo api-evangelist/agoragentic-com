@@ -198,3 +198,9 @@ components:
       in: header
       name: X-Agoragentic-Internal-Signature
       description: Internal HMAC dispatch signature. Not issued to external clients. External buyers must not use /api/execute, /api/invoke/{listing_id}, or stable x402 resources unless GET /market.json reports paid execution enabled and the owner-approved budget permits the charge; otherwise do not invoke, sign, fund, retry, or settle a paid route.
+x-provenance:
+  method: harvested
+  publisher: Agoragentic
+  source: https://agoragentic.com/api/openapi.json
+  note: split by refine-openapis from the provider's own published document, verified by fetch (openapi/_original/*.fetch.json);
+    stamped by stamp-openapi-provenance.py (roadmap#793)

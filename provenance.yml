@@ -18,6 +18,9 @@ artifacts:
   authentication/agoragentic-com-authentication.yml:
     method: searched
     evidence: declared in the artifact
+  capabilities/agoragentic-com-capability-edges.yml:
+    method: unknown
+    evidence: no authorship recorded
   changelog/agoragentic-com-changelog.yml:
     method: searched
     evidence: declared in the artifact
@@ -39,7 +42,13 @@ artifacts:
   front-door-ai/2026-09-17.yml:
     method: unknown
     evidence: no authorship recorded
-  kin/checks-2026-09-24T161608.yml:
+  integrations/_index.yml:
+    method: generated
+    evidence: carries an API Evangelist house phrase
+  integrations/agoragentic-com-integration-edges.yml:
+    method: unknown
+    evidence: no authorship recorded
+  kin/checks-2026-10-11T110117.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
   kin/score-2026-09-19T193153.yml:
@@ -72,6 +81,21 @@ artifacts:
   kin/score-2026-09-24T161608.yml:
     method: generated
     evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-25T210408.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-09-25T232841.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-03T000835.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-03T024842.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
+  kin/score-2026-10-11T110117.yml:
+    method: generated
+    evidence: Kin Score snapshot written by score.rb
   lifecycle/agoragentic-com-lifecycle.yml:
     method: searched
     evidence: declared in the artifact
@@ -87,12 +111,301 @@ artifacts:
   mcp/agoragentic-com-tool-crosswalk.yml:
     method: derived
     evidence: declared in the artifact
-  openapi/agoragentic-com-openapi.json:
-    method: unknown
-    evidence: no authorship recorded
+  openapi/_original/agoragentic-com-openapi.json:
+    method: harvested
+    evidence: the same operations as https://agoragentic.com/api/openapi.json (sha256 a502e66c22a4, fetched
+      2026-10-04)
+  openapi/agoragentic-com-admin-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-advocacy-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-identity-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-ag-ui-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-architecture-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-codebase-workspaces-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-finance-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-governed-memory-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-hermes-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-intent-compiler-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-market-intelligence-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-onboarding-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-owner-control-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-parallel-work-graphs-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-work-packs-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-os-workspace-board-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agent-vault-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agentic-market-maker-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-agents-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-analytics-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-argent-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-commerce-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-consequences-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-crypto-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-demand-board-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-discord-support-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-discovery-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-disputes-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-free-tools-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-hosting-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-invoke-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-job-runs-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-jobs-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-marketplace-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-messaging-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-nft-passport-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-paid-services-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-reputation-trust-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-seller-os-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-staking-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-subscriptions-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-tumbler-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-versioning-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-wallet-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-webhooks-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-withdrawals-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  openapi/agoragentic-com-x402-payments-api-openapi.yml:
+    method: derived
+    evidence: paths are a subset of openapi/_original/ (split from the harvested spec)
+  overlays/agoragentic-com-admin-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-advocacy-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-identity-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-ag-ui-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-architecture-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-codebase-workspaces-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-finance-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-governed-memory-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-hermes-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-intent-compiler-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-market-intelligence-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-onboarding-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-owner-control-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-parallel-work-graphs-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-work-packs-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-os-workspace-board-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agent-vault-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agentic-market-maker-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-agents-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-analytics-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-argent-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-commerce-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-consequences-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-crypto-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-demand-board-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-discord-support-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-discovery-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-disputes-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-free-tools-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-hosting-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-invoke-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-job-runs-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-jobs-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-marketplace-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-messaging-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-nft-passport-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
   overlays/agoragentic-com-openapi-overlay.yaml:
-    method: unknown
-    evidence: no authorship recorded
+    method: derived
+    evidence: an API Evangelist overlay (title) over the provider's contract
+  overlays/agoragentic-com-paid-services-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-reputation-trust-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-seller-os-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-staking-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-subscriptions-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-tumbler-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-versioning-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-wallet-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-webhooks-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-withdrawals-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
+  overlays/agoragentic-com-x402-payments-api-phrasing-overlay.yaml:
+    method: generated
+    evidence: declared in the artifact
   packages/agoragentic-com-packages.yml:
     method: searched
     evidence: declared in the artifact
